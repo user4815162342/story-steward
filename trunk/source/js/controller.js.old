@@ -1,0 +1,1139 @@
+// From before I got rid of the 'TagList' object and switched to plain string arrays.
+var TagList = function(tags) {
+
+    var TagListSchema = {
+        type: "array",
+        items: {
+            type: "string"
+        }
+    }
+    
+    var data = [];
+    
+    var StringToTagArray = function(value) {
+        var result = dojo.fromJson(value);
+        if (!dojox.json.schema.validate(result, TagListSchema).valid) {
+            throw "Invalid format for tag list string.";
+        }
+        return result;
+    }
+    
+    this.Serialize = function() {
+        return dojo.toJson(data);
+    }
+    
+    this.length = function() {
+        return data.length;
+    }
+    
+    this.getItem = function(index) {
+        return data[index];
+    }
+    
+    var checkItem = function(item) {
+        if (!dojo.isString(item)) {
+            throw "Inappropriate data type for tag."
+        }
+        
+    }
+    
+    this.push = function(item) {
+        checkItem(item);
+        data.push(item);
+    }
+    
+    this.indexOf = function(item) {
+        return data.indexOf(item);
+    }
+    
+    this.removeIndex = function(index) {
+        data.splice(index, 1);
+    }
+    
+    this.setItem = function(index, item) {
+        if (typeof index != "number") {
+            throw "Inappropriate data type for tag index."
+        }
+        checkItem(item);
+        data[index] = item;
+    }
+    
+    if (tags) {
+        if (dojo.isArray(tags)) {
+            if (!dojox.json.schema.validate(tags, TagListSchema).valid) {
+                throw "Invalid format for tag list string.";
+            }
+            data = tags;
+        } else if (dojo.isString(tags)) {
+            data = StringToTagArray(tags);
+        } else 
+            throw "Inappropriate data for taglist."
+    } else {
+        data = [];
+    }
+}
+
+var Controller = new function() {
+
+    var isInitialized = false;
+    
+    var booksDataModel = null;
+    var booksTree = null;
+    var notesDataModel = null;
+    var notesTree = null;
+    var journalsDataModel = null;
+    var journalsTree = null;
+    var peopleDataModel = null;
+    var peopleTree = null;
+    var placesDataModel = null;
+    var placesTree = null;
+    var thingsDataModel = null;
+    var thingsTree = null;
+    var goalsDataModel = null;
+    var goalsTree = null;
+    
+    var projectSettings = null;
+    
+    this.ProjectData = null;
+    
+    this.Initialize = function() {
+        if (!isInitialized) {
+            this.ProjectData = new my.ProjectData();
+            
+            dojo.connect(this.ProjectData, "onBeginLoad", this, this._projectBeginLoad);
+            dojo.connect(this.ProjectData, "onEndLoad", this, this._projectEndLoad);
+            dojo.connect(this.ProjectData, "onLoadError", this, this._projectLoadError);
+            dojo.connect(this.ProjectData, "onSaveError", this, this._projectSaveError);
+            
+            // TODO: Listen for onload and onclose and change UI as necessary.
+            
+            // NOTE: Cookies are turned off for these trees (persist: false) because:
+            // 1) It wasn't doing anything anyway, when I reload I still had to expand. 
+            // 2) I'd prefer to save all of those things with the project.
+            // 3) A bug in firefox (https://bugzilla.mozilla.org/show_bug.cgi?id=430045)
+            // makes it not persist cookie exceptions for local files, which means
+            // opening this document up from a file scheme leads to about 10 cookie
+            // prompts, very annoying.
+            
+            
+            booksDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectData.ProjectStore,
+                query: {
+                    type: 'content'
+                },
+                rootId: "root",
+                rootLabel: "Content",
+                childrenAttrs: ["content"]
+            });
+            booksTree = new dijit.Tree({
+                id: 'contentTree',
+                model: booksDataModel,
+                showRoot: false,
+                persist: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("content", target, source, position);
+                }
+            }, "contentTree");
+            notesDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectData.ProjectStore,
+                query: {
+                    type: 'note'
+                },
+                rootId: "root",
+                rootLabel: "Notes",
+                childrenAttrs: ["subnotes"]
+            });
+            notesTree = new dijit.Tree({
+                model: notesDataModel,
+                showRoot: false,
+                persist: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("note", target, source, position);
+                }
+            }, "notesTree");
+            journalsDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectData.ProjectStore,
+                query: {
+                    type: 'journal'
+                },
+                rootId: "root",
+                rootLabel: "Journals",
+                childrenAttrs: []
+            });
+            journalsTree = new dijit.Tree({
+                model: journalsDataModel,
+                showRoot: false,
+                persist: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("journal", target, source, position);
+                }
+            }, "journalsTree");
+            peopleDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectData.ProjectStore,
+                query: {
+                    type: 'person'
+                },
+                rootId: "root",
+                rootLabel: "People",
+                childrenAttrs: []
+            });
+            peopleTree = new dijit.Tree({
+                model: peopleDataModel,
+                showRoot: false,
+                persist: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("person", target, source, position);
+                }
+            }, "peopleTree");
+            placesDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectData.ProjectStore,
+                query: {
+                    type: 'place'
+                },
+                rootId: "root",
+                rootLabel: "Places",
+                childrenAttrs: []
+            });
+            placesTree = new dijit.Tree({
+                model: placesDataModel,
+                showRoot: false,
+                persist: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("place", target, source, position);
+                }
+            }, "placesTree");
+            thingsDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectData.ProjectStore,
+                query: {
+                    type: 'thing'
+                },
+                rootId: "root",
+                rootLabel: "Things",
+                childrenAttrs: []
+            });
+            thingsTree = new dijit.Tree({
+                model: thingsDataModel,
+                showRoot: false,
+                persist: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("thing", target, source, position);
+                }
+            }, "thingsTree");
+            goalsDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectData.ProjectStore,
+                query: {
+                    type: 'goal'
+                },
+                rootId: "root",
+                rootLabel: "Goals",
+                childrenAttrs: []
+            });
+            goalsTree = new dijit.Tree({
+                model: goalsDataModel,
+                showRoot: false,
+                persist: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("goal", target, source, position);
+                }
+            }, "goalsTree");
+            
+            
+        }
+    }
+    
+    var isFullScreen = false;
+    
+    this.toggleFullScreen = function() {
+        if (isFullScreen) {
+            this.turnOffFullScreen();
+        } else {
+            this.turnOnFullScreen();
+        }
+    }
+    
+    this.turnOffFullScreen = function() {
+        dojo.removeClass(dojo.body(), "fullScreen");
+        
+        dijit.byId("main").resize();
+        dijit.byId("systemToolBar-fullScreen").set('checked', false);
+        dijit.byId("floatingSystemToolbar-fullScreen").set('checked', false);
+        isFullScreen = false;
+    }
+    
+    this.turnOnFullScreen = function() {
+        dojo.addClass(dojo.body(), "fullScreen");
+        dijit.byId("main").resize();
+        dijit.byId("systemToolBar-fullScreen").set('checked', true);
+        dijit.byId("floatingSystemToolbar-fullScreen").set('checked', true);
+        isFullScreen = true;
+    }
+    
+    var openTabs = {};
+    
+    
+    this.ShowProjectProperties = function() {
+    
+        this.ProjectData.ProjectStore.fetch({
+            query: {
+                uid: 'project'
+            },
+            onItem: function(item) {
+				Controller.ShowDataItem(item);
+            },
+            onError: function() {
+                throw "Error fetch project properties."
+            }
+        });
+    };
+    
+    this.CheckTreeNodeAcceptance = function(treeType, target, source, position) {
+        if (this.ProjectData.ReadOnly) {
+            return false;
+        }
+        try {
+            if (source !== undefined) {
+                var nodes = source.anchor; //get the dragged tree row's div
+                var id = nodes.id; //get the id of the dragged div
+                var dragDndItem = source.getItem(id); //get the dnd item for the dragged div
+                var dragTreeNode = dragDndItem.data; //get the treenode of the dragged div
+                var dragItem = dragTreeNode.item; //get the store item bound to the dragged treenode
+                var dragType = this.ProjectData.ProjectStore.getValue(dragItem, "type", "");
+                // can't drag items of other types into here.
+                if (dragType != treeType) {
+                    return false;
+                }
+                if (this.ProjectData.TypeLookup[dragType].isAbstract) {
+                    dragType = this.ProjectData.ProjectStore.getValue(dragItem, "subtype", "");
+                }
+                var allowedParents = this.ProjectData.TypeLookup[dragType].allowedParents;
+                
+                // Find Target Info.
+                var targetNode = dijit.getEnclosingWidget(target);
+                if (targetNode.indent < 0) {
+                    // anything can be in the root.
+                    return true;
+                }
+                if ((position == "before") || (position == "after")) {
+                    // we are actually dealing with the parent, not this target.
+                    targetNode = targetNode.getParent();
+                    if (targetNode.indent < 0) {
+                        // again, anything can be in the root.
+                        return true;
+                    }
+                }
+                if (allowedParents.length == 0) {
+                    // item can not be contained in anything but the root, so return false now.
+                    return false;
+                }
+                var targetItem = targetNode.item;
+                var targetType = this.ProjectData.ProjectStore.getValue(targetItem, "type", "");
+                if (this.ProjectData.TypeLookup[targetType].isAbstract) {
+                    targetType = this.ProjectData.ProjectStore.getValue(targetItem, "subtype", "");
+                }
+                return dojo.indexOf(allowedParents, targetType) > -1;
+            }
+            
+        } catch (e) {
+            // catch any errors to make sure the UI doesn't leave
+            // weird panels everywhere.
+        }
+        return false;
+    }
+    
+    
+    this.ShowDataItem = function(item) {
+        var uid = this.ProjectData.ProjectStore.getValue(item, "uid", "");
+        if (openTabs.hasOwnProperty(uid)) {
+            // TODO: Show the tab in openTabs.uid.
+            dijit.byId("contentTabs").selectChild(openTabs[uid]);
+        } else {
+            var type = this.ProjectData.ProjectStore.getValue(item, "type", "");
+            if (this.ProjectData.TypeLookup.hasOwnProperty(type) && this.ProjectData.TypeLookup[type].isAbstract) {
+                type = this.ProjectData.ProjectStore.getValue(item, "subtype", "");
+            }
+            if (this.ProjectData.TypeLookup.hasOwnProperty(type)) {
+                var form = this.ProjectData.TypeLookup[type].form;
+                var args = {
+                    dataItem: item,
+                    dataStore: this.ProjectData.ProjectStore,
+                    closable: true,
+                    form: form,
+                    title: this.ProjectData.TypeLookup[type].typeLabel,
+                    bindScope: this
+                }
+                var viewer = new my.DataItemViewer(args);
+                openTabs[uid] = viewer;
+                viewer.onClose = function() {
+                    if (viewer.IsEditing()) {
+                        // TODO: Should have a 'confirmation' dialog instead,
+                        // possibly focusing the control that is editing.
+                        return false;
+                    }
+                    delete openTabs[uid];
+                    // TODO: This is finding the menu prior to
+                    // destroying this one, which means it never gets cleared,
+                    // Once I come up with a better mechanism, I won't have to
+                    // pass the viewer instance along to check against.
+                    // NOTE: I've tried delaying it here, and it seems to fix it,
+                    // but I'm not sure if this is enough.
+                    setTimeout(function() {
+                        Controller.ResetTabsMenu(viewer);
+                    }, 1)
+                    return true;
+                }
+                viewer.DataItemRemoved = function() {
+                    // just simulate a 'close' button click to make it
+                    // close gracefully.
+                    // TODO: Test this.
+                    dijit.byId("contentTabs").tablist.onCloseButtonClick(viewer);
+                }
+                // Delay the creation of the tab a little bit, in order to
+                // make sure that everything else hooking into this onnew has
+                // a chance to run rather quickly.
+                setTimeout(function() {
+                    dijit.byId("contentTabs").addChild(viewer);
+                    dijit.byId("contentTabs").selectChild(viewer);
+                    Controller.ResetTabsMenu();
+                }, 1);
+            } else {
+                throw "Invalid data item type."
+            }
+        }
+    };
+    
+    this.DeleteItem = function(item) {
+        var ProjectData = this.ProjectData;
+        var CloseChildTabs = function(item) {
+            // TODO: Can this be converted into a loop instead of recursion?
+            var type = ProjectData.ProjectStore.getValue(item, "type", "");
+            if (ProjectData.TypeLookup.hasOwnProperty(type) && ProjectData.TypeLookup[type].isAbstract) {
+                type = ProjectData.ProjectStore.getValue(item, "subtype", "");
+                
+            }
+            var childrenAttributes = ProjectData.TypeLookup[type].childrenAttributes;
+            for (var i = 0; i < childrenAttributes.length; i++) {
+                var children = ProjectData.ProjectStore.getValues(item, childrenAttributes[i]);
+                for (var j = 0; j < children.length; j++) {
+                    if (ProjectData.ProjectStore.isItem(children[j])) {
+                        CloseChildTabs(children[j]);
+                        var uid = ProjectData.ProjectStore.getValue(children[j], "uid");
+                        if (openTabs.hasOwnProperty(uid)) {
+                            // simulate a 'deleted' event so the tab closes itself.
+                            openTabs[uid]._DataItemDeleted(children[j]);
+                        }
+                    }
+                }
+            }
+            
+        }
+        
+        this.BeginTabUpdate();
+        try {
+            // NOTE: This is not notifying the children of the item
+            // being deleted, which means that their tabs aren't closing
+            // as well. When an item is deleted, there's no notification
+            // that it's children are deleted as well. Until I can figure
+            // that out, I need to do this.
+            // TODO: Let Dojo know that this would be a useful notification
+            // to have. Along with the ability to find the 'parent' for 
+            // a data item.
+            CloseChildTabs(item);
+            ProjectData.ProjectStore.deleteItem(item);
+        } finally {
+            // defer this one, so that in theory it happens after all of the other calls
+            // to resetTabMenu, which are also deferred.
+            setTimeout(function() {
+                Controller.EndTabUpdate();
+            }, 1)
+        }
+    }
+    
+    this._newItemOnTree = function(type, tree, selectedPath, parent, parentAttribute) {
+        if (!selectedPath) {
+            selectedPath = [tree.get('rootNode')];
+        }
+        var item = this.ProjectData.NewDataItem(type, null, parent ? {
+            parent: parent,
+            attribute: parentAttribute
+        } : null);
+        this.ShowDataItem(item);
+        selectedPath.push(item)
+        tree.set('path', selectedPath).then(function() {
+            tree.focusNode(tree.get('selectedNode'))
+        });
+    }
+    
+    /*
+     * Basically, will create the new item as a child of the current, if it is a valid parent. Otherwise
+     * as a sibling or auntuncle of the current depending on the first valid parent.
+     */
+    this._newContentItem = function(type) {
+        var typeInfo = this.ProjectData.TypeLookup[type];
+        var parent = null;
+        var selectedPath = null;
+        if (typeInfo.allowedParents.length > 0) {
+            var node = booksTree.get('selectedNode');
+            if (node && node.domNode) { // in IE, the node is null if not selected, in Firefox, it's the domNode. 
+                selectedPath = booksTree.get('path');
+                if (selectedPath) {
+                    // NOTE: I don't want to include the first one, as that is the 'root' node and
+                    // won't be a data item, but will always be a valid parent.
+                    for (var i = (selectedPath.length - 1); i > 0; i--) {
+                        if (dojo.indexOf(typeInfo.allowedParents, this.ProjectData.ProjectStore.getValue(selectedPath[i], "subtype", "")) > -1) {
+                            parent = selectedPath[i];
+                            break;
+                        }
+                        selectedPath.pop();
+                    }
+                }
+            }
+        }
+        this._newItemOnTree(type, booksTree, selectedPath, parent, "content");
+    }
+    
+    this.NewBook = function() {
+        this._newContentItem("book");
+        
+    }
+    
+    this.NewPart = function() {
+        this._newContentItem("part");
+    }
+    
+    this.NewChapter = function() {
+        this._newContentItem("chapter");
+    }
+    
+    this.NewScene = function() {
+        this._newContentItem("scene");
+    }
+    
+    this.NewNote = function() {
+        this._newItemOnTree("note", notesTree);
+    }
+    
+    this.NewSubNote = function() {
+        var parent = null;
+        var selectedPath = null;
+        var node = notesTree.get('selectedNode');
+        if (node && node.domNode) { // otherwise, the node has been deleted and we can't use it.
+            selectedPath = notesTree.get('path');
+            if (selectedPath) {
+                // NOTE: I don't want to include the first one, as that is the 'root' node and
+                // won't be a data item, but will always be a valid parent.
+                if (selectedPath.length > 1) {
+                    parent = selectedPath[selectedPath.length - 1];
+                }
+            }
+        }
+        this._newItemOnTree("note", notesTree, selectedPath, parent, "subnotes");
+    }
+    
+    this.NewJournal = function() {
+        this._newItemOnTree("journal", journalsTree);
+    }
+    
+    this.NewPerson = function() {
+        this._newItemOnTree("person", peopleTree);
+        
+    }
+    
+    this.NewPlace = function() {
+        this._newItemOnTree("place", placesTree);
+        
+    }
+    
+    this.NewThing = function() {
+        this._newItemOnTree("thing", thingsTree);
+    }
+    
+    this.NewGoal = function() {
+        this._newItemOnTree("goal", goalsTree);
+    }
+    
+    this._tabUpdateCount = 0;
+    
+    
+    this.BeginTabUpdate = function() {
+        this._tabUpdateCount++;
+    }
+    
+    this.EndTabUpdate = function() {
+        this._tabUpdateCount--;
+        if (this._tabUpdateCount === 0) {
+            this.ResetTabsMenu();
+        }
+    }
+    
+    this.ResetTabsMenu = function(deletedTab) {
+        if (this._tabUpdateCount > 0) {
+            return;
+        }
+        // FUTURE: It would be better to set up some sort of widget, perhaps
+        // even getting the dropdown menu directly from the TabContainer.
+        // TODO: I don't like the 'deletedTab' hack, have to hook into an event
+        // somewhere which creates this menu only when it's needed.
+        var menu = dijit.byId("floatingSystemToolbar-chooseTab-menu");
+        menu.destroyDescendants();
+        var tabs = dijit.byId("contentTabs");
+        dojo.forEach(tabs.getChildren(), function(page) {
+            if (deletedTab != page) {
+                var menuItem = new dijit.MenuItem({
+                    id: "floatingSystemToolbar-chooseTab-menu-" + page.id,
+                    label: page.title,
+                    iconClass: page.iconClass,
+                    dir: page.dir,
+                    lang: page.lang,
+                    onClick: function() {
+                        tabs.selectChild(page);
+                    }
+                });
+                menu.addChild(menuItem);
+            }
+        });
+        
+    }
+    
+    
+    
+    this.clickContentItem = function(item, node, evt) {
+        Controller.ShowDataItem(item);
+    }
+    
+    this.CheckSave = function() {
+        var result = new dojo.Deferred();
+        var me = this;
+        if (this.ProjectData.IsDirty()) {
+            this.ShowYesNoCancelDialog("Save Project", "<p>The project has been modified. Would you like to save it?</p>").then(function(answer) {
+                switch (answer) {
+                    case "yes":
+                        me.SaveProject().then(function(success) {
+                            if (success) {
+                                result.callback(true);
+                            } else {
+                                result.callback(false);
+                            }
+                        })
+                        break;
+                    case "no":
+                        result.callback(true);
+                        break;
+                    case "cancel":
+                        result.callback(false);
+                        break;
+                }
+            });
+        } else {
+            result.callback(true);
+        }
+        return result;
+    }
+    
+    this.NewProject = function() {
+        return this.OpenProject(true);
+    }
+    
+    this.OpenProject = function(mightBeNew) {
+        var result = new dojo.Deferred();
+        var me = this;
+        this.CheckSave().then(function(answer) {
+            if (answer) {
+                me.ShowInputDialog("Open Project", "Enter Project URL:", "").then(function(value) {
+                    if (value) {
+                        var wait = me.ShowWaitDialog("Loading...", "<p>Loading Project, please wait...</p>");
+                        me.ProjectData.LoadProject(value, mightBeNew).then(function() {
+							result.callback(true);
+                            wait.destroy();
+                        }, function(e) {
+                            result.errback(e);
+                            wait.destroy();
+                        });
+                    } else {
+                        result.callback(false)
+                    }
+                })
+            } else {
+                result.callback(false);
+            }
+        }, function(e) {
+            result.errback(e);
+        });
+        result.then(null, function(ex) {
+            alert("While Loading: " + ex)
+        })
+        return result;
+    }
+    
+    this.SaveProject = function() {
+        var wait = this.ShowWaitDialog("Saving...", "<p>Saving Project, please wait...</p>");
+        var result = new dojo.Deferred();
+        var tabSavers = [];
+        for (var uid in openTabs) {
+            if (openTabs.hasOwnProperty(uid)) {
+                if (openTabs[uid].IsEditing()) {
+                    tabSavers.push(openTabs[uid].ApplyEditing());
+                }
+            }
+        }
+        var deferredApplies = new dojo.DeferredList(tabSavers, false, true);
+        var me = this;
+        deferredApplies.then(function() {
+            me.ProjectData.SaveProject().then(function() {
+                result.callback();
+            }, function(ex) {
+                result.errback(ex);
+            })
+        }, function(ex) {
+            result.errback(ex);
+        })
+        result.then(function() {
+            wait.destroy();
+        }, function(ex) {
+            wait.destroy();
+            alert("While Saving: " + ex)
+        })
+        return result;
+    }
+    
+    this._projectLoadError = function(e) {
+        //alert("Can't load project: " + e);
+        // TODO: Should put User Interface into a state where nothing
+        // can be done... Perhaps go back to a 'splash' menu which
+        // asks the user to create a new project or load an existing one.
+    }
+    
+    this._projectSaveError = function(e) {
+        //alert("Can't save project: " + e)
+        // TODO: I don't think there's anything I need to do here, since
+        // the error is alerted in SaveProject.
+    }
+    
+    this._projectEndLoad = function() {
+        if (this.ProjectData.ReadOnly) {
+            dojo.addClass(dojo.body(), "readOnly");
+        } else {
+            dojo.removeClass(dojo.body(), "readOnly")
+        }
+        var openTree = function(tree) {
+            var root = tree.rootNode;
+            // Set root NODE to unchecked so that Tree will fetch from the
+            // model again
+            root.state = 'UNCHECKED';
+            tree._expandNode(root);
+        }
+        openTree(booksTree);
+        openTree(notesTree);
+        openTree(journalsTree);
+        openTree(peopleTree);
+        openTree(placesTree);
+        openTree(thingsTree);
+        openTree(goalsTree);
+        // TODO: At this point, should also set user interface positions,
+        // open previously opened tabs, etc.
+    }
+    
+    this._projectBeginLoad = function() {
+    
+        this.BeginTabUpdate();
+        try {
+            for (var uid in openTabs) {
+                if (openTabs.hasOwnProperty(uid)) {
+                    // just simulate a 'close' button click to make it
+                    // close gracefully.
+                    // NOTE: I would assume that the tabs probably delay some of
+                    // the user interface changes here. I don't *think* that would
+                    // be a problem, as I'm deleting from the openTabs as well.
+                    dijit.byId("contentTabs").tablist.onCloseButtonClick(openTabs[uid]);
+                    delete openTabs[uid];
+                }
+            }
+        } finally {
+            // defer this one, so that in theory it happens after all of the other calls
+            // to resetTabMenu, which are also deferred.
+            setTimeout(function() {
+                Controller.EndTabUpdate();
+            }, 1)
+        }
+        var closeTree = function(tree) {
+            var root = tree.rootNode;
+            // Collapse root node and set model children to null, so the model
+            // will fetch again from the datastore when _expandNode() is
+            // called
+            tree._collapseNode(root);
+            tree.model.root.children = null;
+        }
+        closeTree(booksTree);
+        closeTree(notesTree);
+        closeTree(journalsTree);
+        closeTree(peopleTree);
+        closeTree(placesTree);
+        closeTree(thingsTree);
+        closeTree(goalsTree);
+        
+    }
+    
+    this.ShowWaitDialog = function(title, message) {
+        var dialog = new dijit.Dialog({
+            title: title,
+            //style: "width:250px;height:100px",
+            closable: false,
+			refocus: false
+        });
+        // as closable doesn't work, this prevents the escape key from closing it.
+        dialog._onKey = function() {
+        };
+        dojo.style(dialog.closeButtonNode, "display", "none");
+        dialog.set('content', message);
+        dialog.startup();
+        dialog.show();
+        return dialog;
+    }
+    
+    this.ShowInputDialog = function(title, message, defaultValue) {
+        var result = new dojo.Deferred();
+        var dialog = dijit.byId("inputDialog");
+        var textbox = dijit.byId("inputDialog-value");
+        var connections = [];
+        var buttonClosed = false;
+        var accept = function() {
+			buttonClosed = true;
+            dialog.hide();
+            result.callback(textbox.get('value'));
+        }
+        var cancel = function() {
+            buttonClosed = true;
+            dialog.hide();
+            result.callback();
+        }
+        var close = function() {
+            while (connections.length > 0) {
+                dojo.disconnect(connections.pop());
+            }
+            if (!buttonClosed) {
+                result.callback();
+            }
+        }
+        dialog.set('title', title);
+        dojo.byId("inputDialog-prompt").innerHTML = message;
+        textbox.set('value', defaultValue);
+        connections.push(dojo.connect(dijit.byId("inputDialog-accept"), "onClick", this, accept));
+        connections.push(dojo.connect(dijit.byId("inputDialog-cancel"), "onClick", this, cancel));
+        connections.push(dojo.connect(dialog, "onHide", this, close));
+        dialog.startup();
+        dialog.show();
+        return result;
+    }
+    
+    this.ShowYesNoCancelDialog = function(title, message) {
+        var result = new dojo.Deferred();
+        var dialog = dijit.byId("yesNoCancelDialog");
+        var connections = [];
+        var buttonClosed = false;
+        var yes = function() {
+            buttonClosed = true;
+            dialog.hide();
+            result.callback("yes");
+        }
+        var no = function() {
+            buttonClosed = true;
+            dialog.hide();
+            result.callback("no");
+        }
+        var cancel = function() {
+            buttonClosed = true;
+            dialog.hide();
+            result.callback("cancel");
+        }
+        var close = function() {
+            while (connections.length > 0) {
+                dojo.disconnect(connections.pop());
+            }
+            if (!buttonClosed) {
+                result.callback("cancel");
+            }
+        }
+        dialog.set('title', title);
+        dijit.byId("yesNoCancelDialog-prompt").set('content', message);
+        connections.push(dojo.connect(dijit.byId("yesNoCancelDialog-yes"), "onClick", this, yes));
+        connections.push(dojo.connect(dijit.byId("yesNoCancelDialog-no"), "onClick", this, no));
+        connections.push(dojo.connect(dijit.byId("yesNoCancelDialog-cancel"), "onClick", this, cancel));
+        connections.push(dojo.connect(dialog, "onHide", this, close));
+        dialog.startup();
+        dialog.show();
+        return result;
+    }
+    
+    
+    this.DataViewerFormat_ContentSubType = function(value) {
+        if (this.ProjectData.TypeLookup.hasOwnProperty(value)) {
+            return this.ProjectData.TypeLookup[value].typeLabel;
+        }
+        return value;
+        
+    };
+    
+    var tagStore = null;
+    
+    this.DataViewerFormat_GetTagStore = function() {
+        if (!tagStore) {
+            // TODO: Have to eventually load this from somewhere, and keep
+            // modifying it. This probably goes in the ProjectData.
+            tagStore = new dojo.data.ItemFileReadStore({
+                data: {
+                    label: "tagName",
+                    identifier: "tagName",
+                    items: [{
+                        tagName: "animal"
+                    }, {
+                        tagName: "vegetable"
+                    }, {
+                        tagName: "mineral"
+                    }]
+                }
+            });
+            
+        }
+        return tagStore;
+    }
+    
+    this.GridFormat_NegateDoNotPublish = function(value) {
+        // Turns Do Not Publish into it's opposite for a grid, so the column
+        // can be called Publish.
+        return value ? false : true;
+    }
+    
+    this.GridFormat_DisplayTags = function(value) {
+        var result = "";
+        if (value) {
+            for (var i = 0; i < value.length(); i++) {
+                if (i > 0) {
+                    result += ", ";
+                }
+                result += value.getItem(i);
+            }
+        }
+        return result;
+        
+    }
+    
+    this.GridFormat_DisplayHTMLSafe = function(value) {
+        // TODO: Come up with some regex to clean up the HTML for
+        // display.
+        // https://fosswiki.liip.ch/display/BLOG/XSS+Prevention
+        // https://svn.liip.ch/repos/public/popoon/trunk/classes/externalinput.php
+        // TODO: Issues to think about:
+        //  1.  cross-site scripting is a real worry for any dynamically entered HTML.
+        //  2.  I will be making my demo version publicly available, but the data
+        //      will never be saved. Therefore, there shouldn't be any problems --
+        //      anything they could trick the browser into doing could be done without
+        //      a browser, so what's the point of that?
+        //  3.  Personal sites will more than likely be secured and password protected,
+        //      and not publicly available.
+        //  4.  Anything I do with a filesystem version will not be any less secure
+        //      than some equivalent attack in a Microsoft Word document.
+        //  5.  There are very possibly some idiots who may not try to keep their
+        //      data safe. These are the real worry, and I'll have to put some big
+        //      warnings on the site to alert them of this.
+        //  6.  No matter what I strip from the data, there's bound to be something
+        //      that I won't know about that could be used to attack. 
+        //  7.  Everything I stip from the data could potentially cause the user to
+        //      lose something important to them.
+        if (value) {
+            return value.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        } else {
+            return "";
+        }
+    }
+    
+    this.DataViewer_NewCredit = function(parentItem) {
+        return this.ProjectData.NewDataItem("credit", {
+            name: "",
+            biography: "<p></p>",
+            role: "Author"
+        }, {
+            parent: parentItem,
+            attribute: "credits"
+        })
+    }
+    
+    this.DataViewerFormat_SceneRatingName = function(i) {
+        var ratings = this.ProjectData.Customizations.Scene.Ratings;
+        if (i < ratings.length) {
+            return ratings[i].name;
+        }
+        return "Rating " + (i + 1);
+    }
+    
+    this.DataViewerFormat_SceneRatingName0 = function() {
+        return this.DataViewerFormat_SceneRatingName(0);
+    }
+    
+    this.DataViewerFormat_SceneRatingName1 = function() {
+        return this.DataViewerFormat_SceneRatingName(1);
+    }
+    
+    this.DataViewerFormat_SceneRatingName2 = function() {
+        return this.DataViewerFormat_SceneRatingName(2);
+    }
+    
+    this.DataViewerFormat_SceneRatingName3 = function() {
+        return this.DataViewerFormat_SceneRatingName(3);
+    }
+    
+    this.DataViewerFormat_PersonRatingName = function(i) {
+        var ratings = this.ProjectData.Customizations.Person.Ratings;
+        if (i < ratings.length) {
+            return ratings[i].name;
+        }
+        return "Rating " + (i + 1);
+    }
+    
+    this.DataViewerFormat_PersonRatingName0 = function() {
+        return this.DataViewerFormat_PersonRatingName(0);
+    }
+    
+    this.DataViewerFormat_PersonRatingName1 = function() {
+        return this.DataViewerFormat_PersonRatingName(1);
+    }
+    
+    this.DataViewerFormat_PersonRatingName2 = function() {
+        return this.DataViewerFormat_PersonRatingName(2);
+    }
+    
+    this.DataViewerFormat_PersonRatingName3 = function() {
+        return this.DataViewerFormat_PersonRatingName(3);
+    }
+    
+    
+    
+}
+
+// Add the initialization functions.
+dojo.addOnLoad(function() {
+    // **** Load Required Dojo Libraries ****//
+    // NOTE: This is done here to speed up load time. Doing it earlier
+    // makes it take longer to actually show the 'loading' splash screen,
+    // and you sit on a blank screen for a long time.
+    var start = new Date().getTime();
+    {
+        // FUTURE: As long as we are loading from the same domain, these
+        // calls are blocking. If we move over to a cross-domain load 
+        // (i.e. dojo is retrieved from it's primary site instead) then
+        // we have to make sure everything's loaded before we do the other
+        // stuff.
+        dojo.registerModulePath("my", "../../../components")
+        dojo.require("dojo.parser");
+        dojo.require("dijit.Dialog");
+        dojo.require("dijit.layout.BorderContainer");
+        dojo.require("dijit.layout.ContentPane");
+        dojo.require("dijit.layout.AccordionContainer");
+        dojo.require("dijit.layout.TabContainer");
+        dojo.require("dijit.Toolbar");
+        dojo.require("dojo.data.ItemFileWriteStore");
+        dojo.require("dijit.tree.ForestStoreModel");
+        dojo.require("dijit.Tree");
+        dojo.require("dijit.Declaration");
+        dojo.require("dojox.json.schema");
+        dojo.require("dijit.form.DropDownButton")
+        dojo.require("dijit.Menu");
+        dojo.require("dijit.tree.dndSource");
+        dojo.require("dijit.TitlePane");
+        
+        // app-specific widgets.
+        dojo.require("my.LocalFileAccess");
+        dojo.require("my.ProjectData")
+        dojo.require("my.DataItemViewer");
+        dojo.require("my.extensions");
+        // FUTURE: Plugin hook: required-libraries - should go here.
+    
+    
+    }
+    
+    // Now, add another onload here to make sure any asynchronous requests in the requires
+    // above are loaded.
+    dojo.addOnLoad(function() {
+        console.info("Total load time: " + (new Date().getTime() - start) + "ms");
+        // ******* Parse the file for declarative dojo widgets ****//
+        start = new Date().getTime();
+        {
+            // FUTURE: Plugin Hook: modify web page - should go here.
+            dojo.parser.parse(dojo.byId('container'));
+            // FUTURE: Plugin Hook: post process parsing - should go here.
+        }
+        console.info("Total parse time: " + (new Date().getTime() - start) + "ms");
+        
+        
+        start = new Date().getTime();
+        {
+            Controller.Initialize();
+            
+            // FUTURE: Plugin Hook: application controller initialized.
+        
+        }
+        console.info("Total initialization time: " + (new Date().getTime() - start) + "ms");
+        
+        start = new Date().getTime();
+        {
+            // TODO: Should pass a parameter, taken from the settings, based on the project
+            // open last time. If nothing open, this will create a new, empty project.
+            Controller.ProjectData.LoadProject("sample://TheDarkHorizon" /*+ "?readonly=true"*/).then(null, function(ex) {
+                alert("While loading initial project: " + ex)
+            });
+            //Controller.ProjectData.LoadProject("file:///t:/Customers/TownsEdgeTechnology/projects/AuthorOrganizer/todo.txt");
+            //Controller.ProjectData.LoadProject("http://www.google.com/");
+        
+        
+            // FUTURE: Plugin Hook: After load project.
+        }
+        console.info("Total project load time: " + (new Date().getTime() - start) + "ms");
+        
+        start = new Date().getTime();
+        {
+            // ******* Remove the loader screen **** //   
+            // make sure other stuff can be shown once the splash screen is removed.
+            dojo.removeClass("main", "hideOnLoad");
+            dojo.removeClass("resources", "hideOnLoad");
+            // this is necessary since the objects started out hidden, it isn't properly laid out.
+            dijit.byId("main").resize();
+            // FUTURE: Plugin Hook: update controls -- should go here.
+            // TODO: Here is where UI positions should be applied as well.
+        }
+        console.info("Total display time: " + (new Date().getTime() - start) + "ms");
+        
+        
+        // close loader, do this after initialization to make sure there isn't anything
+        // else that has to be finished first.
+        setTimeout(function hideLoader() {
+            var loader = dojo.byId('loader');
+            dojo.fadeOut({
+                node: loader,
+                duration: 500,
+                onEnd: function() {
+                    loader.style.display = "none";
+                    
+                }
+            }).play();
+        }, 1);
+    });
+});

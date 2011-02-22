@@ -1,0 +1,184 @@
+<!--
+   Copyright 2011 Neil M. Sheldon
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Leaf by Niggle</title>
+        <link rel="stylesheet" href="bin/dojo/dojo/resources/dojo.css" />
+        <link rel="stylesheet" href="bin/dojo/dijit/themes/tundra/tundra.css" />
+        <!-- required for grids -->
+        <style type="text/css">
+            /* The following makes sure we fill the browser window, and only the browser window */
+            html, body, #main {
+                height: 100%;
+                width: 100%;
+                padding: 0;
+                border: 0;
+                margin: 0;
+            }
+            
+            /* pre-loader specific stuff to prevent unsightly flash of unstyled content */
+            #loader {
+                padding: 0;
+                margin: 0;
+                border: 0;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #ededed;
+                z-index: 999;
+                vertical-align: middle;
+            }
+            
+            #loaderInner {
+                position: relative;
+                text-align: center;
+            }
+            
+            /* some special layout stuff */
+            #systemToolbar {
+                float: right;
+            }
+            
+            #leftSidebar, #rightSidebar {
+                width: 150px;
+            }
+            
+            /* Gets rid of the padding in the content pane where we are similating a TitlePane */
+            .tundra .dijitTabContainerLeft-dijitContentPane.sidebarPane, .tundra .dijitTabContainerRight-dijitContentPane.sidebarPane {
+                padding: 0;
+            }
+            
+            /* NOTE: The style thing works around a bug in the tundra css for this icon */
+            .dijitIconEditProperty {
+                background-position: -160px;
+            }
+            
+            /* Dynamic classes */
+            .hideOnLoad {
+                display: none;
+            }
+            
+            .fullScreen #mainHeader, .fullScreen #leftSidebar, .fullScreen #rightSidebar, .fullScreen #statusBar, .fullScreen #contentTabs_tablist {
+                display: none;
+            }
+            
+            #floatingHeader {
+                display: none;
+                position: fixed;
+                right: 5px;
+                top: 0;
+                z-index: 9999;
+            }
+            
+            .fullScreen #floatingHeader {
+                display: block;
+            }
+            
+            /* Read Only stuff */
+            .readOnly .readOnlyDisable {
+                display: none;
+            }
+            
+            /* Get rid of some of the ****EXTREEEME MARRRGIIIN-TOPPPPS!*** that dojo put in
+             * (This is a plague of many common stylesheets... why? */
+            h1 {
+                margin-top: 0.25em;
+                margin-bottom: 0;
+            }
+            
+            h2 {
+                margin-top: 0.48225em; /* Original was 1.929--- ? Where'd that magic number come from? */
+                margin-bottom: 0;
+            }
+            
+            h3, h4, h5, h6 {
+                margin-top: 0.375em;
+                margin-bottom: 0;
+            }
+            
+            /* paragraphs, quotes and lists */
+            p {
+                margin-top: 0.75em;
+                margin-bottom: 0;
+            }
+            
+            blockquote {
+                margin-top: 0.75em;
+                margin-bottom: 0;
+                padding: 0;
+                padding-left: 1.636em;
+            }
+            
+            pre {
+                padding-left: 1.5em;
+            }
+            
+            /** A few classes which I want to use **/
+            /** Draw 'subtitles' up into the master heading */
+            h1.subtitle, h2.subtitle, h3.subtitle, h4.subtitle, h5.subtitle, h6.subtitle, p.subtitle {
+                margin-top: 0;
+                padding-left: 0.5em;
+                font-style: italic;
+                font-size: 90%;
+            }
+            
+            .tagsLabel {
+                display: inline;
+            }
+            
+            /** This just looks a little nicer in the various property editors. */
+            label {
+                font-weight: bold;
+            }
+            
+            /** But not in the subtitle */
+            .subtitle label {
+                font-weight: normal;
+            }
+        </style>
+        <script type="text/javascript" src="js/Math.uuid.js">
+        </script>
+        <!--        <script type="text/javascript" src="lib/dojo/dojo/dojo.js">
+        </script>-->
+        <script type="text/javascript" src="js/dojo/dojo/dojo.js" djConfig="parseOnLoad:true">
+        </script>
+        <script type="text/javascript" src="js/dojo/dojo/custom-dojo.js">
+        </script>
+        <script type="text/javascript">
+            dojo.require("dojox.charting.widget.Chart2D");
+            dojo.require("dojox.charting.themes.Distinctive");
+        </script>
+    </head>
+    <body class='tundra'>
+        <div dojoType="dojox.charting.widget.Chart2D" id="chart4" theme="dojox.charting.themes.Distinctive" style="width: 300px; height: 300px;">
+            <div class="plot" name="default" type="ClusteredColumns" gap="2" fontColor="black" hAxis="days" vAxis="wordCount">
+            </div>
+			<div class="axis" name="days" vertical="true" title="Days"></div>
+			<div class="axis" name="wordCount" title="Word Count"></div>
+            <div class="series" name="Actual" data="250, 267, 380, 420, 1200, 1300, 1324, 1567, 1890, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100, 2100" valueFn="Number(x)">
+            </div>
+            <div class="series" name="Suggested" data="200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000, 3200, 3400, 3600, 3800, 4000, 4200, 4400, 4600, 4800, 5000, 5200, 5400, 5600, 5800, 6000" valueFn="Number(x)">
+            </div>
+            <div class="action" type="Tooltip">
+            </div>
+        </div>
+    </body>
+</html>

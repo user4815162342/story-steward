@@ -1,0 +1,397 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+Copyright 2011 Neil M. Sheldon
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Loading Application...</title>
+        <link rel="stylesheet" href="js/dojo/dojo/resources/dojo.css" />
+        <link rel="stylesheet" href="js/dojo/dijit/themes/tundra/tundra.css" />
+        <!-- required for grids -->
+        <link rel="stylesheet" href="js/dojo/dojox/grid/resources/Grid.css"/>
+        <link rel="stylesheet" href="js/dojo/dojox/grid/resources/tundraGrid.css"/>
+		<link rel="stylesheet" href="desktop.css"/>
+        <script type="text/javascript" src="js/appinfo.js">
+        </script>
+        <script type="text/javascript" src="js/Math.uuid.js">
+        </script>
+        <script type="text/javascript" src="js/dojo/dojo/dojo.js">
+        </script>
+        <!-- NOTE: This one *must* be called here -->
+        <script type="text/javascript" src="js/dojofixup.js">
+        </script>
+        <script type="text/javascript" src="js/dojo/dojo/my-dojo.js">
+        </script>
+        <script type="text/javascript" src="js/controller.js">
+        </script>
+        <script type="text/javascript" src="resources/quotes.js">
+        </script>
+        <!-- This stuff appears to be necessary in IE, when running from 'file' scheme.
+        As dojo can't load these things dynamically from that. This is also
+        helpful for debugging, since FireBug can see the code this way (otherwise,
+        it can't see the eval string stuff).
+        The dillemma is that apparently, when these are *included* in Firefox,
+        I get errors when I try to load the data item viewer templates.
+        TODO: See System error: -2146697211 bug in the todo.txt.
+        --><!--<script type="text/javascript" src="components/ProjectData.js">
+        </script>
+        <script type="text/javascript" src="components/extensions.js">
+        </script>
+        <script type="text/javascript" src="components/DataGrid.js">
+        </script>
+        <script type="text/javascript" src="components/TagEditor.js">
+        </script>
+        <script type="text/javascript" src="components/DataItemViewer.js">
+        </script>-->
+    </head>
+    <body class='tundra'>
+        <div id="loader">
+            <!-- Splash Screen -->
+            <div id="loaderInner">
+                Loading Application... 
+            </div>
+        </div>
+        <div id="resources" class="hideOnLoad">
+            <!-- Various dialogs, context menus, etc. -->
+            <div id="yesNoCancelDialog" dojoType="dijit.Dialog" title="Save Project">
+                <div dojoType="dijit.layout.ContentPane" style="width:250px;height:100px">
+                    <div dojoType="dijit.layout.BorderContainer" gutters="false">
+                        <div id="yesNoCancelDialog-prompt" dojoType="dijit.layout.ContentPane" region="center">
+                        </div>
+                        <div dojoType="dijit.Toolbar" region="bottom">
+                            <div dojoType="dijit.form.Button" id="yesNoCancelDialog-yes">
+                                <span>Yes</span>
+                            </div>
+                            <div dojoType="dijit.form.Button" id="yesNoCancelDialog-no">
+                                <span>No</span>
+                            </div>
+                            <div dojoType="dijit.form.Button" id="yesNoCancelDialog-cancel">
+                                <span>Cancel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="yesNoDialog" dojoType="dijit.Dialog" title="Save Project">
+                <div dojoType="dijit.layout.ContentPane" style="width:250px;height:100px">
+                    <div dojoType="dijit.layout.BorderContainer" gutters="false">
+                        <div id="yesNoDialog-prompt" dojoType="dijit.layout.ContentPane" region="center">
+                        </div>
+                        <div dojoType="dijit.Toolbar" region="bottom">
+                            <div dojoType="dijit.form.Button" id="yesNoDialog-yes">
+                                <span>Yes</span>
+                            </div>
+                            <div dojoType="dijit.form.Button" id="yesNoDialog-no">
+                                <span>No</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="quoteDialog" dojoType="dijit.Dialog" title="Message">
+                <div dojoType="dijit.layout.ContentPane" style="width:250px;height:100px">
+                    <div dojoType="dijit.layout.BorderContainer" gutters="false">
+                        <div id="quoteDialog-prompt" dojoType="dijit.layout.ContentPane" region="center">
+                        </div>
+                        <div dojoType="dijit.Toolbar" region="bottom">
+                            <div dojoType="dijit.form.Button" id="quoteDialog-next">
+                                <span>Next</span>
+                            </div>
+                            <div dojoType="dijit.form.Button" id="quoteDialog-ok">
+                                <span>Ok</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="inputDialog" dojoType="dijit.Dialog" title="Enter Value:">
+                <div dojoType="dijit.layout.ContentPane" style="width:250px;height:100px">
+                    <div dojoType="dijit.layout.BorderContainer" gutters="false">
+                        <div dojoType="dijit.layout.ContentPane" region="center">
+                            <label for="inputDialogTextbox" id="inputDialog-prompt">
+                            </label>
+                            <input type="text" name="inputDialogTextbox" dojoType="dijit.form.TextBox" id="inputDialog-value" style="width:220px"></span>
+                        </div>
+                        <div dojoType="dijit.Toolbar" region="bottom">
+                            <div dojoType="dijit.form.Button" id="inputDialog-accept">
+                                <span>Ok</span>
+                            </div>
+                            <div dojoType="dijit.form.Button" id="inputDialog-cancel">
+                                <span>Cancel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="openProjectDialog" dojoType="dijit.Dialog" title="Open Project:">
+                <div dojoType="dijit.layout.ContentPane" style="width:300px;height:100px">
+                    <div dojoType="dijit.layout.BorderContainer" gutters="false">
+                        <div dojoType="dijit.layout.ContentPane" region="center">
+                            <label for="openProjectDialogTextBox" id="openProjectDialog-prompt">
+                                File URL:
+                            </label>
+                            <input type="text" name="openProjectDialogTextBox" dojoType="dijit.form.TextBox" id="openProjectDialog-value" style="width:220px"/>
+                            <p id="openProjectDialog-error" style="color: red;">
+                            </p>
+                        </div>
+                        <div dojoType="dijit.layout.ContentPane" region="bottom">
+                            <div>
+                                <input id="openProjectDialog-mightBeNew" name="openProjectDialogNewCheck" dojoType="dijit.form.CheckBox" />
+                                <label for="openProjectDialogNewCheck">
+                                    New
+                                </label>
+                                <input id="openProjectDialog-readOnly" name="openProjectDialogROCheck" dojoType="dijit.form.CheckBox" />
+                                <label for="openProjectDialogROCheck">
+                                    Lock
+                                </label>
+                            </div>
+                            <div dojoType="dijit.Toolbar" region="bottom">
+                                <div dojoType="dijit.form.Button" id="openProjectDialog-sample">
+                                    <span>Sample</span>
+                                </div>
+                                <div dojoType="dijit.form.Button" id="openProjectDialog-browse" disabled="true">
+                                    <span>Browse</span>
+                                </div>
+                                <div dojoType="dijit.form.Button" id="openProjectDialog-accept">
+                                    <span>Ok</span>
+                                </div>
+                                <div dojoType="dijit.form.Button" id="openProjectDialog-cancel">
+                                    <span>Cancel</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="main" class="hideOnLoad" dojoType="dijit.layout.BorderContainer" liveSplitters="false" design="header">
+            <div id="floatingHeader" dojoType="dijit.layout.ContentPane">
+                <div id="floatingSystemToolbar" dojoType="dijit.Toolbar" region="top">
+                    <div dojoType="dijit.form.DropDownButton" id="floatingSystemToolbar-chooseTab" iconClass="iconChooseTab" showLabel="false">
+                        <span>Choose Tab</span>
+                        <div dojoType="dijit.Menu" id="floatingSystemToolbar-chooseTab-menu">
+                        </div>
+                    </div>
+                    <div dojoType="dijit.form.ToggleButton" id="floatingSystemToolbar-fullScreen" iconClass="iconFullScreenOff" showLabel="false" onClick="Controller.toggleFullScreen()">
+                        Full Screen
+                    </div>
+                </div>
+            </div>
+            <div id="mainHeader" dojoType="dijit.layout.ContentPane" region="top">
+                <div id="systemToolbar" dojoType="dijit.Toolbar" region="top">
+                    <div dojoType="dijit.form.Button" id="mainToolBar-quote" iconClass="iconQuote" showLabel="false" onClick="Controller.ShowRandomQuote();">
+                        Oblique Strategies
+                    </div>
+                    <div dojoType="dijit.form.ToggleButton" id="systemToolBar-fullScreen" iconClass="iconFullScreenOn" showLabel="false" onClick="Controller.toggleFullScreen()">
+                        Full Screen
+                    </div>
+                </div>
+                <div id="mainToolbar" class="hideOnFullScreen" dojoType="dijit.Toolbar" region="top">
+                    <div dojoType="dijit.form.Button" id="mainToolBar-project-open" iconClass="iconOpenProject" showLabel="false" onClick="Controller.OpenProject();">
+                        Open Project
+                    </div>
+                    <!--<div dojoType="dijit.form.DropDownButton" id="mainToolBar-project-mru" iconClass="iconOpenRecentProject" showLabel="false">
+                    <span>Open Recent...</span>
+                    <div dojoType="dijit.Menu"></div>
+                    </div>-->
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-project-save" iconClass="iconSaveProject" showLabel="false" onClick="Controller.SaveProject();">
+                        Save Project
+                    </div>
+                    <div dojoType="dijit.form.Button" id="mainToolBar-project-properties" iconClass="iconEditProject" showLabel="false" onClick="Controller.ShowProjectProperties();">
+                        Project Properties
+                    </div>
+                    <span dojoType="dijit.ToolbarSeparator"></span>
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-chapter-new" iconClass="iconNewChapter" showLabel="false" onClick="Controller.NewChapter();">
+                        New Chapter
+                    </div>
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-scene-new" iconClass="iconNewScene" showLabel="false" onClick="Controller.NewScene();">
+                        New Scene
+                    </div>
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-note-new" iconClass="iconNewNote" showLabel="false" onClick="Controller.NewNote();">
+                        New Note
+                    </div>
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-subnote-new" iconClass="iconNewSubnote" showLabel="false" onClick="Controller.NewSubNote();">
+                        New SubNote
+                    </div>
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-journal-new" iconClass="iconNewJournal" showLabel="false" onClick="Controller.NewJournal();">
+                        New Journal Entry
+                    </div>
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-person-new" iconClass="iconNewPerson" showLabel="false" onClick="Controller.NewPerson();">
+                        New Person
+                    </div>
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-place-new" iconClass="iconNewPlace" showLabel="false" onClick="Controller.NewPlace();">
+                        New Place
+                    </div>
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-thing-new" iconClass="iconNewThing" showLabel="false" onClick="Controller.NewThing();">
+                        New Thing
+                    </div>
+                    <div dojoType="dijit.form.Button" class="readOnlyDisable" id="mainToolBar-goal-new" iconClass="iconNewGoal" showLabel="false" onClick="Controller.NewGoal();">
+                        New Goal
+                    </div>
+                </div>
+            </div>
+            <div dojoType="dijit.layout.TabContainer" tabPosition="left-h" class="hideOnFullScreen" minSize="35" style="width:150px" id="leftSidebar" region="leading" splitter="true">
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" id="contentsPane" iconClass="iconContent" showTitle="false" gutters="false" title="Content">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Content</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <div id="contentTree">
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" id="notesPane" showTitle="false" iconClass="iconNote" title="Notes" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Notes</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <div id="notesTree">
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" id="journalsPane" iconClass="iconJournal" showTitle="false" title="Journals" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Journals</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <div id="journalsTree">
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" id="peoplePane" iconClass="iconPerson" showTitle="false" title="People" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">People</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <div id="peopleTree">
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" id="placesPane" iconClass="iconPlace" showTitle="false" title="Places" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Places</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <div id="placesTree">
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" id="thingsPane" iconClass="iconThing" showTitle="false" title="Things" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Things</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <div id="thingsTree">
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" id="goalsPane" iconClass="iconGoal" showTitle="false" title="Goals" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Goals</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <div id="goalsTree">
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" id="toolsPane" iconClass="iconTools" showTitle="false" title="Tools" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Tools</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        Tools menu will go here: 
+                        - storyboard  
+                        - reports 
+                        - automatically add characters, locations, items to scenes where they are mentioned.
+                        - work with orphan, duplicate scenes.
+                        - word usage count
+                        - export?
+                        - backup
+                        - system settings.
+                        <button dojoType="dijit.form.Button" id="failSafeButton" type="button">
+                            Trigger Fail-safe
+                            <script type="dojo/method" event="onClick" args="evt">
+                                Controller.TriggerFailSafe();
+                            </script>
+                        </button>
+                        <div dojoType="dijit.Tooltip" connectId="failSafeButton">
+                            <p>
+                                When you can't save, press this button to open up all 
+                                of your raw, unsaved data in separate browser windows. You  
+                                can then use copy and paste, or your browser's file-save 
+                                commands to save the data in a safe location. Note that  
+                                this is the easy part, getting your data back in is more 
+                                difficult, but, at least you'll have your data. Please contact
+                                the programmer if you need assistance.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div dojoType="dijit.layout.TabContainer" region="center" id="contentTabs" tabStrip="true" useSlider="true" useMenu="true">
+            </div>
+            <div dojoType="dijit.layout.TabContainer" class="hideOnFullScreen" tabPosition="right-h" minSize="35" style="width:35px"  id="rightSidebar" region="trailing" splitter="true">
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" showTitle="false" title="Search" iconClass="iconSearchFiles" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Search</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                    </div>
+                </div>
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" showTitle="false" title="Dictionary" iconClass="iconDictionary" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Dictionary</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                    </div>
+                </div>
+                <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" showTitle="false" title="Symbols" iconClass="iconSymbols" gutters="false">
+                    <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
+                        <div class="dijitTitlePaneTitleFocus">
+                            <span class="dijitTitlePaneTextNode">Symbols</span>
+                        </div>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                    </div>
+                </div>
+            </div>
+            <div dojoType="dijit.layout.ContentPane" id="statusBar" class="hideOnFullScreen" region="bottom">
+                <span id="statusPanel-appName"></span>
+                <span dojoType="dijit.ToolbarSeparator"></span>
+                <span id="statusPanel-saveStatus"></span>
+                <span dojoType="dijit.ToolbarSeparator"></span>
+                <span id="statusPanel-totalWordCount"></span>
+            </div>
+        </div>
+    </body>
+</html>

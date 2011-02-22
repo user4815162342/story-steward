@@ -1,0 +1,253 @@
+<div widgetClass="my.ChapterViewer" titleField="name" defaultTitle="Scene" defaults="{ dataItem: {}, dataStore: {}, form: '' }" dojoAttachPoint="containerNode">
+<!--
+   Copyright 2011 Neil M. Sheldon
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+-->
+    <div dojoType="dijit.layout.TabContainer" region="center" tabStrip="true" tabPosition="bottom">
+        <div dojoType="dijit.layout.ContentPane" title="Details">
+            <div dojoType="dijit.layout.BorderContainer" gutters="false" design="headline">
+                <div dojoType="dijit.layout.ContentPane" region="top">
+                    <h2 dojoAttachPoint="_titleField" bindField="name" dojoType="dijit.InlineEditBox" editor="dijit.form.TextBox" title="Editable Scene Title">Title</h2>
+                    <p class="subtitle">
+                        Scene&mdash; 
+                        Created: <span dojoAttachPoint="_createdField" bindField="created" bindDataType="Date"></span>&nbsp; 
+                        Modified: <span dojoAttachPoint="_modifiedField" bindField="modified" bindDataType="Date"></span>&nbsp;<span dojoType="dijit.form.Button" class="readOnlyDisable" showLabel="false" iconClass="iconDelete" dojoAttachPoint="_deleteButton" dojoAttachEvent="onClick:DeleteDataItem">Delete</span>&nbsp;<input type="checkbox" bindField="doNotPublish" name="doNotPublish" dojoType="dijit.form.CheckBox" dojoAttachPoint="_doNotPublishField"/>
+                        <label for="doNotPublish">
+                            Do Not Publish
+                        </label>&nbsp;
+                    </p>
+                </div>
+                <div dojoType="dijit.layout.ContentPane" region="center">
+                    <h3>Description:</h3>
+                    <div dojoAttachPoint="_descriptionField" bindField="description" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; Enter a short summary of your scene here &mdash;" title="Editable Scene Description">
+                    </div>
+                </div>
+                <div dojoType="dijit.layout.ContentPane" region="right" style="width: 200px;">
+                    <p>
+                        <label>
+                            Status:
+                        </label>
+                        <span dojoAttachPoint="_status" bindField="status" width="70px" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.Customizations.Scene.Statuses, searchAttr: 'name', autoComplete: true }" title="Choose Scene Status"></span>&nbsp;
+                    </p>
+                    <p>
+                        <label>
+                            Word Count:
+                        </label>
+<!--                        <span dojoAttachPoint="_wordCount" bindField="lastWordCount" width="70px" dojoType="dijit.InlineEditBox" editor="dijit.form.NumberTextBox" editorParams="{constraints: {places: 0}}" title="Editable Scene Word Count"></span>-->
+                        <span dojoAttachPoint="_wordCount" bindField="lastWordCount" title="Calculated Scene Word Count"></span>
+                    </p>
+                    <p>
+                        <label>
+                            Begins:
+                        </label>
+                        <!-- TODO: Link up the buttons, or create a new widget. Also give the buttons some nice icons. --><span dojoAttachPoint="_beginDate" bindField="begins" width="70px" dojoType="dijit.InlineEditBox" editor="dijit.form.TextBox" title="Edit Scene Start Time"></span>
+                        <div dojoType="dijit.form.DropDownButton" iconClass="iconSetDate">
+                            <div dojoType="dijit.Calendar">
+                            </div>
+                        </div>
+                        <div dojoType="dijit.form.DropDownButton" iconClass="iconSetTime">
+                            <div dojoType="dijit._TimePicker">
+                            </div>
+                        </div>
+                    </p>
+                    <p>
+                        <label>
+                            Ends:
+                        </label>
+                        <span dojoAttachPoint="_endDate" bindField="ends" width="70px" dojoType="dijit.InlineEditBox" editor="dijit.form.TextBox" title="Edit Scene Ends Time"></span>
+                        <div dojoType="dijit.form.DropDownButton" iconClass="iconSetDate">
+                            <div dojoType="dijit.Calendar">
+                            </div>
+                        </div>
+                        <div dojoType="dijit.form.DropDownButton" iconClass="iconSetTime">
+                            <div dojoType="dijit._TimePicker">
+                            </div>
+                        </div>
+                    </p>
+                </div>
+                <div dojoType="dijit.layout.ContentPane" region="bottom">
+                    <h4 class="tagsLabel">Tags:</h4>
+                    <span dojoType="my.TagEditor" bindField="tags" getTagStore="DataViewerFormat_GetTagStore" getTagStoreScope="Controller" dojoAttachPoint="_tagsField"></span>
+                </div>
+            </div>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" title="Content">
+            <div dojoType="my.ContentEditor" dojoAttachPoint="_contentEditor" bindField="text" bindFormatForGui="DataViewerFormat_CLOBToGUI" bindFormatForData="DataViewerFormat_CLOBToData">
+            	<script type="dojo/connect" event="onChange" args="text">
+            		Controller.UpdateWordCount(this.bindItem,text);
+            	</script>
+            </div>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" title="References">
+            <div dojoType="dijit.layout.BorderContainer" gutters="false" design="headline">
+                <!-- FUTURE: The TitlePane may be a bit of overkill, since I'm including a whole bunch of
+                code which I'll never user. -->
+                <div dojoType="dijit.layout.BorderContainer" gutters="false" title="People" region="left" style="width: 33%;">
+                    <div dojoType="dijit.layout.ContentPane" region="top">
+                        <h2>People</h2>
+                        <p>
+                            <label>
+                                Viewpoint:
+                            </label>
+                            <span dojoAttachPoint="_pov" bindField="viewpoint" width="100px" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.ProjectStore, query: { type: 'person' }, searchAttr: 'name', autoComplete: true }" title="Choose Viewpoint Character"></span>
+                        </p>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <table dojoType="my.DataGrid" dojoAttachPoint="_peopleField" bindField="people" formatterScope="Controller">
+                            <script type="dojo/connect" event="onRowDblClick" args="e">
+                                Controller.ShowDataItem(e.grid.getItem(e.rowIndex));
+                            </script>
+                            <thead>
+                                <tr>
+                                    <th field="name" width="150">
+                                        Name
+                                    </th>
+                                    <th field="tags" width="150" formatter="GridFormat_DisplayTags">
+                                        Tags
+                                    </th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+                <div dojoType="dijit.layout.BorderContainer" gutters="false" title="Places" region="center">
+                    <div dojoType="dijit.layout.ContentPane" region="top">
+                        <h2>Places</h2>
+                        <p>
+                            <label>
+                                Setting:
+                            </label>
+                            <span dojoAttachPoint="_setting" bindField="setting" width="100px" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.ProjectStore, query: { type: 'place' }, searchAttr: 'name', autoComplete: true }" title="Choose Setting"></span>
+                        </p>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <table dojoType="my.DataGrid" dojoAttachPoint="_placesField" bindField="places" formatterScope="Controller">
+                            <script type="dojo/connect" event="onRowDblClick" args="e">
+                                Controller.ShowDataItem(e.grid.getItem(e.rowIndex));
+                            </script>
+                            <thead>
+                                <tr>
+                                    <th field="name" width="150">
+                                        Name
+                                    </th>
+                                    <th field="tags" width="150" formatter="GridFormat_DisplayTags">
+                                        Tags
+                                    </th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+                <div dojoType="dijit.layout.BorderContainer" gutters="false" title="Things" region="right" style="width: 33%;">
+                    <div dojoType="dijit.layout.ContentPane" region="top">
+                        <h2>Things</h2>
+                    </div>
+                    <div dojoType="dijit.layout.ContentPane" region="center">
+                        <table dojoType="my.DataGrid" dojoAttachPoint="_thingsField" bindField="things" formatterScope="Controller">
+                            <script type="dojo/connect" event="onRowDblClick" args="e">
+                                Controller.ShowDataItem(e.grid.getItem(e.rowIndex));
+                            </script>
+                            <thead>
+                                <tr>
+                                    <th field="name" width="150">
+                                        Name
+                                    </th>
+                                    <th field="tags" width="150" formatter="GridFormat_DisplayTags">
+                                        Tags
+                                    </th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" title="Notes">
+            <div dojoType="my.NoteEditor" dojoAttachPoint="_notesEditor" bindField="notes" bindFormatForGui="DataViewerFormat_CLOBToGUI" bindFormatForData="DataViewerFormat_CLOBToData">
+            </div>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" title="Analysis">
+            <div dojoType="dijit.layout.BorderContainer" gutters="false" design="sidebars">
+                <div dojoType="dijit.layout.ContentPane" region="top">
+                </div>
+                <div dojoType="dijit.layout.ContentPane" region="right" style="width: 200px;">
+                    <p>
+                        <label>
+                            Structure:
+                        </label>
+                        <span dojoAttachPoint="_structure" bindField="structure" width="100px" style="width: 100px;" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.Customizations.Scene.Structures, searchAttr: 'name', autoComplete: true }" title="Choose Scene Structure"></span>
+                    </p>
+                    <p>
+                        <label>
+                            Importance:
+                        </label>
+                        <span dojoAttachPoint="_importance" bindField="importance" width="100px" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.Customizations.Scene.Importances, searchAttr: 'name', autoComplete: true }" title="Choose Scene Importance"></span>
+                    </p>
+                    <h3>Ratings:</h3>
+                    <!-- TODO: This should have a dynamic length, not sure exactly how... Also, the title should somehow be more dynamic. -->
+                    <p>
+                        <label>
+                            <span dojoAttachPoint="_rating0Label" bindField="rating0" bindFormatForGui="DataViewerFormat_SceneRatingName0"></span>:
+                        </label>
+                        <div dojoAttachPoint="_rating0value" bindField="rating0" width="100px" dojoType="dijit.form.HorizontalSlider" title="Rate Scene on Rating 0" minimum="0" maximum="10" discreteValues="11">
+                        </div>
+                    </p>
+                    <p>
+                        <label>
+                            <span dojoAttachPoint="_rating1Label" bindField="rating1" bindFormatForGui="DataViewerFormat_SceneRatingName1"></span>:
+                        </label>
+                        <div dojoAttachPoint="_rating1value" bindField="rating1" width="100px" dojoType="dijit.form.HorizontalSlider" title="Rate Scene on Rating 0" minimum="0" maximum="10" discreteValues="11">
+                        </div>
+                    </p>
+                    <p>
+                        <label>
+                            <span dojoAttachPoint="_rating2Label" bindField="rating2" bindFormatForGui="DataViewerFormat_SceneRatingName2"></span>:
+                        </label>
+                        <div dojoAttachPoint="_rating2value" bindField="rating2" width="100px" dojoType="dijit.form.HorizontalSlider" title="Rate Scene on Rating 0" minimum="0" maximum="10" discreteValues="11">
+                        </div>
+                    </p>
+                    <p>
+                        <label>
+                            <span dojoAttachPoint="_rating3Label" bindField="rating3" bindFormatForGui="DataViewerFormat_SceneRatingName3"></span>:
+                        </label>
+                        <div dojoAttachPoint="_rating3value" bindField="rating3" width="100px" dojoType="dijit.form.HorizontalSlider" title="Rate Scene on Rating 0" minimum="0" maximum="10" discreteValues="11">
+                        </div>
+                    </p>
+                </div>
+                <div dojoType="dijit.layout.ContentPane" region="center">
+                    <h3>Goal:</h3>
+                    <div dojoAttachPoint="_goalField" bindField="goal" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; Your primary goal for this scene &mdash;" title="Editable Scene Goal">
+                    </div>
+                    <h3>Conflict:</h3>
+                    <div dojoAttachPoint="_conflictField" bindField="conflict" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; The primary conflict of this scene &mdash;" title="Editable Scene Conflict">
+                    </div>
+                    <h3>Disaster:</h3>
+                    <div dojoAttachPoint="_disasterField" bindField="disaster" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; The outcome of this scene &mdash;" title="Editable Scene Conflict">
+                    </div>
+                    <h3>Reaction:</h3>
+                    <div dojoAttachPoint="_reactionField" bindField="reaction" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; The reaction to the previous scene &mdash;" title="Editable Scene Reaction">
+                    </div>
+                    <h3>Dilemma:</h3>
+                    <div dojoAttachPoint="_dilemmaField" bindField="dilemma" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; A dilemma to be resolved in this scene &mdash;" title="Editable Scene Dilemma">
+                    </div>
+                    <h3>Decision:</h3>
+                    <div dojoAttachPoint="_decisionField" bindField="decision" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; The decision to be reached to resolve the dilemma &mdash;" title="Editable Scene Decision">
+                    </div>
+					
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

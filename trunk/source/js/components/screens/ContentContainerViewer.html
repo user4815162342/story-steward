@@ -1,0 +1,112 @@
+<div widgetClass="my.ChapterViewer" titleField="name" defaultTitle="content" defaults="{ dataItem: {}, dataStore: {}, form: '' }" dojoAttachPoint="containerNode">
+    <!--
+    Copyright 2011 Neil M. Sheldon
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    -->
+    <div dojoType="dijit.layout.TabContainer" region="center" tabStrip="true" tabPosition="bottom">
+        <div dojoType="dijit.layout.ContentPane" title="Details">
+            <div dojoType="dijit.layout.BorderContainer" gutters="false" design="headline">
+                <div dojoType="dijit.layout.ContentPane" region="top">
+                    <h2 dojoAttachPoint="_titleField" bindField="name" dojoType="dijit.InlineEditBox" editor="dijit.form.TextBox" title="Editable Book Title">Title</h2>
+                    <p class="subtitle">
+                        <span dojoAttachPoint="_contentType" bindField="subtype" bindFormatForGui="DataViewerFormat_ContentSubType"></span>&mdash; 
+                        Created: <span dojoAttachPoint="_createdField" bindField="created" bindDataType="Date"></span>&nbsp; 
+                        Modified: <span dojoAttachPoint="_modifiedField" bindField="modified" bindDataType="Date"></span>&nbsp;<span dojoType="dijit.form.Button" class="readOnlyDisable" dojoAttachPoint="_deleteButton" showLabel="false" iconClass="iconDelete" dojoAttachEvent="onClick:DeleteDataItem">Delete</span>&nbsp;<input type="checkbox" bindField="doNotPublish" name="doNotPublish" dojoType="dijit.form.CheckBox" dojoAttachPoint="_doNotPublishField"/>
+                        <label for="doNotPublish">
+                            Do Not Publish
+                        </label>&nbsp;<span dojoType="dijit.form.Button" iconClass="iconBuildBook" dojoAttachPoint="_buildManuscriptButton" bindField="doNotPublish" showLabel="false" bindDefaultValue="false" title="Build Manuscript">
+                            <script type="dojo/event" event="onClick">
+                            	Controller.BuildManuscript(this.bindItem);
+                            </script>
+							<script type="dojo/method" event="_dataItemSet" args="value">
+								if (value) {
+								  dojo.style(this.domNode,"display","none");
+								} else {
+								  dojo.style(this.domNode,"display","");
+								}
+							</script>
+							Build Manuscript
+                        </span>&nbsp;
+                    </p>
+                </div>
+                <div dojoType="dijit.layout.ContentPane" region="center">
+                    <h3>Description:</h3>
+                    <div dojoAttachPoint="_descriptionField" bindField="description" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; Enter a short summary of this here &mdash;" title="Editable Book Description">
+                    </div>
+                </div>
+                <div dojoType="dijit.layout.ContentPane" region="bottom">
+                    <h4 class="tagsLabel">Tags:</h4>
+                    <span dojoType="my.TagEditor" bindField="tags" getTagStore="DataViewerFormat_GetTagStore" getTagStoreScope="Controller" dojoAttachPoint="_tagsField"></span>
+                </div>
+            </div>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" title="Contents">
+            <table dojoType="my.DataGrid" dojoAttachPoint="_contentField" bindField="content" formatterScope="Controller">
+                <script type="dojo/connect" event="onRowDblClick" args="e">
+                    Controller.ShowDataItem(e.grid.getItem(e.rowIndex));
+                </script>
+                <thead>
+                    <tr>
+                        <th field="subtype" width="30">
+                            <!-- TODO: Should be an icon? -->
+                            Type
+                        </th>
+                        <th field="name" width="150">
+                            Title
+                        </th>
+                        <th field="doNotPublish" width="30" formatter="GridFormat_NegateDoNotPublish">
+                            <!-- TODO: I'd like to display this as a 'checkbox' icon -->
+                            Pub?
+                        </th>
+                        <th field="tags" width="150" formatter="GridFormat_DisplayTags">
+                            Tags
+                        </th>
+                        <th field="begins">
+                            <!-- TODO: This and other 'scene' fields should be calculated as
+                            aggregates of the scenes contained within. begins should be the earliest
+                            begins, ends should be the earliest ends, viewpoint should be a list,
+                            wordcount should be a sum, status should be the 'lowest' status. kind
+                            should be a list, importance should be a list, ratings should be
+                            a list. -->
+                            Begins
+                        </th>
+                        <th field="ends">
+                            Ends
+                        </th>
+                        <th field="viewpoint">
+                            POV
+                        </th>
+                        <th field="lastWordCount">
+                            Words
+                        </th>
+                        <th field="status">
+                            Status
+                        </th>
+                        <th field="kind">
+                            Kind
+                        </th>
+                        <th field="importance">
+                            Importance
+                        </th>
+                        <th field="ratings">
+                            Ratings
+                        </th>
+                    </tr>
+                    <tr>
+                        <th field="description" colspan="12" formatter="GridFormat_DisplayHTMLSafe">
+                            Description
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,51 @@
+<div widgetClass="my.ChapterViewer" titleField="name" defaultTitle="content" defaults="{ dataItem: {}, dataStore: {}, form: '' }" dojoAttachPoint="containerNode">
+<!--
+   Copyright 2011 Neil M. Sheldon
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+-->
+    <div dojoType="dijit.layout.BorderContainer" gutters="false" design="headline">
+        <div dojoType="dijit.layout.ContentPane" region="top">
+            <h2 dojoAttachPoint="_titleField" bindField="name" dojoType="dijit.InlineEditBox" editor="dijit.form.TextBox" title="Editable Note Title">Title</h2>
+            <p class="subtitle">
+                Note&mdash; 
+                Created: <span dojoAttachPoint="_createdField" bindField="created" bindDataType="Date"></span>&nbsp; 
+                Modified: <span dojoAttachPoint="_modifiedField" bindField="modified" bindDataType="Date"></span>
+                <span dojoType="dijit.form.Button" class="readOnlyDisable" showLabel="false" iconClass="iconDelete" dojoAttachPoint="_deleteButton" dojoAttachEvent="onClick:DeleteDataItem">Delete</span>
+            </p>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" region="center">
+            <div dojoType="my.NoteEditor" dojoAttachPoint="_notesEditor" bindField="text" bindFormatForGui="DataViewerFormat_CLOBToGUI" bindFormatForData="DataViewerFormat_CLOBToData" title="Editable Note">
+            </div>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" region="right" style="width: 150px;">
+            <table dojoType="my.DataGrid" dojoAttachPoint="_contentField" bindField="subnotes" formatterScope="Controller">
+                <script type="dojo/connect" event="onRowDblClick" args="e">
+                    Controller.ShowDataItem(e.grid.getItem(e.rowIndex));
+                </script>
+                <thead>
+                    <tr>
+                        <th field="name" width="100">
+                            Subnotes
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" region="bottom">
+            <h4 class="tagsLabel">Tags:</h4>
+            <span dojoType="my.TagEditor" bindField="tags" getTagStore="DataViewerFormat_GetTagStore" getTagStoreScope="Controller" dojoAttachPoint="_tagsField"></span>
+        </div>
+    </div>
+</div>
