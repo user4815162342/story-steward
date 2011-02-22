@@ -14,6 +14,7 @@ In addition to the line tools, there are several third-party libraries which are
 Tools:
   * Java Runtime (My version is 1.6, I have not tried it with earlier versions)
   * Windows Batch File interpreter (cmd --version on my machine produces 5.1.2600) (NOTE: Windows is only required for building, not for running)
+  * Subversion command line client, with svnversion command (My version is 1.6.15)
 
 Libraries:
   * Dojo Toolkit v1.5 full source build
