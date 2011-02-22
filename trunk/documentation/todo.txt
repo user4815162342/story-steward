@@ -1,33 +1,6 @@
 TODO:
--- Figure out how to get the revision number into revision-number.txt
---- Document any new requirements on wiki - building.
--- Try to shrink dojo more
 -- Try to upload deploy file to Google Code
 -- Move these issues and documentation to Google Code
-
-TODO: Version Control:
-- I've chosen SVN for the following reasons:
---- I *want* a central repository.
---- More mature GUI tools.
---- I don't like having to check out the *whole* thing, or setting up my own
-repository when I'm only working on the code. I want to be able to check out 
-just the current code to my disk, make changes, and do the updates. As I tend 
-to keep my working copy always on my computer, I will still have multiple copies.
---- I do see the advantages for a distribute model, but anyone who wants these
-can use git-svn utilies.
-
-TODO: Hosting:
-- I've chosen Google Code for the following reasons:
--- It supports SVN.
--- It's one of the top five or ten project sites, which means lots of company.
--- Users only need a google login to contribute, which many people have.
--- It's interface is simpler than SourceForge.
--- CodePlex is more Microsoft Oriented, and I don't want a stigma of not being cross-platform.
-
-- New Server on Hyperborea would be too complex to set up.
-- Launchpad only does Bazaar
-- Bitbucket only does Mercurial
-- Github only does Git
 
 TODO: Once SVN, or whatever, is set up, need to make sure the revision number gets into the 'version'
 file. Use http://svnbook.red-bean.com/en/1.4/svn.ref.svnversion.re.html, somehow.
