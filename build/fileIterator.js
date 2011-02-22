@@ -50,7 +50,7 @@ function RecursiveFileIterator(startDir, checkCallback, makeUnixPaths, startDirI
                         var filePath = file.getPath();
                         if (makeUnixPaths) {
                             //Make sure we have a JS string.
-                            filePath = new String(filePath);
+                            filePath = String(filePath);
                             if (filePath.indexOf("/") == -1) {
                                 filePath = filePath.replace(/\\/g, "/");
                             }
