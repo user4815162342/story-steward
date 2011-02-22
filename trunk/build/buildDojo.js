@@ -25,50 +25,13 @@ var isRelTarget = arguments[2] == 1;
 
 buildScriptsPath = typeof buildScriptsPath == "undefined" ? scriptPath + "../vendor/dojo/util/buildscripts/" : buildScriptsPath;
 load(buildScriptsPath + "jslib/logger.js");
+load(scriptPath + "runprocess.js");
 
 
 var jarPath = "../shrinksafe/";
 var classPath = jarPath + "js.jar;" + jarPath + "shrinksafe.jar";
 
 
-function PipeThread(inputStream) {
-
-    spawn(function() {
-        var isr = new java.io.InputStreamReader(inputStream);
-        var br = new java.io.BufferedReader(isr);
-        var line = null;
-        while ((line = br.readLine()) != null) {
-            java.lang.System.out.println(line);
-        }
-        
-    });
-    
-}
-
-function RunProcess(cmdArgs, workingDirectory) {
-
-    var p = java.lang.Runtime.getRuntime().exec(cmdArgs, null, new java.io.File(workingDirectory));
-    
-    try {
-        // simply close the output stream (actually the input stream, 
-        // it's output from our process to the new one) to avoid weird deadlocks.
-        p.getOutputStream().close();
-        
-        PipeThread(p.getInputStream());
-        
-        PipeThread(p.getErrorStream());
-        
-        
-        // wait for process completion
-        var exitCode = p.waitFor();
-        if (exitCode != 0) {
-            throw "Process ended with exit code " + exitCode;
-        }
-    } finally {
-        p.destroy();
-    }
-    
-}
 
 if (isDevTarget || isRelTarget) {
     // TODO: Pre-build, perhaps go through source and find dojo.requires and build 
