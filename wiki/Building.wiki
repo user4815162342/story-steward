@@ -49,7 +49,9 @@ Libraries:
 
 4) Place the Math.uuid.js script directly under vendor, and unzip the famfamfam file into a directory called famfam-silkicons.
 
-5) Make sure the java runtime is set up on your path environment variable.
+5) Make sure the java runtime and svn command line are set up on your path environment variable.
+
+6) If you are creating a package to deploy for this project page: Make sure all code is updated and committed to the repository. 
 
 = Building =
 
