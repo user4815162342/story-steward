@@ -1,0 +1,49 @@
+<div widgetClass="my.ChapterViewer" titleField="name" defaultTitle="Scene" defaults="{ dataItem: {}, dataStore: {}, form: '' }" dojoAttachPoint="containerNode">
+<!--
+   Copyright 2011 Neil M. Sheldon
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+-->
+    <div dojoType="dijit.layout.TabContainer" region="center" tabStrip="true" tabPosition="bottom">
+        <div dojoType="dijit.layout.ContentPane" title="Details">
+            <div dojoType="dijit.layout.BorderContainer" gutters="false" design="headline">
+                <div dojoType="dijit.layout.ContentPane" region="top">
+                    <h2 dojoAttachPoint="_titleField" bindField="name" dojoType="dijit.InlineEditBox" editor="dijit.form.TextBox" title="Editable Name"></h2>
+                    <p class="subtitle">
+                        Thing&mdash; 
+                        Created: <span dojoAttachPoint="_createdField" bindField="created" bindDataType="Date"></span>&nbsp; 
+                        Modified: <span dojoAttachPoint="_modifiedField" bindField="modified" bindDataType="Date"></span>&nbsp;<span dojoType="dijit.form.Button" class="readOnlyDisable" dojoAttachPoint="_deleteButton" showLabel="false" iconClass="iconDelete" dojoAttachEvent="onClick:DeleteDataItem">Delete</span>&nbsp;
+                    </p>
+                </div>
+                <div dojoType="dijit.layout.ContentPane" region="center">
+                    <h3>Description:</h3>
+                    <div dojoAttachPoint="_descriptionField" bindField="description" dojoType="dijit.InlineEditBox" editor="dijit.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; Enter a short summary of your scene here &mdash;" title="Editable Scene Description">
+                    </div>
+                </div>
+                <div dojoType="dijit.layout.ContentPane" region="bottom">
+                    <h4 class="tagsLabel">Tags:</h4>
+                    <span dojoType="my.TagEditor" bindField="tags" getTagStore="DataViewerFormat_GetTagStore" getTagStoreScope="Controller" dojoAttachPoint="_tagsField"></span>
+                </div>
+            </div>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" title="Background">
+            <div dojoType="my.NoteEditor" dojoAttachPoint="_backgroundEditor" bindField="background" bindFormatForGui="DataViewerFormat_CLOBToGUI" bindFormatForData="DataViewerFormat_CLOBToData">
+            </div>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" title="Notes">
+            <div dojoType="my.NoteEditor" dojoAttachPoint="_notesEditor" bindField="notes" bindFormatForGui="DataViewerFormat_CLOBToGUI" bindFormatForData="DataViewerFormat_CLOBToData">
+            </div>
+        </div>
+    </div>
+</div>

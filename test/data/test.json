@@ -1,0 +1,100 @@
+{
+	"created": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
+	"modified": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
+	"type": "project", 
+	"uid": "project", 
+	"name": "test", 
+	"credits": { 
+		"created": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
+		"modified": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
+		"uid": "wnCpHYaCmq", 
+		"role": "Author"
+	}, 
+	"format": "story-steward-1.0", 
+	"content": [
+		{
+			"created": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
+			"modified": "Sat Jan 22 2011 17:13:11 GMT-0600 (Central Standard Time)", 
+			"type": "content", 
+			"subtype": "book", 
+			"uid": "6XW9VLPdjb", 
+			"name": "test", 
+			"doNotPublish": false, 
+			"tags": "animal", 
+			"description": "A short summary here.<br />", 
+			"content": {
+				"uid": "2oWzncCBJd", 
+				"type": "content", 
+				"subtype": "scene", 
+				"created": "Sat Jan 22 2011 17:13:13 GMT-0600 (Central Standard Time)", 
+				"modified": "Sat Jan 22 2011 17:14:23 GMT-0600 (Central Standard Time)", 
+				"tags": [
+				], 
+				"name": "New Scene", 
+				"doNotPublish": false, 
+				"rating0": 0, 
+				"rating1": 0, 
+				"rating2": 0, 
+				"rating3": 0, 
+				"text": "cskLjY6wo7"
+			}
+		}
+	], 
+	"notes": [
+	], 
+	"journals": [
+	], 
+	"people": [
+	], 
+	"places": [
+	], 
+	"things": [
+	], 
+	"goals": [
+	], 
+	"interfaceSettings": {
+	}, 
+	"customizations": {
+		"scene": {
+			"statuses": [
+				"draft", 
+				"reviewed", 
+				"ready"
+			], 
+			"structures": [
+				"action", 
+				"reaction"
+			], 
+			"importances": [
+				"plot", 
+				"subplot", 
+				"exposition"
+			], 
+			"ratings": [
+				"wordiness", 
+				"quality", 
+				"action", 
+				"beauty"
+			]
+		}, 
+		"person": {
+			"roles": [
+				"protagonist", 
+				"antagonist", 
+				"bystander", 
+				"noncommitted"
+			], 
+			"importances": [
+				"major", 
+				"supporting", 
+				"minor"
+			], 
+			"ratings": [
+				"depth", 
+				"realism", 
+				"sympathy", 
+				"likeability"
+			]
+		}
+	}
+}

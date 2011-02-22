@@ -1,0 +1,399 @@
+/* The following makes sure we fill the browser window, and only the browser window */
+html, body, #main {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    margin: 0;
+}
+
+/* pre-loader specific stuff to prevent unsightly flash of unstyled content */
+#loader {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ededed;
+    z-index: 999;
+    vertical-align: middle;
+}
+
+#loaderInner {
+    position: relative;
+    text-align: center;
+}
+
+/* some special layout stuff */
+#systemToolbar {
+    float: right;
+}
+
+/* Gets rid of the padding in the content pane where we are similating a TitlePane */
+.tundra .dijitTabContainerLeft-dijitContentPane.sidebarPane, .tundra .dijitTabContainerRight-dijitContentPane.sidebarPane {
+    padding: 0;
+}
+
+/* NOTE: The style thing works around a bug in the tundra css for this icon */
+.dijitIconEditProperty {
+    background-position: -160px;
+}
+
+/* Dynamic classes */
+.hideOnLoad {
+    display: none;
+}
+
+.fullScreen #mainHeader, .fullScreen #leftSidebar, .fullScreen #rightSidebar, .fullScreen #statusBar, .fullScreen #contentTabs_tablist {
+    display: none;
+}
+
+#floatingHeader {
+    display: none;
+    position: fixed;
+    right: 5px;
+    top: 0;
+    z-index: 9999;
+}
+
+.fullScreen #floatingHeader {
+    display: block;
+}
+
+/* Read Only stuff */
+.readOnly .readOnlyDisable {
+    display: none;
+}
+
+/* Get rid of some of the ****EXTREEEME MARRRGIIIN-TOPPPPS!*** that dojo put in
+ * (This is a plague of many common stylesheets... why? */
+h1 {
+    margin-top: 0.25em;
+    margin-bottom: 0;
+}
+
+h2 {
+    margin-top: 0.48225em; /* Original was 1.929--- ? Where'd that magic number come from? */
+    margin-bottom: 0;
+}
+
+h3, h4, h5, h6 {
+    margin-top: 0.375em;
+    margin-bottom: 0;
+}
+
+/* paragraphs, quotes and lists */
+p {
+    margin-top: 0.75em;
+    margin-bottom: 0;
+}
+
+blockquote {
+    margin-top: 0.75em;
+    margin-bottom: 0;
+    padding: 0;
+    padding-left: 1.636em;
+}
+
+pre {
+    padding-left: 1.5em;
+}
+
+/** A few classes which I want to use **/
+/** Draw 'subtitles' up into the master heading */
+h1.subtitle, h2.subtitle, h3.subtitle, h4.subtitle, h5.subtitle, h6.subtitle, p.subtitle {
+    margin-top: 0;
+    padding-left: 0.5em;
+    font-style: italic;
+    font-size: 90%;
+}
+
+.tagsLabel {
+    display: inline;
+}
+
+/** This just looks a little nicer in the various property editors. */
+label {
+    font-weight: bold;
+}
+
+/** But not in the subtitle */
+.subtitle label {
+    font-weight: normal;
+}
+
+.iconChooseTab {
+    background: url(resources/icons.png);
+    background-position: -64px -64px;
+    width: 16px;
+    height: 16px;
+}
+
+.iconFullScreenOff {
+    /* FUTURE: Come up with our own full screen icon that goes with silk. */
+    /*    background: url(resources/icons.png);
+     width: 16px;
+     height: 16px;
+     background-position: -80px -64px;*/
+    background-image: url('js/dojo/dijit/icons/images/editorIconsEnabled.png');
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 16px;
+    background-position: -793px;
+}
+
+.iconFullScreenOn {
+    /* FUTURE: Come up with our own full screen icon that goes with silk. */
+    /*    background: url(resources/icons.png);
+     width: 16px;
+     height: 16px;
+     background-position: -96px -64px;*/
+    background-image: url('js/dojo/dijit/icons/images/editorIconsEnabled.png');
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 16px;
+    background-position: -793px;
+}
+
+.iconOpenProject {
+    background: url(resources/icons.png);
+    background-position: 0px -64px;
+    width: 16px;
+    height: 16px;
+}
+
+.iconSaveProject {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -16px -64px;
+}
+
+.iconEditProject {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -32px -64px;
+}
+
+.iconNewChapter {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -96px 0px;
+}
+
+.iconNewScene {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -32px -16px;
+}
+
+.iconNewNote {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -64px -16px;
+}
+
+.iconNewSubnote {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -96px -16px;
+}
+
+.iconNewJournal {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -32px -32px;
+}
+
+.iconNewPerson {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -64px -32px;
+}
+
+.iconNewPlace {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -96px -32px;
+}
+
+.iconNewThing {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -32px -48px;
+}
+
+.iconNewGoal {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -64px -48px;
+}
+
+.iconQuote {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -48px -64px;
+}
+
+.iconContent {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: 0 -80px;
+}
+
+.iconBook {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -16px 0;
+}
+
+.iconPart {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -48px 0;
+}
+
+.iconChapter {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -80px 0;
+}
+
+.iconScene {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -16px -16px;
+}
+
+.iconNote {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -48px -16px;
+}
+
+.iconJournal {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -16px -32px;
+}
+
+.iconPerson {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -48px -32px;
+}
+
+.iconPlace {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -80px -32px;
+}
+
+.iconThing {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -16px -48px;
+}
+
+.iconGoal {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -48px -48px;
+}
+
+.iconTools {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -16px -80px;
+}
+
+.iconSearchFiles {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -32px -80px;
+}
+
+.iconDictionary {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -48px -80px;
+}
+
+.iconSymbols {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -64px -80px;
+}
+
+.iconAddTag {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: 0 -96px;
+}
+
+.iconRemoveTag {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -16px -96px;
+}
+
+.iconSetDate {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -32px -96px;
+}
+
+.iconSetTime {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -48px -96px;
+}
+
+.iconBuildBook {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -80px -96px;
+	
+}
+
+.iconDelete {
+    background: url(resources/icons.png);
+    width: 16px;
+    height: 16px;
+    background-position: -96px -96px;
+	
+}

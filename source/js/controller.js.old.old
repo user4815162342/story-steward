@@ -1,0 +1,1284 @@
+// This was before splitting off a new Data Access layer in ProjectData.js
+var TagList = function(tags) {
+
+    var TagListSchema = {
+        type: "array",
+        items: {
+            type: "string"
+        }
+    }
+    
+    var data = [];
+    
+    var StringToTagArray = function(value) {
+        var result = dojo.fromJson(value);
+        if (!dojox.json.schema.validate(result, TagListSchema).valid) {
+            throw "Invalid format for tag list string.";
+        }
+        return result;
+    }
+    
+    this.Serialize = function() {
+        return dojo.toJson(data);
+    }
+    
+    this.length = function() {
+        return data.length;
+    }
+    
+    this.getItem = function(index) {
+        return data[index];
+    }
+    
+    var checkItem = function(item) {
+        if (!dojo.isString(item)) {
+            throw "Inappropriate data type for tag."
+        }
+        
+    }
+    
+    this.push = function(item) {
+        checkItem(item);
+        data.push(item);
+    }
+    
+    this.indexOf = function(item) {
+        return data.indexOf(item);
+    }
+    
+    this.removeIndex = function(index) {
+        data.splice(index, 1);
+    }
+    
+    this.setItem = function(index, item) {
+        if (typeof index != "number") {
+            throw "Inappropriate data type for tag index."
+        }
+        checkItem(item);
+        data[index] = item;
+    }
+    
+    if (tags) {
+        if (dojo.isArray(tags)) {
+            /*for (var i = 0; i < tags.length; i++) {
+             if (!dojo.isString(tags[i])) {
+             throw "Inappropriate data for taglist tag."
+             }
+             }*/
+            if (!dojox.json.schema.validate(tags, TagListSchema).valid) {
+                throw "Invalid format for tag list string.";
+            }
+            data = tags;
+        } else if (dojo.isString(tags)) {
+            data = StringToTagArray(tags);
+        } else 
+            throw "Inappropriate data for taglist."
+    } else {
+        data = [];
+    }
+}
+
+var Controller = new function() {
+
+    var isInitialized = false;
+    
+    this.ProjectStore = null;
+    
+    var booksDataModel = null;
+    var booksTree = null;
+    var notesDataModel = null;
+    var notesTree = null;
+    var journalsDataModel = null;
+    var journalsTree = null;
+    var peopleDataModel = null;
+    var peopleTree = null;
+    var placesDataModel = null;
+    var placesTree = null;
+    var thingsDataModel = null;
+    var thingsTree = null;
+    var goalsDataModel = null;
+    var goalsTree = null;
+    
+    var projectSettings = null;
+    
+    
+    var genericDataStoreTypeMap = {
+        "Date": Date,
+        "Tags": {
+            type: TagList,
+            deserialize: function(value) {
+                return new TagList(value);
+            },
+            serialize: function(value) {
+                return value.serialize();
+            }
+        }
+    }
+    
+    this.Initialize = function() {
+        if (!isInitialized) {
+            this.ProjectStore = new dojo.data.ItemFileWriteStore({
+                data: this.CreateProjectData(),
+                typeMap: genericDataStoreTypeMap
+            });
+            
+            // add some triggers.
+            dojo.connect(this.ProjectStore, "onSet", this, function(item, attribute, oldValue, newValue) {
+                // make sure we don't end up in an infinite loop, and
+                // make sure the item is actually set.
+                if ((item) && (attribute != "modified")) {
+                    this.ProjectStore.setValue(item, "modified", new Date());
+                }
+            })
+            
+            booksDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectStore,
+                query: {
+                    type: 'content'
+                },
+                rootId: "root",
+                rootLabel: "Content",
+                childrenAttrs: ["content"]
+            });
+            booksTree = new dijit.Tree({
+                id: 'contentTree',
+                model: booksDataModel,
+                showRoot: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("content", target, source, position);
+                }
+            }, "contentTree");
+            notesDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectStore,
+                query: {
+                    type: 'note'
+                },
+                rootId: "root",
+                rootLabel: "Notes",
+                childrenAttrs: ["subnotes"]
+            });
+            notesTree = new dijit.Tree({
+                model: notesDataModel,
+                showRoot: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("note", target, source, position);
+                }
+            }, "notesTree");
+            journalsDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectStore,
+                query: {
+                    type: 'journal'
+                },
+                rootId: "root",
+                rootLabel: "Journals",
+                childrenAttrs: []
+            });
+            journalsTree = new dijit.Tree({
+                model: journalsDataModel,
+                showRoot: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("journal", target, source, position);
+                }
+            }, "journalsTree");
+            peopleDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectStore,
+                query: {
+                    type: 'person'
+                },
+                rootId: "root",
+                rootLabel: "People",
+                childrenAttrs: []
+            });
+            peopleTree = new dijit.Tree({
+                model: peopleDataModel,
+                showRoot: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("person", target, source, position);
+                }
+            }, "peopleTree");
+            placesDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectStore,
+                query: {
+                    type: 'place'
+                },
+                rootId: "root",
+                rootLabel: "Places",
+                childrenAttrs: []
+            });
+            placesTree = new dijit.Tree({
+                model: placesDataModel,
+                showRoot: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("place", target, source, position);
+                }
+            }, "placesTree");
+            thingsDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectStore,
+                query: {
+                    type: 'thing'
+                },
+                rootId: "root",
+                rootLabel: "Things",
+                childrenAttrs: []
+            });
+            thingsTree = new dijit.Tree({
+                model: thingsDataModel,
+                showRoot: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("thing", target, source, position);
+                }
+            }, "thingsTree");
+            goalsDataModel = new dijit.tree.ForestStoreModel({
+                store: this.ProjectStore,
+                query: {
+                    type: 'goal'
+                },
+                rootId: "root",
+                rootLabel: "Goals",
+                childrenAttrs: []
+            });
+            goalsTree = new dijit.Tree({
+                model: goalsDataModel,
+                showRoot: false,
+                onClick: this.clickContentItem,
+                dndController: "dijit.tree.dndSource",
+                betweenThreshold: 5,
+                checkItemAcceptance: function(target, source, position) {
+                    return Controller.CheckTreeNodeAcceptance("goal", target, source, position);
+                }
+            }, "goalsTree");
+            
+        }
+    }
+    
+    var isFullScreen = false;
+    
+    this.toggleFullScreen = function() {
+        if (isFullScreen) {
+            this.turnOffFullScreen();
+        } else {
+            this.turnOnFullScreen();
+        }
+    }
+    
+    this.turnOffFullScreen = function() {
+        dojo.removeClass(dojo.body(), "fullScreen");
+        
+        dijit.byId("main").resize();
+        dijit.byId("systemToolBar-fullScreen").set('checked', false);
+        dijit.byId("floatingSystemToolbar-fullScreen").set('checked', false);
+        isFullScreen = false;
+    }
+    
+    this.turnOnFullScreen = function() {
+        dojo.addClass(dojo.body(), "fullScreen");
+        dijit.byId("main").resize();
+        dijit.byId("systemToolBar-fullScreen").set('checked', true);
+        dijit.byId("floatingSystemToolbar-fullScreen").set('checked', true);
+        isFullScreen = true;
+    }
+    
+    var openTabs = {};
+    
+    var typeLookup = {
+        "content": {
+            isAbstract: true
+        },
+        "project": {
+            form: "ProjectViewer",
+            baseType: "project",
+            typeLabel: "Project",
+            defaultValue: {},
+            allowedParents: [],
+            childrenAttributes: []
+        },
+        "book": {
+            form: "ContentContainerViewer",
+            baseType: "content",
+            typeLabel: "Book",
+            allowedParents: [],
+            defaultValue: {},
+            childrenAttributes: ["content"]
+        },
+        "part": {
+            form: "ContentContainerViewer",
+            baseType: "content",
+            typeLabel: "Part",
+            allowedParents: ["book"],
+            defaultValue: {},
+            childrenAttributes: ["content"]
+        },
+        "chapter": {
+            form: "ContentContainerViewer",
+            baseType: "content",
+            typeLabel: "Chapter",
+            allowedParents: ["book", "part"],
+            defaultValue: {},
+            childrenAttributes: ["content"]
+        },
+        "scene": {
+            form: "SceneViewer",
+            baseType: "content",
+            typeLabel: "Scene",
+            allowedParents: ["book", "part", "chapter"],
+            defaultValue: {},
+            childrenAttributes: []
+        },
+        "note": {
+            form: "NoteViewer",
+            baseType: "note",
+            typeLabel: "Note",
+            defaultValue: {},
+            childrenAttributes: ["subnotes"],
+            allowedParents: ["note"]
+        },
+        "journal": {
+            form: "JournalViewer",
+            baseType: "journal",
+            typeLabel: "Entry",
+            defaultValue: {},
+            childrenAttributes: [],
+            allowedParents: [],
+            initialize: function(item) {
+                item.posted = dojo.date.locale.format(new Date(), {
+                    selector: 'date',
+                    formatLength: 'short'
+                });
+            }
+        },
+        "person": {
+            form: "PersonViewer",
+            baseType: "person",
+            typeLabel: "Person",
+            defaultValue: {},
+            childrenAttributes: [],
+            allowedParents: []
+        },
+        "place": {
+            form: "PlaceViewer",
+            baseType: "place",
+            typeLabel: "Place",
+            defaultValue: {},
+            childrenAttributes: [],
+            allowedParents: []
+        },
+        "thing": {
+            form: "ThingViewer",
+            baseType: "thing",
+            typeLabel: "Thing",
+            defaultValue: {},
+            childrenAttributes: [],
+            allowedParents: []
+        },
+        "goal": {
+            form: "GoalViewer",
+            baseType: "goal",
+            typeLabel: "Goal",
+            defaultValue: {},
+            childrenAttributes: [],
+            allowedParents: []
+        }
+    }
+    
+    this.ShowProjectProperties = function() {
+    
+        this.ProjectStore.fetch({
+            query: {
+                uid: 'project'
+            },
+            onItem: function(item) {
+                Controller.ShowDataItem(item);
+            },
+            onError: function() {
+                throw "Error fetch project properties."
+            }
+        });
+    };
+    
+    this.CheckTreeNodeAcceptance = function(treeType, target, source, position) {
+        try {
+            if (source !== undefined) {
+                var nodes = source.anchor; //get the dragged tree row's div
+                var id = nodes.id; //get the id of the dragged div
+                var dragDndItem = source.getItem(id); //get the dnd item for the dragged div
+                var dragTreeNode = dragDndItem.data; //get the treenode of the dragged div
+                var dragItem = dragTreeNode.item; //get the store item bound to the dragged treenode
+                var dragType = this.ProjectStore.getValue(dragItem, "type", "");
+                // can't drag items of other types into here.
+                if (dragType != treeType) {
+                    return false;
+                }
+                if (typeLookup[dragType].isAbstract) {
+                    dragType = this.ProjectStore.getValue(dragItem, "subtype", "");
+                }
+                var allowedParents = typeLookup[dragType].allowedParents;
+                
+                // Find Target Info.
+                var targetNode = dijit.getEnclosingWidget(target);
+                if (targetNode.indent < 0) {
+                    // anything can be in the root.
+                    return true;
+                }
+                if ((position == "before") || (position == "after")) {
+                    // we are actually dealing with the parent, not this target.
+                    targetNode = targetNode.getParent();
+                    if (targetNode.indent < 0) {
+                        // again, anything can be in the root.
+                        return true;
+                    }
+                }
+                if (allowedParents.length == 0) {
+                    // item can not be contained in anything but the root, so return false now.
+                    return false;
+                }
+                var targetItem = targetNode.item;
+                var targetType = this.ProjectStore.getValue(targetItem, "type", "");
+                if (typeLookup[targetType].isAbstract) {
+                    targetType = this.ProjectStore.getValue(targetItem, "subtype", "");
+                }
+                return dojo.indexOf(allowedParents, targetType) > -1;
+            }
+            
+        } catch (e) {
+            // catch any errors to make sure the UI doesn't leave
+            // weird panels everywhere.
+        }
+        return false;
+    }
+    
+    
+    this.ShowDataItem = function(item) {
+        var uid = this.ProjectStore.getValue(item, "uid", "");
+        if (openTabs.hasOwnProperty(uid)) {
+            // TODO: Show the tab in openTabs.uid.
+            dijit.byId("contentTabs").selectChild(openTabs[uid]);
+        } else {
+            var type = this.ProjectStore.getValue(item, "type", "");
+            if (typeLookup.hasOwnProperty(type) && typeLookup[type].isAbstract) {
+                type = this.ProjectStore.getValue(item, "subtype", "");
+            }
+            if (typeLookup.hasOwnProperty(type)) {
+                var form = typeLookup[type].form;
+				var args = {
+                    dataItem: item,
+                    dataStore: this.ProjectStore,
+                    closable: true,
+                    form: form,
+                    title: typeLookup[type].typeLabel,
+                    bindScope: this
+                }
+				var viewer = new my.DataItemViewer(args);
+				openTabs[uid] = viewer;
+                viewer.onClose = function() {
+                    if (viewer.IsEditing()) {
+                        // TODO: Should have a 'confirmation' dialog instead,
+                        // possibly focusing the control that is editing.
+                        return false;
+                    }
+                    delete openTabs[uid];
+                    // TODO: This is finding the menu prior to
+                    // destroying this one, which means it never gets cleared,
+                    // Once I come up with a better mechanism, I won't have to
+                    // pass the viewer instance along to check against.
+                    // NOTE: I've tried delaying it here, and it seems to fix it,
+                    // but I'm not sure if this is enough.
+                    setTimeout(function() {
+                        Controller.ResetTabsMenu(viewer);
+                    }, 1)
+                    return true;
+                }
+                viewer.DataItemRemoved = function() {
+                    // just simulate a 'close' button click to make it
+                    // close gracefully.
+                    // TODO: Test this.
+                    dijit.byId("contentTabs").tablist.onCloseButtonClick(viewer);
+                }
+                // Delay the creation of the tab a little bit, in order to
+                // make sure that everything else hooking into this onnew has
+                // a chance to run rather quickly.
+                setTimeout(function() {
+                    dijit.byId("contentTabs").addChild(viewer);
+                    dijit.byId("contentTabs").selectChild(viewer);
+                    Controller.ResetTabsMenu();
+                }, 1);
+            } else {
+                throw "Invalid data item type."
+            }
+        }
+    };
+    
+    this.SceneStatusStore = null;
+    this.SceneStructureStore = null;
+    this.SceneImportanceStore = null;
+    this.PersonRoleStore = null;
+    this.PersonImportanceStore = null;
+    
+    this.DeleteItem = function(item) {
+        var ProjectStore = this.ProjectStore;
+        var CloseChildTabs = function(item) {
+            // TODO: Can this be converted into a loop instead of recursion?
+            var type = ProjectStore.getValue(item, "type", "");
+            if (typeLookup.hasOwnProperty(type) && typeLookup[type].isAbstract) {
+                type = ProjectStore.getValue(item, "subtype", "");
+                
+            }
+            var childrenAttributes = typeLookup[type].childrenAttributes;
+            for (var i = 0; i < childrenAttributes.length; i++) {
+                var children = ProjectStore.getValues(item, childrenAttributes[i]);
+                for (var j = 0; j < children.length; j++) {
+                    if (ProjectStore.isItem(children[j])) {
+                        CloseChildTabs(children[j]);
+                        var uid = ProjectStore.getValue(children[j], "uid");
+                        if (openTabs.hasOwnProperty(uid)) {
+                            // simulate a 'deleted' event so the tab closes itself.
+                            openTabs[uid]._DataItemDeleted(children[j]);
+                        }
+                    }
+                }
+            }
+            
+        }
+        
+        this.BeginTabUpdate();
+        try {
+            // TODO: This is not notifying the children of the item
+            // being deleted, which means that their tabs aren't closing
+            // as well. When an item is deleted, there's no notification
+            // that it's children are deleted as well. Until I can figure
+            // that out, I need to do this.
+            // TODO: Let Dojo know that this would be a useful notification
+            // to have. Along with the ability to find the 'parent' for 
+            // a data item.
+            CloseChildTabs(item);
+            this.ProjectStore.deleteItem(item);
+        } finally {
+            this.EndTabUpdate();
+        }
+    }
+    
+    this.NewDataItem = function(type, base, parentInfo) {
+        if (!base) {
+            base = {};
+        }
+        if (typeLookup.hasOwnProperty(type)) {
+            if (typeLookup[type].isAbstract) {
+                throw "Can't create data item of type " + type;
+            }
+            base.type = typeLookup[type].baseType;
+            if (type != base.type) {
+                base.subtype = type;
+            }
+            base.uid = Controller.CreateDataUID();
+            base.created = new Date();
+            base.modified = new Date();
+            if (!base.tags) {
+                base.tags = new TagList();
+            }
+            if ((!base.name) && (base.name !== "")) {
+                base.name = "New " + typeLookup[type].typeLabel;
+            }
+            if (typeLookup[type].initialize) {
+                typeLookup[type].initialize(base);
+            }
+            return this.ProjectStore.newItem(base, parentInfo);
+        } else {
+            throw "Invalid type for data item: " + type;
+        }
+    }
+    
+    this._newItemOnTree = function(type, tree, selectedPath, parent, parentAttribute) {
+        if (!selectedPath) {
+            selectedPath = [tree.get('rootNode')];
+        }
+        var item = this.NewDataItem(type, typeLookup[type].defaultValue, parent ? {
+            parent: parent,
+            attribute: parentAttribute
+        } : null);
+        this.ShowDataItem(item);
+        selectedPath.push(item)
+        tree.set('path', selectedPath).then(function() {
+            tree.focusNode(tree.get('selectedNode'))
+        });
+    }
+    
+    /*
+     * Basically, will create the new item as a child of the current, if it is a valid parent. Otherwise
+     * as a sibling or auntuncle of the current depending on the first valid parent.
+     */
+    this._newContentItem = function(type) {
+        var typeInfo = typeLookup[type];
+        var parent = null;
+        var selectedPath = null;
+        if (typeInfo.allowedParents.length > 0) {
+            var node = booksTree.get('selectedNode');
+			if (node && node.domNode) { // in IE, the node is null if not selected, in Firefox, it's the domNode. 
+                selectedPath = booksTree.get('path');
+                if (selectedPath) {
+                    // NOTE: I don't want to include the first one, as that is the 'root' node and
+                    // won't be a data item, but will always be a valid parent.
+                    for (var i = (selectedPath.length - 1); i > 0; i--) {
+                        if (dojo.indexOf(typeInfo.allowedParents, this.ProjectStore.getValue(selectedPath[i], "subtype", "")) > -1) {
+                            parent = selectedPath[i];
+                            break;
+                        }
+                        selectedPath.pop();
+                    }
+                }
+            }
+        }
+        this._newItemOnTree(type, booksTree, selectedPath, parent, "content");
+    }
+    
+    this.NewBook = function() {
+        this._newContentItem("book");
+        
+    }
+    
+    this.NewPart = function() {
+        this._newContentItem("part");
+    }
+    
+    this.NewChapter = function() {
+        this._newContentItem("chapter");
+    }
+    
+    this.NewScene = function() {
+        this._newContentItem("scene");
+    }
+    
+    this.NewNote = function() {
+        this._newItemOnTree("note", notesTree);
+    }
+    
+    this.NewSubNote = function() {
+        var parent = null;
+        var selectedPath = null;
+        if (node.domNode) { // otherwise, the node has been deleted and we can't use it.
+            selectedPath = notesTree.get('path');
+            if (selectedPath) {
+                // NOTE: I don't want to include the first one, as that is the 'root' node and
+                // won't be a data item, but will always be a valid parent.
+                if (selectedPath.length > 1) {
+                    parent = selectedPath[selectedPath.length - 1];
+                }
+            }
+        }
+        this._newItemOnTree("note", notesTree, selectedPath, parent, "subnotes");
+    }
+    
+    this.NewJournal = function() {
+        this._newItemOnTree("journal", journalsTree);
+    }
+    
+    this.NewPerson = function() {
+        this._newItemOnTree("person", peopleTree);
+        
+    }
+    
+    this.NewPlace = function() {
+        this._newItemOnTree("place", placesTree);
+        
+    }
+    
+    this.NewThing = function() {
+        this._newItemOnTree("thing", thingsTree);
+    }
+    
+    this.NewGoal = function() {
+        this._newItemOnTree("goal", goalsTree);
+    }
+    
+    this._tabUpdateCount = 0;
+    
+    
+    this.BeginTabUpdate = function() {
+        this._tabUpdateCount++;
+    }
+    
+    this.EndTabUpdate = function() {
+        this._tabUpdateCount--;
+        if (this._tabUpdateCount === 0) {
+            this.ResetTabsMenu();
+        }
+    }
+    
+    this.ResetTabsMenu = function(deletedTab) {
+        if (this._tabUpdateCount > 0) {
+            return;
+        }
+        // FUTURE: It would be better to set up some sort of widget, perhaps
+        // even getting the dropdown menu directly from the TabContainer.
+        // TODO: I don't like the 'deletedTab' hack, have to hook into an event
+        // somewhere which creates this menu only when it's needed.
+        var menu = dijit.byId("floatingSystemToolbar-chooseTab-menu");
+        menu.destroyDescendants();
+        var tabs = dijit.byId("contentTabs");
+        dojo.forEach(tabs.getChildren(), function(page) {
+            if (deletedTab != page) {
+                var menuItem = new dijit.MenuItem({
+                    id: "floatingSystemToolbar-chooseTab-menu-" + page.id,
+                    label: page.title,
+                    iconClass: page.iconClass,
+                    dir: page.dir,
+                    lang: page.lang,
+                    onClick: function() {
+                        tabs.selectChild(page);
+                    }
+                });
+                menu.addChild(menuItem);
+            }
+        });
+        
+    }
+    
+    this.clickContentItem = function(item, node, evt) {
+        Controller.ShowDataItem(item);
+    }
+    
+    this.CreateDataUID = function() {
+        return Math.uuid(10);
+    }
+    
+    this.CreateSampleData = function() {
+        var now = new Date();
+        var result = {
+            created: now,
+            modified: now,
+            type: "project",
+            uid: "project",
+            name: "Branch by Nigel",
+            description: "<p>A monumental foray into the desparate realms of cross-platform software development using HTML and JavaScript.</p>",
+            credits: [{
+                uid: this.CreateDataUID(),
+                name: "Neil M. Sheldon",
+                biography: "<p>Stunted by unprofessionalism, Neil has yet to publish a single word.</p>",
+                role: "Author"
+            }],
+            content: [],
+            notes: [],
+            journals: [],
+            people: [],
+            places: [],
+            things: [],
+            goals: [],
+            customizations: {
+                scene: {
+                    statuses: ["draft", "reviewed", "ready"],
+                    structures: ["action", "reaction"],
+                    importances: ["plot", "subplot", "exposition"],
+                    ratings: ["wordiness", "quality", "action", "beauty"]
+                },
+                person: {
+                    roles: ["protagonist", "antagonist", "bystander", "supporting protagonist", "supporting antagonist"],
+                    importances: ["major", "supporting", "minor"],
+                    ratings: ["depth", "realism", "sympathy", "likeability"]
+                }
+            },
+            "interface": {}
+        }
+        var book = {
+            uid: this.CreateDataUID(),
+            name: "The Dark Horizon...",
+            type: "content",
+            subtype: "book",
+            created: now,
+            modified: now,
+            tags: {
+                _type: "Tags",
+                _value: "[]"
+            },
+            content: []
+        }
+        result.content.push(book);
+        var part = {
+            uid: this.CreateDataUID(),
+            name: "...And the brightness beyond.",
+            created: now,
+            modified: now,
+            type: "content",
+            subtype: "part",
+            tags: {
+                _type: "Tags",
+                _value: "[]"
+            },
+            content: []
+        }
+        book.content.push(part);
+        var chapter = {
+            uid: this.CreateDataUID(),
+            created: now,
+            modified: now,
+            type: "content",
+            subtype: "chapter",
+            name: "And thus, it happened...",
+            description: "<p>In which our hero begins his journey and destroys the chalice.</p>",
+            tags: {
+                _type: "Tags",
+                _value: "[]"
+            },
+            content: []
+        
+        }
+        part.content.push(chapter);
+        chapter.content.push({
+            uid: this.CreateDataUID(),
+            created: now,
+            modified: now,
+            type: "content",
+            subtype: "scene",
+            name: "It was a Dark and Really Stormy Night",
+            description: "<p>Our hero meets a dark stranger.</p>",
+            tags: {
+                _type: "Tags",
+                _value: "[]"
+            },
+        });
+        result.notes.push({
+            uid: this.CreateDataUID(),
+            type: "note",
+            created: now,
+            modified: now,
+            tags: {
+                _type: "Tags",
+                _value: "[]"
+            },
+            name: "Here's the Truth about the Island."
+        
+        })
+        return result;
+    }
+    
+    this.CreateProjectData = function(items) {
+        return {
+            label: "name",
+            identifier: "uid",
+            items: items ||
+            []
+        }
+    }
+    
+    this.LoadProject = function() {
+        // TODO: Should take a parameter specifying the location of the file.
+        // TODO: This should also be the function to call when creating an
+        // empty file, as it should be simply a matter of creating an empty
+        // data and then restoring everything.
+        // TODO: Have to make sure that all tabs are closed, first.
+        var start = new Date().getTime();
+        {
+            var closeTree = function(tree) {
+                var root = tree.rootNode;
+                // Collapse root node and set model children to null, so the model
+                // will fetch again from the datastore when _expandNode() is
+                // called
+                tree._collapseNode(root);
+                tree.model.root.children = null;
+                
+                // return a function which can be called later to re-open the tree.
+                return function() {
+                    // Set root NODE to unchecked so that Tree will fetch from the
+                    // model again
+                    root.state = 'UNCHECKED';
+                    tree._expandNode(root);
+                }
+                
+            }
+            
+            // TODO: Load data from file instead.
+            var data = this.CreateSampleData();
+            // TODO: For these entites, extract the data and put into the datastore:
+            
+            // NOTE: This 'mangles' the source data. I don't really need to keep it in place,
+            // however, so that's okay.
+            
+            var treeRefreshers = [];
+            var dataItems = [];
+            dataItems.push(data);
+            dataItems.push.apply(dataItems, data.content);
+            delete data.content;
+            treeRefreshers.push(closeTree(booksTree));
+            dataItems.push.apply(dataItems, data.notes);
+            delete data.notes;
+            treeRefreshers.push(closeTree(notesTree));
+            dataItems.push.apply(dataItems, data.journals);
+            delete data.journals;
+            treeRefreshers.push(closeTree(journalsTree));
+            dataItems.push.apply(dataItems, data.people);
+			delete data.people;
+            treeRefreshers.push(closeTree(peopleTree));
+            dataItems.push.apply(dataItems, data.places);
+            delete data.places;
+            treeRefreshers.push(closeTree(placesTree));
+            dataItems.push.apply(dataItems, data.things);
+            delete data.things;
+            treeRefreshers.push(closeTree(thingsTree));
+            dataItems.push.apply(dataItems, data.goals);
+            delete data.goals;
+            treeRefreshers.push(closeTree(goalsTree));
+            
+            // put project interface settings and customizations into a separate unit,
+            // as they'll get in the way of the regular data.
+            projectSettings = {
+                customizations: data.customizations,
+                "interface": data["interface"]
+            }
+            delete data.customizations;
+            delete data["interface"];
+            
+            var sceneStatuses = projectSettings.customizations.scene.statuses || [];
+            delete projectSettings.customizations.scene.statuses;
+            for (var i = 0; i < sceneStatuses.length; i++) {
+                sceneStatuses[i] = {
+                    name: sceneStatuses[i]
+                };
+            }
+            
+            this.SceneStatusStore = new dojo.data.ItemFileReadStore({
+                data: {
+                    label: "name",
+                    identifier: "name",
+                    items: sceneStatuses
+                }
+            });
+            
+            var sceneStructures = projectSettings.customizations.scene.structures || [];
+            delete projectSettings.customizations.scene.structures;
+            for (var i = 0; i < sceneStructures.length; i++) {
+                sceneStructures[i] = {
+                    name: sceneStructures[i]
+                };
+            }
+            
+            this.SceneStructureStore = new dojo.data.ItemFileReadStore({
+                data: {
+                    label: "name",
+                    identifier: "name",
+                    items: sceneStructures
+                }
+            });
+            
+            var sceneImportances = projectSettings.customizations.scene.importances || [];
+            delete projectSettings.customizations.scene.importances;
+            for (var i = 0; i < sceneImportances.length; i++) {
+                sceneImportances[i] = {
+                    name: sceneImportances[i]
+                };
+            }
+            
+            this.SceneImportanceStore = new dojo.data.ItemFileReadStore({
+                data: {
+                    label: "name",
+                    identifier: "name",
+                    items: sceneImportances
+                }
+            });
+            
+            var peopleRoles = projectSettings.customizations.person.roles || [];
+            delete projectSettings.customizations.person.roles;
+            for (var i = 0; i < peopleRoles.length; i++) {
+                peopleRoles[i] = {
+                    name: peopleRoles[i]
+                };
+            }
+            
+            this.PersonRoleStore = new dojo.data.ItemFileReadStore({
+                data: {
+                    label: "name",
+                    identifier: "name",
+                    items: peopleRoles
+                }
+            });
+            
+            var peopleImportances = projectSettings.customizations.person.importances || [];
+            delete projectSettings.customizations.person.importances;
+            for (var i = 0; i < peopleImportances.length; i++) {
+                peopleImportances[i] = {
+                    name: peopleImportances[i]
+                };
+            }
+            
+            this.PersonImportanceStore = new dojo.data.ItemFileReadStore({
+                data: {
+                    label: "name",
+                    identifier: "name",
+                    items: peopleImportances
+                }
+            });
+            
+            this.ProjectStore.clearOnClose = true;
+            this.ProjectStore.data = this.CreateProjectData(dataItems);
+            this.ProjectStore.close();
+            
+            for (var i = 0; i < treeRefreshers.length; i++) {
+                treeRefreshers[i]();
+            }
+            
+            
+            
+            // FUTURE: Plugin hook: project loaded (although 
+        }
+        console.info("Project load time: " + (new Date().getTime() - start) + "ms");
+        
+    };
+    
+    this.DataViewerFormat_ContentSubType = function(value) {
+        if (typeLookup.hasOwnProperty(value)) {
+            return typeLookup[value].typeLabel;
+        }
+        return value;
+        
+    };
+    
+    var tagStore = null;
+    
+    this.DataViewerFormat_GetTagStore = function() {
+        if (!tagStore) {
+            // TODO: Have to eventually load this from somewhere, and keep
+            // modifying it.
+            tagStore = new dojo.data.ItemFileReadStore({
+                data: {
+                    label: "tagName",
+                    identifier: "tagName",
+                    items: [{
+                        tagName: "animal"
+                    }, {
+                        tagName: "vegetable"
+                    }, {
+                        tagName: "mineral"
+                    }]
+                }
+            });
+            
+        }
+        return tagStore;
+    }
+    
+    this.GridFormat_NegateDoNotPublish = function(value) {
+        // Turns Do Not Publish into it's opposite for a grid, so the column
+        // can be called Publish.
+        return value ? false : true;
+    }
+    
+    this.GridFormat_DisplayTags = function(value) {
+        var result = "";
+        if (value) {
+            for (var i = 0; i < value.length(); i++) {
+                if (i > 0) {
+                    result += ", ";
+                }
+                result += value.getItem(i);
+            }
+        }
+        return result;
+        
+    }
+    
+    this.GridFormat_DisplayHTMLSafe = function(value) {
+        // TODO: Come up with some regex to clean up the HTML for
+        // display.
+        // https://fosswiki.liip.ch/display/BLOG/XSS+Prevention
+        // https://svn.liip.ch/repos/public/popoon/trunk/classes/externalinput.php
+        // TODO: Issues to think about:
+        //  1.  cross-site scripting is a real worry for any dynamically entered HTML.
+        //  2.  I will be making my demo version publicly available, but the data
+        //      will never be saved. Therefore, there shouldn't be any problems --
+        //      anything they could trick the browser into doing could be done without
+        //      a browser, so what's the point of that?
+        //  3.  Personal sites will more than likely be secured and password protected,
+        //      and not publicly available.
+        //  4.  Anything I do with a filesystem version will not be any less secure
+        //      than some equivalent attack in a Microsoft Word document.
+        //  5.  There are very possibly some idiots who may not try to keep their
+        //      data safe. These are the real worry, and I'll have to put some big
+        //      warnings on the site to alert them of this.
+        //  6.  No matter what I strip from the data, there's bound to be something
+        //      that I won't know about that could be used to attack. 
+        //  7.  Everything I stip from the data could potentially cause the user to
+        //      lose something important to them.
+        if (value) {
+            return value.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        } else {
+            return "";
+        }
+    }
+    
+    this.DataViewer_NewCredit = function(parentItem) {
+        return this.NewDataItem("credit", {
+            name: "",
+            biography: "<p></p>",
+            role: "Author"
+        }, {
+            parent: parentItem,
+            attribute: "credits"
+        })
+    }
+    
+    this.DataViewerFormat_SceneRatingName0 = function() {
+        if (projectSettings.customizations && projectSettings.customizations.scene && (projectSettings.customizations.scene.ratings) && (projectSettings.customizations.scene.ratings.length > 0)) {
+            return projectSettings.customizations.scene.ratings[0];
+        }
+        return "Rating 1";
+    }
+    
+    this.DataViewerFormat_SceneRatingName1 = function() {
+        if (projectSettings.customizations && projectSettings.customizations.scene && (projectSettings.customizations.scene.ratings) && (projectSettings.customizations.scene.ratings.length > 1)) {
+            return projectSettings.customizations.scene.ratings[1];
+        }
+        return "Rating 2";
+    }
+    
+    this.DataViewerFormat_SceneRatingName2 = function() {
+        if (projectSettings.customizations && projectSettings.customizations.scene && (projectSettings.customizations.scene.ratings) && (projectSettings.customizations.scene.ratings.length > 2)) {
+            return projectSettings.customizations.scene.ratings[2];
+        }
+        return "Rating 3";
+    }
+    
+    this.DataViewerFormat_SceneRatingName3 = function() {
+        if (projectSettings.customizations && projectSettings.customizations.scene && (projectSettings.customizations.scene.ratings) && (projectSettings.customizations.scene.ratings.length > 3)) {
+            return projectSettings.customizations.scene.ratings[3];
+        }
+        return "Rating 4";
+    }
+    
+    this.DataViewerFormat_PersonRatingName0 = function() {
+        if (projectSettings.customizations && projectSettings.customizations && projectSettings.customizations.person && (projectSettings.customizations.person.ratings) && (projectSettings.customizations.person.ratings.length > 0)) {
+            return projectSettings.customizations.person.ratings[0];
+        }
+        return "Rating 1";
+    }
+    
+    this.DataViewerFormat_PersonRatingName1 = function() {
+        if (projectSettings.customizations && projectSettings.customizations.person && (projectSettings.customizations.person.ratings) && (projectSettings.customizations.person.ratings.length > 1)) {
+            return projectSettings.customizations.person.ratings[1];
+        }
+        return "Rating 2";
+    }
+    
+    this.DataViewerFormat_PersonRatingName2 = function() {
+        if (projectSettings.customizations && projectSettings.customizations.person && (projectSettings.customizations.person.ratings) && (projectSettings.customizations.person.ratings.length > 2)) {
+            return projectSettings.customizations.person.ratings[2];
+        }
+        return "Rating 3";
+    }
+    
+    this.DataViewerFormat_PersonRatingName3 = function() {
+        if (projectSettings.customizations && projectSettings.customizations.person && (projectSettings.customizations.person.ratings) && (projectSettings.customizations.person.ratings.length > 3)) {
+            return projectSettings.customizations.person.ratings[3];
+        }
+        return "Rating 4";
+    }
+    
+    
+    
+}
+
+// Add the initialization functions.
+dojo.addOnLoad(function() {
+    // **** Load Required Dojo Libraries ****//
+    // NOTE: This is done here to speed up load time. Doing it earlier
+    // makes it take longer to actually show the 'loading' splash screen,
+    // and you sit on a blank screen for a long time.
+    var start = new Date().getTime();
+    {
+        // FUTURE: As long as we are loading from the same domain, these
+        // calls are blocking. If we move over to a cross-domain load 
+        // (i.e. dojo is retrieved from it's primary site instead) then
+        // we have to make sure everything's loaded before we do the other
+        // stuff.
+        dojo.registerModulePath("my", "../../../components")
+        dojo.require("dojo.parser");
+        dojo.require("dijit.Dialog");
+        dojo.require("dijit.layout.BorderContainer");
+        dojo.require("dijit.layout.ContentPane");
+        dojo.require("dijit.layout.AccordionContainer");
+        dojo.require("dijit.layout.TabContainer");
+        dojo.require("dijit.Toolbar");
+        dojo.require("dojo.data.ItemFileWriteStore");
+        dojo.require("dijit.tree.ForestStoreModel");
+        dojo.require("dijit.Tree");
+        dojo.require("dijit.Declaration");
+        dojo.require("dojox.json.schema");
+        dojo.require("dijit.form.DropDownButton")
+        dojo.require("dijit.Menu");
+        dojo.require("dijit.tree.dndSource");
+        dojo.require("dijit.TitlePane");
+        
+        // app-specific widgets.
+        dojo.require("my.DataItemViewer");
+        dojo.require("my.extensions");
+        // FUTURE: Plugin hook: required-libraries - should go here.
+    
+    
+    }
+    console.info("Total load time: " + (new Date().getTime() - start) + "ms");
+    
+    
+    // ******* Parse the file for declarative dojo widgets ****//
+    start = new Date().getTime();
+    {
+        // FUTURE: Plugin Hook: modify web page - should go here.
+        dojo.parser.parse(dojo.byId('container'));
+        // FUTURE: Plugin Hook: post process parsing - should go here.
+    }
+    console.info("Total parse time: " + (new Date().getTime() - start) + "ms");
+    
+    
+    start = new Date().getTime();
+    {
+        Controller.Initialize();
+        
+        // FUTURE: Plugin Hook: application controller initialized.
+        
+        // TODO: Should pass a parameter, taken from the settings, based on the project
+        // open last time. If nothing open, this will create a new, empty project.
+        Controller.LoadProject();
+    }
+    console.info("Total initialization time: " + (new Date().getTime() - start) + "ms");
+    
+    start = new Date().getTime();
+    {
+        // ******* Remove the loader screen **** //   
+        // make sure other stuff can be shown once the splash screen is removed.
+        dojo.removeClass("main", "hideOnLoad");
+        dojo.removeClass("resources", "hideOnLoad");
+        // this is necessary since the objects started out hidden, it isn't properly laid out.
+        dijit.byId("main").resize();
+        // FUTURE: Plugin Hook: update controls -- should go here.
+        // TODO: Here is where UI positions should be applied as well.
+    }
+    console.info("Total display time: " + (new Date().getTime() - start) + "ms");
+    
+    
+    // close loader, do this after initialization to make sure there isn't anything
+    // else that has to be finished first.
+    setTimeout(function hideLoader() {
+        var loader = dojo.byId('loader');
+        dojo.fadeOut({
+            node: loader,
+            duration: 500,
+            onEnd: function() {
+                loader.style.display = "none";
+                
+            }
+        }).play();
+    }, 1);
+    
+});
