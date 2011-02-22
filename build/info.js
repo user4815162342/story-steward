@@ -17,12 +17,30 @@
  */
 /*
  * This contains the basic editable attributes for this project. The build system
- * will do some substitution from from the values here.
+ * may do some substitution from from the values here.
  * NOTE: In addition to tracking version numbers easily, the primary reason for
  * this file is to have one place in which to store the Application name and other
  * identifiers. I'm not particularly proud of the name, and I'd like to be able to
  * switch it easily when I come up with something better.
  */
+
+load(scriptPath + "runprocess.js");
+// Get the svn version stuff...
+
+
+logger.info("Retrieving current revision number");
+var revision = "0";
+var buffer = new java.io.ByteArrayOutputStream();
+var ps = new java.io.PrintStream(buffer);
+try {
+	RunProcess("svnversion", scriptPath + "../", ps);
+	revision = new String(buffer.toString()).replace(/^\s*/, "").replace(/\s*$/, "") || "0";
+} finally {
+	ps.close();
+}
+logger.info("Revision number found is: " + revision);
+
+
 AppInfo = {
 	// ApplicationTitle is the full name for the application, as
 	// displayed on screen to the user.
@@ -51,7 +69,7 @@ AppInfo = {
 		 * version control system, and should always match the revision number
 		 * of the version that was extracted from the system.
 		 */
-		Revision: fileUtil.readFile(scriptPath + "revision-number.txt").replace(/^\s*/, "").replace(/\s*$/, "")
+		Revision: revision
 
 	}
 }

@@ -53,7 +53,7 @@ function CreatePackage(files, path) {
     }
 }
 
-var filename = AppInfo.Name + "-" + AppInfo.Version.Major + "." + AppInfo.Version.Minor + "." + AppInfo.Version.Build + "." + AppInfo.Version.revision;
+var filename = AppInfo.Name + "-" + AppInfo.Version.Major + "." + AppInfo.Version.Minor + "." + AppInfo.Version.Build + "." + AppInfo.Version.Revision;
 
 if (isDevTarget) {
     var base = scriptPath + "../development/";
@@ -68,5 +68,5 @@ if (isRelTarget) {
     CreatePackage(list, scriptPath + "../deploy/" + filename + ".zip");
 }
 logger.info("Packages Created.");
-fileUtil.saveFile(scriptPath + "build-number.txt","" + (applicationInfo.Version.Build++));
+fileUtil.saveFile(scriptPath + "build-number.txt","" + (AppInfo.Version.Build++));
 logger.info("Build number incremented.")
