@@ -20,7 +20,7 @@ _NOTE: that if you have a project file in the same directory named "MyNovel.manu
 
 If you have more than one period in the filename, only the last one will be used to mark the extension.
 
-Hereafter, I use <filename> to reference the name of the file before the extension, and <extension> to indicate the extension of the project file.
+Hereafter, I use `<filename>` to reference the name of the file before the extension, and `<extension>` to indicate the extension of the project file.
 
 == File Hierarchy ==
 
@@ -28,43 +28,49 @@ The file hierarchy for the project begins at the level of the primary project fi
 
 The hierachy of the project is listed below. The formats of each file are explained later.
 
-  * <filename>.<extension>: this is the primary project file.
-  * <filename>.lock: this is a 'lock' file, explained below.
-  * <filename>.contents\: this is a directory which contains content files used for scene contents and certain notes fields. 
-    * <identifier>.htm: this would be a content file identified by the semi-random unique identifier used as a filename, and referenced in the project file.
-  * <filename>.backup\: this is a directory which contains backup files.
-    * project.everySave.<n>.json: This is a backup of the primary file file created before every save. The most recent backup is always numbered '0', with each previous backup numbered '1','2', etc. The maximum number of backups is 10, as defined in the source code.
-    * project.everySession.<n>.json: This is a backup of the primary file created before the first save in every session.
-    * <identifier>.everySave.<n>.htm: This is a backup of a content file created before each save of that content.
-    * <identifier>.everySession.<n>.htm: This is a backup of a content file created before the first save of every session.
+  * `<filename>`.`<extension>`: this is the primary project file.
+  * `<filename>`.lock: this is a 'lock' file, explained below.
+  * `<filename>`.contents\: this is a directory which contains content files used for scene contents and certain notes fields. 
+    * `<identifier>`.htm: this would be a content file identified by the semi-random unique identifier used as a filename, and referenced in the project file.
+  * `<filename>`.backup\: this is a directory which contains backup files.
+    * project.everySave.`<n>`.json: This is a backup of the primary file file created before every save. The most recent backup is always numbered '0', with each previous backup numbered '1','2', etc. The maximum number of backups is 10, as defined in the source code.
+    * project.everySession.`<n>`.json: This is a backup of the primary file created before the first save in every session.
+    * `<identifier>`.everySave.`<n>`.htm: This is a backup of a content file created before each save of that content.
+    * `<identifier>`.everySession.`<n>`.htm: This is a backup of a content file created before the first save of every session.
 
 == Primary Project File Format ==
 
 The syntax of the primary project file conforms to the JSON specifications.
 
 The schema of the format is defined in a pseudo-JSON below. Conventions used:
-  * name: <type> = specifies that the property 'name' contains an object of type 'type'.
-  * name: "value" = specifies that the property 'name' must contain a string with the value 'value'.
-  * [ <type> ] = specifies that the type is an array that contains 0 or more objects of type 'type'.
-  * <type0>: <type1> = specifies that a property with an arbitrary name of type 'type0' (which must be a string or a number) contains an object of type 'type1'.
-  * <@type> = specifies that the type is a <uid> which must reference an object of type 'type'.
-  * type0|type1|type2 = specifies that objects of type 'type0', 'type1' or 'type2' are all allowed in this location.
+  * `name: <type>` = specifies that the property 'name' contains an object of type 'type'.
+  * `name: "value"` = specifies that the property 'name' must contain a string with the value 'value'.
+  * `[ <type> ]` = specifies that the type is an array that contains 0 or more objects of type 'type'.
+  * `<type0>: <type1>` = specifies that a property with an arbitrary name of type 'type0' (which must be a string or a number) contains an object of type 'type1'.
+  * `<@type>` = specifies that the type is a `<uid>` which must reference the 'uid' property of an object of type 'type'.
+  * `<type0> | <type1> | <type2>` = specifies that objects of type 'type0', 'type1' or 'type2' are all allowed in this location.
+  * `<type> = <type> + { ... }` = specifies that the type extends a base type with additional properties.
 
 All properties are optional. In general, defaults for values are standard for a type (string defaults to a blank string, objects to null, etc), although this varies and is described further in the source code.
 
 Each object type may also have additional undocumented properties, to allow for future compatibility (i.e. I don't have to change the format identifier every time I want to add a new property). In theory, the application should keep these undocumented attributes intact.
 
 The following primitive types are used:
-  * <string>: represents a JSON string value.
-  * <number>: represents a JSON numeric value.
-  * <boolean>: represents a JSON boolean value.
-  * <date>: represents a JSON string formatted in TODO: What is this format called: "Fri Jan 28 2011 10:45:35 GMT-0600 (Central Standard Time)"?
-  * <uid>
-  * <file>
+  * `<string>`: a JSON string value.
+  * `<number>`: a JSON numeric value.
+  * `<boolean>`: a JSON boolean value.
+  * `<date>`: a JSON string representing a date formatted in ISO 8601 format.
+  * `<uid>`: a JSON string representing an id intended to be unique within the project, usually generated by the application.
+  * `<memo>`: a JSON string containing an HTML fragment representing formatted text content.  
+  * `<file>`: a JSON string representing the name of a content file in which formatted text content is stored. The data for this field is an HTML fragment stored in a content file identified by this value. This is *not* just used for the content of a scene, it is also used for certain notes fields. 
 
-project = {
+The base type for the project file is `<project>`.
+
+{{{
+<project> = {
   type: "project",
-  uid: "project", // NOTE: this is pre-specified because there can only ever be one project.
+  /* NOTE: pre-specifying this id makes it possible to find this unique item in the database later. */
+  uid: "project", 
   created: <date>,
   modified: <date>,
   name: <string>,
@@ -79,35 +85,39 @@ project = {
   goals: [ <goal> ],
   customizations: {
     scene: {
-      statuses: [ <string> ], // specifies the statuses that a scene can have.
-      structures: {             // specifies the 'structure' of the scene (action, reaction, etc.),
-        <string>: [ <string> ]  // and the labels for the structcomp fields based on that structure.
-      },                             
-      importances: [ <string> ], // specifies the importance of the scene (plot,subplot,exposition,etc.)
-      ratings: [ <string> ], // specifies the ways in which a scene can be rated (for review statistics, etc.)
+      /* specifies the statuses that a scene can have. */
+      statuses: [ <string> ], 
+      /* specifies the 'structure' of the scene (action, reaction, etc.), */
+      structures: [ <string> ],  
+      /* specifies the importance of the scene (plot,subplot,exposition,etc.) */     
+      importances: [ <string> ],
+      /* specifies the ways in which a scene can be rated (for review statistics, etc.) */ 
+      ratings: [ <string> ], 
     }
     person: {
-      roles: [ <string> ], // specifies the 'role' of the character (antagonist, protagonist, etc.)
-      importances: [ <string> ], // specifies the importance of the scene (major, minor ,etc.)
-      ratings: [ <string> ], // specifies the ways in which a character can be rated (for review statistics, etc.)
+      /* specifies the 'role' of the character (antagonist, protagonist, etc.) */
+      roles: [ <string> ], 
+      /* specifies the importance of the scene (major, minor ,etc.) */
+      importances: [ <string> ],
+      /* specifies the ways in which a character can be rated (for review statistics, etc.) */ 
+      ratings: [ <string> ], 
     }
   },
-  interface: { // TODO: Store data in here regarding the size, position and current tab of various
-               // parts of the interface, as much as possible should be remembered.
+  interface: { 
+     /* Eventually, data stored here will be use for recording the state of the interface between sessions. */ 
   }
 }
 
-credit = {
+<credit> = {
   type: "credit",
   uid: <uid>,
   name: <string>,
   biography: <memo>,
-  role: <string> // author, editor, illustrator, etc.
+  role: <string> 
 }
 
-book = {
+<content> = {
   type: "content",
-  subtype: "book",
   uid: <uid>,
   created: <date>,
   modified: <date>,
@@ -115,74 +125,50 @@ book = {
   description: <memo>, 
   credits: [ <credit> ],
   doNotPublish: <boolean>,
-  tags: [ <string> ],
+  tags: [ <string> ]
+}
+
+<book> = <content> + {
+  subtype: "book",
   content: [ <part> | <chapter> | <scene> ]
 }
 
-part = {
-  type: "content",
+<part> = <content> + {
   subtype: "part",
-  uid: <uid>,
-  created: <date>,
-  modified: <date>,
-  name: <string>, 
-  description: <memo>, 
-  doNotPublish: <boolean>,
-  credits: [ <credit> ],
-  tags: [ <string> ],
   content: [ <chapter> | <scene> ]
 }
 
-chapter = {
-  type: "content",
+<chapter> = <content> + {
   subtype: "chapter",
-  uid: <uid>,
-  created: <date>,
-  modified: <date>,
-  name: <string>, 
-  description: <memo>, 
-  credits: [ <credit> ],
-  doNotPublish: <boolean>,
-  tags: [ <string> ],
   content: [ <scene> ]
 }
 
-scene = {
-  type: "content",
+<scene> = <content> + {
   subtype: "scene",
-  uid: <uid>,
-  created: <date>,
-  modified: <date>,
-  name: <string>, 
-  description: <memo>, 
   begins: <date>,
   ends: <date>,
-  viewpoint: <@uid>, 
-  setting: <@uid>,
-  people: [ <@uid> ],
-  places: [ <@uid> ],
-  things: [ <@uid> ],
-  notes: <file>, // allows you to grow to some very large notes. the memos are meant
-                 // to be small (and should be kept this way).
+  viewpoint: <@person>, 
+  setting: <@place>,
+  people: [ <@person> ],
+  places: [ <@place> ],
+  things: [ <@thing> ],
+  notes: <file>, 
   lastWordCount: <number>,
   tags: [ <string> ], 
-  status: <string>, // must be a valid status, or treated as null.
-  structure: <string>, // must be a valid scene kind, or treated as null.
-  importance: <string>, // must be a valid scene importances, or treated as null.
-  ratings: [ <number> ], // ratings match the order in the lookup
-  doNotPublish: <boolean>,
+  status: <string>, 
+  structure: <string>, 
+  importance: <string>, 
+  ratings: [ <number> ], 
   goal: <memo>,
   conflict: <memo>,
   disaster: <memo>,
   reaction: <memo>,
   dilemma: <memo>,
   decision: <memo>,
-  text: <file> // can't really call this 'content', as that would cause confusion with 
-               // the 'content' property of other content types (which contain children,
-               // not text)  
+  text: <file>   
 }
 
-note = {
+<note> = {
   type: "note",
   uid: <uid>,
   created: <date>,
@@ -193,7 +179,7 @@ note = {
   tags: [ <string> ]
 }
 
-journal-entry = {
+<journal-entry> = {
   type: "journal",
   uid: <uid>,
   created: <date>,
@@ -204,21 +190,21 @@ journal-entry = {
   tags: [ <string> ]
 }
 
-person = {
+<person> = {
   type: "person",
   uid: <uid>,
   created: <date>,
   modified: <date>,
   name: <string>,
   fullName: <string>,
-  aliases: [<string>,
+  aliases: <string>,
   isMajor: <boolean>,
   description: <memo>,
   biography: <file>,
   notes: <file>,
-  role: <string>, // must be a valid character role, or treated as null.
-  importance: <string>, // must be a valid character importance, or treated as null.
-  ratings: [ <number> ], // ratings match the order of the rating lookup
+  role: <string>, 
+  importance: <string>, 
+  ratings: [ <number> ], 
   motivation: <memo>,
   goal: <memo>,
   conflict: <memo>,
@@ -227,9 +213,7 @@ person = {
 }
 
 
-Character analysis should be motivation, goal, conflict, epiphany.
-
-place = {
+<place> = {
   type: "place",
   uid: <uid>,
   created: <date>,
@@ -241,41 +225,37 @@ place = {
   tags: [ <string> ],
 }
 
-thing = {
+<thing> = {
   type: "thing",
   uid: <uid>,
   created: <date>,
   modified: <date>,
   name: <string>,
-  aliases: [<string>,
   description: <memo>,
   background: <file>,
   notes: <file>,
   tags: [ <string> ],
 }
 
-goal = {
+<goal> = {
   type: "goal",
   uid: <uid>,
   created: <date>,
   modified: <date>,
   name: <string>,
-  what: <@book|@part|@chapter>,
+  what: <@book> | <@part> | <@chapter>,
   comments: <memo>,
   starting: <date>,
   ending: <date>,
-  startingWordCount: <number>, // specifies the total word count at the beginning, which
-                               // can be used to reduce the bounds of the chart.
-  targetWordCount: <number>, // specifies the total word count of all scenes at the specified status.
-                             // if targetStatus is null, then all scenes are counted.
+  startingWordCount: <number>, 
+  targetWordCount: <number>, 
   history: [ 
     {
       uid: <uid>,
       when: <date>,
-      wordCount: <number>, // the total word count of all scenes being counted. NOTE: Only
-                           // scenes which are 'publishable' are counted. If the scene, or the
-                           // books, parts or chapters which contain it are marked 'doNotPublish'
-                           // the scene will not be counted.
+      wordCount: <number> 
     } 
   ]
 }
+
+}}}
