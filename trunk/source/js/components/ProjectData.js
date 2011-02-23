@@ -142,7 +142,6 @@ dojo.declare("my.ProjectData", null, {
     },
     
     genericDataStoreTypeMap: {
-        "Date": Date
     },
     
     constructor: function() {
@@ -180,7 +179,7 @@ dojo.declare("my.ProjectData", null, {
                     return referenceObject;
                 }
             } else {
-                if (typeof value === "object") {
+				if (typeof value === "object") {
                     for (var type in this._datatypeMap) {
                         var typeMap = this._datatypeMap[type];
                         if (dojo.isObject(typeMap) && !dojo.isFunction(typeMap)) {
@@ -870,6 +869,10 @@ dojo.declare("my.ProjectData", null, {
  */
 // initialize the drivers array.
 my.ProjectData.Drivers = {
+	
+	_readDate: function(date) {
+		
+	},
 
     _projectEntityLoadFixup: function(entity) {
         if (entity.created) {
