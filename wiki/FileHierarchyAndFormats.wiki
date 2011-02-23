@@ -1,0 +1,40 @@
+#summary Describes the file hierarchy and formats for a Story Steward project.
+#labels Phase-Implementation
+
+= Introduction =
+
+Story Steward does not use on monolithic file to store it's data. This improves performance some, as only a little bit has to be loaded at a time, when it is needed. This is a description of the formats, it is not a full fledged specification.
+
+
+= Details =
+
+The lack of a single monolithic file means there is a specific folder hierarchy which the project must maintain, it also means that you have to be careful to copy all files when you are moving them around, and keep them in the same relative hierarchy.
+
+== Project File Name ==
+
+There is no default extension for the main project file, which is what is loaded. Currently, it is somewhat standard to use '.json' as the extension, because that defines the format of the content, however this is not required. You can give it whatever extension you want.
+
+The filename of the project, before the extension, determines the path for all other files in the project. For example, if your file is "MyNovel.json", files and folders will be named with "MyNovel" as a prefix. 
+
+_NOTE: that if you have a project file in the same directory named "MyNovel.manuscript", it's folder and file names will conflict with the first project._
+
+If you have more than one period in the filename, only the last one will be used to mark the extension.
+
+Hereafter, I use <filename> to reference the name of the file before the extension, and <extension> to indicate the extension of the project file.
+
+== File Hierarchy ==
+
+The file hierarchy for the project begins at the level of the primary project file. It is not currently possible to have more disconnected set up, and I do not foresee it every being possible. Just don't mess with the hierarchy, and everything should be fine. You can put a readme.txt file in the same folder if you want to make sure everyone knows to leave it alone.
+
+The hierachy of the project is listed below. The formats of each file are explained later.
+
+  * <filename>.<extension>: this is the primary project file.
+  * <filename>.lock: this is a 'lock' file, explained below.
+  * <filename>.contents\: this is a directory which contains content files used for scene contents and certain notes fields. 
+    * <identifier>.htm: this would be a content file identified by the semi-random unique identifier used as a filename, and referenced in the project file.
+  * <filename>.backup\: this is a directory which contains backup files.
+    * project.everySave.<n>.json: This is a backup of the primary file file created before every save. The most recent backup is always numbered '0', with each previous backup numbered '1','2', etc. The maximum number of backups is 10, as defined in the source code.
+    * project.everySession.<n>.json: This is a backup of the primary file created before the first save in every session.
+    * <identifier>.everySave.<n>.htm: This is a backup of a content file created before each save of that content.
+    * <identifier>.everySession.<n>.htm: This is a backup of a content file created before the first save of every session.
+
