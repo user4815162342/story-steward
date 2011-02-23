@@ -1,20 +1,20 @@
 {
-	"created": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
-	"modified": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
+	"created": "2011-01-22T08:25:30-06:00", 
+	"modified": "2011-01-22T08:25:30-06:00", 
 	"type": "project", 
 	"uid": "project", 
 	"name": "test", 
 	"credits": { 
-		"created": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
-		"modified": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
+		"created": "2011-01-22T08:25:30-06:00", 
+		"modified": "2011-01-22T08:25:30-06:00", 
 		"uid": "wnCpHYaCmq", 
 		"role": "Author"
 	}, 
 	"format": "story-steward-1.0", 
 	"content": [
 		{
-			"created": "Sat Jan 22 2011 08:25:30 GMT-0600 (Central Standard Time)", 
-			"modified": "Sat Jan 22 2011 17:13:11 GMT-0600 (Central Standard Time)", 
+			"created": "2011-01-22T08:25:30-06:00", 
+			"modified": "2011-01-22T08:25:30-06:00", 
 			"type": "content", 
 			"subtype": "book", 
 			"uid": "6XW9VLPdjb", 
@@ -26,8 +26,8 @@
 				"uid": "2oWzncCBJd", 
 				"type": "content", 
 				"subtype": "scene", 
-				"created": "Sat Jan 22 2011 17:13:13 GMT-0600 (Central Standard Time)", 
-				"modified": "Sat Jan 22 2011 17:14:23 GMT-0600 (Central Standard Time)", 
+				"created": "2011-01-22T08:25:30-06:00", 
+				"modified": "2011-01-22T08:25:30-06:00", 
 				"tags": [
 				], 
 				"name": "New Scene", 
