@@ -1,0 +1,28 @@
+#summary Documentation Home for Story Steward
+= Introduction =
+
+As a [Status beta project], one of the features that still has not been completed is decent documentation. The following is a simple run-down on what you have to do to install and use the application. If you need more information, [Support let me know].
+
+= Installation =
+
+First, [http://code.google.com/p/story-steward/downloads/list download] the latest version of the General Release archive.
+
+Using the zip application of your choice, unzip the contents of the downloaded file into an appropriate place on your hard drive, preferably in its own directory next to other programs on your machine, where you're not going to forget about it.
+
+If you wish, create a shortcut to the index.html file in that directory and place it on your desktop or startup menu, according to how that is normally done on your operating system.
+
+Assuming your operating system is configured to open up your browser when an HTML file (web page) is opened up, you should then be able to run that shortcut whenever you want to run Story Steward.
+
+= Usage =
+
+After the application loads, you will be greeted with a dialog box which asks for a URI to the Story Steward project you want to load. 
+
+If you just want to play around with the features, press the 'Sample' button on this dialog, and a basic test project will open up. You will be able to make any changes in this project, but saving it does nothing. This way, you can go back to the original sample project again in the future.
+
+Once you are ready to open up a real project, go back to this dialog either be refreshing the Story Steward page, or clicking the folder button in the top left corner. Then enter the URL for your project, but wait...
+
+Currently, Story Steward expects an actual URL, not just the path on your disk. This means, it must start with a 'file://' and continue on with the regular path, but with forward slashes instead of backwards. On Windows, the path to your C: drive would be 'file:///C:/', and you can continue from there.
+
+Assuming this is a new project, check the 'New' box in the dialog, and a new project will be created at that location (Otherwise, you will see an error message stating that the project could not be found -- this is a safeguard). Go ahead and start working on your project. Press the disk button in the upper left to save.
+
+If you have any problems, please [Support contact me].
