@@ -10,6 +10,6 @@ As I'm also a struggling writer and have other paying projects to work on, I can
 
 If you want to hurry up progress, there are several things you can do: 
   # [Support Let me know] that you're interested in this project, and especially what features you want me to finish, or bugs you want me to fix. This reminds me that my users are waiting, and may give me a nudge to finish up something that is only a couple hours from being done.
-  # If you know how to write !JavaScript, [Support offer to help]. Even better, check the code out via subversion, have a look at it, [Building build it] and see if you can fix any of the bugs or figure out how to add new features. If you can, let me know.
+  # If you know how to write !JavaScript, [Support offer to help]. Even better, get the development package from the downloads page or check the code out via subversion, have a look at it, [Building build it] and see if you can fix any of the bugs or figure out how to add new features. If you can, let me know.
   # [Support Donate some money to the project]. I should warn you, however, that programming labor is not cheap, so one person throwing ten dollars at me once a year isn't going to get much done. Which brings up the last thing you can do:
   # Tell anyone you know who might be interested about this program, and point them to this website so they can try it out.
