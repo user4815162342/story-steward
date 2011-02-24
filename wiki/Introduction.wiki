@@ -1,0 +1,21 @@
+#summary Full Introduction
+
+=Make Writing Easier: Don't Organize, Just Create!=
+
+_Story Steward_ is a tool for organizing and authoring novels and other large writing projects. Use it to keep track of your characters, settings and other notes while organizing your scenes into chapters. Instead of using separate word processor files, spreadsheets, and note cards to keep all these things organized, put it all in one place. Make it easy to find what you need when you need it. Make backups easier. Don't organize, just create. 
+
+_Story Steward_ runs in your browser, but is not a web application. The application is written entirely in !JavaScript, HTML and CSS, but is meant to be run off of your local machine. Using technology introduced to the wide world by the makers of [http://tiddlywiki.com/ TiddlyWiki], it should be able to load and save files from your hard drive in most popular browsers.
+
+==Status==
+
+_Story Steward_ is currently in beta, and there are numerous features which are planned but have not yet been added to it. It is hoped that by releasing it as an open source project, it will be easier to get suggestions for future improvements.
+
+Please, if you are looking for a good novel writing software, but are unsure about using a beta project, please try it out. If you don't like it, contact us and let us know what's wrong. Maybe it's something that can be fixed.
+
+Story Steward is intended to run on Firefox, Internet Explorer, Opera and webkit-based browsers like Safari and Chrome. However at this point it has only been tested on Firefox and Internet Explorer. Further, [http://code.google.com/p/story-steward/issues/detail?id=1 Issue #1] prevents it from running properly on Internet Explorer.
+
+==Support and Contact==
+
+If you notice a bug in the software, an error in the documentation, or have a feature suggestion, please consider searching the issue list. If you can't find something that matches, [http://en.wiktionary.org/wiki/feel_free feel free] to add one. If you can, go ahead and star it, let me know that you're interested so I can decide what to work on next.
+
+If you have any questions or comments or simply need some help installing or using it, and the documentation on this site does not help you, please contact the [http://code.google.com/p/story-steward/people/list owner] of this project. Once the user base has grown, I will consider adding a forum to this project.
