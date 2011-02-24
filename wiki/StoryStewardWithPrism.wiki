@@ -1,0 +1,11 @@
+#summary How to run Story Steward with Mozilla Prism
+
+= Introduction =
+
+[http://prism.mozillalabs.com/ Mozilla Prism] is an application from the creators of Firefox which lets you run any web page as a standalone application. It can do the same with Story Steward.
+
+= Details =
+
+Prism is very easy to use, just go to the link above and download the Firefox extension or the full application. Then, follow the instructions for turning your copy of Story Steward into a standalone application.
+
+More advanced users may want to review the [https://developer.mozilla.org/en/Prism/Configuration Prism Configuration File format] and make some additional tweaks. A particularly good one is the 'include' property, which ensures that links within Story Steward will open up in your regular browser.
