@@ -67,7 +67,9 @@ The following primitive types are used:
 The base type for the project file is `<project>`.
 
 {{{
+
 <project> = {
+  format: "story-steward-1.0", 
   type: "project",
   /* NOTE: pre-specifying this id makes it possible to find this unique item in the database later. */
   uid: "project", 
@@ -259,3 +261,7 @@ The base type for the project file is `<project>`.
 }
 
 }}}
+
+== Content File Format ==
+
+Content file formats are simple HTML fragments. That is, they contain HTML markup that would normally appear in the `<body>` tag of an HTML document. Their exact structure may depend on what browser you are running Story Steward in, but in general they will always be readable and editable in every browser.
