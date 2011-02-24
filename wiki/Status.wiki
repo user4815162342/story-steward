@@ -1,0 +1,7 @@
+#summary Current status of Story Steward
+
+_Story Steward_ is currently in beta, and there are numerous features which are planned but have not yet been added to it. It is hoped that by releasing it as an open source project, it will be easier to get suggestions for future improvements.
+
+If you are looking for a good novel writing software, but are unsure about using a beta project, please try it out. If you don't like it, [Support contact] this project and let us know what's wrong. Maybe it's something that can be fixed.
+
+Story Steward is intended to run on Firefox, Internet Explorer, Opera and webkit-based browsers like Safari and Chrome. However at this point it has only been tested on Firefox and Internet Explorer. Further, [http://code.google.com/p/story-steward/issues/detail?id=1 Issue #1] prevents it from running properly on Internet Explorer.
