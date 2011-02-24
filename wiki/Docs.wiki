@@ -11,6 +11,8 @@ Using the zip application of your choice, unzip the contents of the downloaded f
 
 If you wish, create a shortcut to the index.html file in that directory and place it on your desktop or startup menu, according to how that is normally done on your operating system.
 
+NOTE: At this point, if you would prefer to use Story Steward as a standalone application, you can run it through [StoryStewardWithPrism Mozilla Prism].
+
 Assuming your operating system is configured to open up your browser when an HTML file (web page) is opened up, you should then be able to run that shortcut whenever you want to run Story Steward.
 
 = Usage =
