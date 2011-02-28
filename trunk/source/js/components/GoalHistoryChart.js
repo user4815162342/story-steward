@@ -16,8 +16,6 @@
 
  */
 dojo.provide("my.GoalHistoryChart");
-// TODO: Have to find a way to require these from the template instead
-// of this file, so I can use widgets which I don't know about.
 dojo.require("dojox.charting.widget.Chart2D");
 dojo.require("dojox.charting.themes.Distinctive");
 

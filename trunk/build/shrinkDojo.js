@@ -52,7 +52,6 @@ function shrinkDojo(target) {
     deleteAllBut(dojopath,"dojo/resources/",/^(?:dojo\.css|LICENSE)$/,/\.(?:js|css)$/);
 	deleteAllBut(dojopath,"dojo/nls/",nlsKeep);
 
-// TODO: What else can I get rid of?
     deleteAllBut(dojopath,"dijit/",/^(?:LICENSE|themes|icons)$/);
 	deleteAllBut(dojopath,"dijit/themes/",/^(?:dijit\.css|a11y|tundra)$/);
 	deleteAllBut(dojopath,"dijit/themes/tundra/",/^(?:tundra.css|images)$/);
@@ -85,33 +84,6 @@ function shrinkDojo(target) {
 	
 	deleteAllBut(dojopath,"dojox/grid/",/^(?:resources)$/)
 	deleteAllBut(dojopath,"dojox/grid/resources/",/^(?:images|Grid.css|tundraGrid.css)$/)
-/*
-	//TODO: Can I switch to this?
-	//  for (var i = 0; i < requireddojoxdirs.length; i++) {
-	//	deleteAllBut(dojopath,"dojox/" + requireddojoxdirs[i],/\.(?:js|css)$/);
-	//}
-    
-    // TODO: What do I have to get rid of in charting?
-    
-    var dojox = RecursiveFileIterator(new java.io.File(dojopath + "dojox/"), function(file) {
-        // TODO: What else can we get rid of here? There are
-        // certainly some theme files that we don't need, but I'm not
-        // sure if the nameing conventions are accurate.
-        var name = file.getName();
-        if ((file.getParentFile().getName() == "nls") || (file.getParentFile().getParentFile().getName() == "nls")) {
-            // do not delete any localization files.
-            return false;
-        }
-        return name.endsWith(".js");
-    }, true, true)
-    
-    
-    
-    while (item = dojox.getCurrent()) {
-        logger.info("Deleting dojox/" + item.entry);
-        fileUtil.deleteFile(item.file);
-        dojox.next();
-    }*/
     logger.info("Dojo shrunken for " + target + ".");
     
 }

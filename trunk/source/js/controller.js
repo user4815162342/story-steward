@@ -169,9 +169,6 @@ var Controller = new function() {
         
             document.title = ApplicationInfo.Title;
             
-            // TODO: Need to be able to obtain the version number from the same
-            // place the build system does it, or the build system has to write
-            // the version number in.
             dojo.byId("statusPanel-appName").innerHTML = ApplicationInfo.Title + " " + ApplicationInfo.Version.Major + "." + ApplicationInfo.Version.Minor + "." + ApplicationInfo.Version.Build + "." + ApplicationInfo.Version.Revision;
             
             this.ProjectData = new my.ProjectData();
@@ -399,7 +396,7 @@ var Controller = new function() {
                 openTabs[uid] = viewer;
                 viewer.onClose = function() {
                     if (viewer.IsEditing()) {
-                        // TODO: Should have a 'confirmation' dialog instead,
+                        // FUTURE: Should have a 'confirmation' dialog instead,
                         // possibly focusing the control that is editing.
                         alert("Can't close, some field is still editing!");
                         return false;
@@ -1083,15 +1080,13 @@ var Controller = new function() {
         // update the MRU store:
         setTimeout(dojo.hitch(this, this._updateMRU), 0);
         
-        // TODO: At this point, should also set user interface positions,
+        // FUTURE: At this point, should also set user interface positions,
         // open previously opened tabs, etc.
         dojo.byId("statusPanel-saveStatus").innerHTML = this.ProjectData.IsDirty() ? "Not Saved" : "Saved";
         
     }
     
     this._projectTitleChange = function(newValue) {
-        // TODO: This is a branding name, change it once I
-        // come up with something.
         document.title = ApplicationInfo.Title + " \u2014 " + newValue || "Untitled";
     }
     
@@ -1218,7 +1213,7 @@ var Controller = new function() {
                 addWordCount(item);
             }),
             onComplete: function() {
-                // TODO: Is this really the right place to do this?
+                // FUTURE: Is this really the right place to do this?
                 dojo.byId("statusPanel-totalWordCount").innerHTML = "Last Word Count: " + totalCount;
                 result.callback(totalCount);
             },
@@ -1440,7 +1435,6 @@ var Controller = new function() {
         openProjectDialog.set('refocus', true);
         openProjectDialog.set('closable', true);
         openProjectDialog._onKey = openProjectDialog._originalOnKey
-        // TODO: Will this work?
         dojo.style(openProjectDialog.closeButtonNode, "display", "inline");
         dojo.style("openProjectDialog-cancel", "display", "inline");
         var textbox = dijit.byId("openProjectDialog-value");
@@ -1650,27 +1644,6 @@ var Controller = new function() {
     }
     
     this.GridFormat_DisplayHTMLSafe = function(value) {
-        // TODO: Come up with some regex to clean up the HTML for
-        // display.
-        // https://fosswiki.liip.ch/display/BLOG/XSS+Prevention
-        // https://svn.liip.ch/repos/public/popoon/trunk/classes/externalinput.php
-        // TODO: Issues to think about:
-        //  1.  cross-site scripting is a real worry for any dynamically entered HTML.
-        //  2.  I will be making my demo version publicly available, but the data
-        //      will never be saved. Therefore, there shouldn't be any problems --
-        //      anything they could trick the browser into doing could be done without
-        //      a browser, so what's the point of that?
-        //  3.  Personal sites will more than likely be secured and password protected,
-        //      and not publicly available.
-        //  4.  Anything I do with a filesystem version will not be any less secure
-        //      than some equivalent attack in a Microsoft Word document.
-        //  5.  There are very possibly some idiots who may not try to keep their
-        //      data safe. These are the real worry, and I'll have to put some big
-        //      warnings on the site to alert them of this.
-        //  6.  No matter what I strip from the data, there's bound to be something
-        //      that I won't know about that could be used to attack. 
-        //  7.  Everything I stip from the data could potentially cause the user to
-        //      lose something important to them.
         if (value) {
             return value.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
         } else {
@@ -1839,7 +1812,7 @@ dojo.addOnLoad(function() {
             dijit.byId("main").resize();
             
             // FUTURE: Plugin Hook: update controls -- should go here.
-            // TODO: Here is where UI positions should be applied as well.
+            // FUTURE: Here is where UI positions should be applied as well.
         }
         console.info("Total display time: " + (new Date().getTime() - start) + "ms");
         

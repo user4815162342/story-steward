@@ -16,8 +16,6 @@
 
  */
 dojo.provide("my.GoalProgress");
-// TODO: Have to find a way to require these from the template instead
-// of this file, so I can use widgets which I don't know about.
 dojo.require("dijit._Widget");
 dojo.require("dijit._Templated");
 dojo.require("dijit.layout.ContentPane");

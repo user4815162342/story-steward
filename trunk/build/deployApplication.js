@@ -23,11 +23,6 @@ load(buildScriptsPath + "jslib/logger.js");
 load(scriptPath + "fileIterator.js");
 load(scriptPath + "info.js");
 
-// TODO: Need to include version numbers as well. Would these simply be files
-// stored in the build area, which can be loaded?
-// TODO: Make sure the modified dates and times for the entries match the
-// files.
-
 function CreatePackage(files, path) {
     logger.info("Creating Package: " + path);
     var zipstream = new java.util.zip.ZipOutputStream(new java.io.FileOutputStream(new java.io.File(path)));
@@ -62,7 +57,6 @@ if (isDevTarget) {
     
 }
 if (isRelTarget) {
-    // TODO: Need to filter out the dojo stuff that we don't need.
     var base = scriptPath + "../release/";
     var list = RecursiveFileIterator(base, null, true, false);
     CreatePackage(list, scriptPath + "../deploy/" + filename + ".zip");
