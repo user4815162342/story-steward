@@ -242,9 +242,6 @@ dojo.declare("my.ProjectData", null, {
             // 4. Only items also appearing at arrayOfTopLevelItems are flattened when referenced, the rest are
             // included inline.
             // 5. A couple of other things are flattened as well based on the expected schema
-            // TODO: Problem: Goal 'what' field should be 'flattened', however,
-            // since the items referenced may not be in the top level, they
-            // won't be here.
             var serializableItems = [];
             
             for (var i = 0; i < this._arrayOfTopLevelItems.length; ++i) {
@@ -449,7 +446,6 @@ dojo.declare("my.ProjectData", null, {
                 throw "Can't create data item of type " + type;
             }
             if (!base) {
-                // TODO: Perhaps we should really merge the objects instead.
                 base = this.TypeLookup[type].defaultValue || {};
             }
             base.type = this.TypeLookup[type].baseType;
@@ -521,7 +517,7 @@ dojo.declare("my.ProjectData", null, {
                     name: defaultName
                 }]
             },
-            // TODO: Come up with some useful defaults for these, so I can use them
+            // FUTURE: Come up with some useful defaults for these, so I can use them
             // until I allow them to be edited.
             GetTags: function() {
                 return [{
@@ -608,7 +604,7 @@ dojo.declare("my.ProjectData", null, {
     },
     
     GetJSON: function() {
-        // TODO: At some point in the future, it might be nice to have a 'SetJSON' as well.
+        // FUTURE: At some point in the future, it might be nice to have a 'SetJSON' as well.
         try {
             return my.ProjectData.Drivers._writeStandardJSONFormat(this.ProjectStore._getSaver());
         } catch (ex) {
@@ -646,7 +642,6 @@ dojo.declare("my.ProjectData", null, {
     _Revert: function() {
         // NOTE: This must be called before reloading new data when there
         // are unsaved changes.
-        // TODO: Also revert any lookup data changes.
         this.ProjectStore.revert();
     },
     
@@ -809,7 +804,6 @@ dojo.declare("my.ProjectData", null, {
     },
     
     IsDirty: function() {
-        // TODO: Also have to track the lookup data.
         return this.isDirty || this.ProjectStore.isDirty();
     },
     
@@ -847,19 +841,6 @@ dojo.declare("my.ProjectData", null, {
         // stub function for other objects to connect to.
     }
     
-    /* TODO: 
-     * - methods for opening and saving file content attributes. This will load and save
-     * depending on the mode, as mentioned above.
-     *
-     * - events for handling a change in mode (from writeable to read-only, for example,
-     * or when a new item is loaded (one event before loading and one after, to allow
-     * refreshing of trees, closing tabs, etc. prior to loading, and opening of
-     * preferred tabs after).
-     *
-     * - methods for opening up a dialog box to search for a local file, but only under
-     * certain circumstances.
-     *
-     */
 });
 
 /*
@@ -1146,8 +1127,6 @@ my.ProjectData.Drivers = {
     },
     
     _readStandardJSONFormat: function(rawData, readOnly) {
-        // TODO: Should have a 'schema' to follow here and use dojox.json.schema.validate.
-        // TODO: Come up with an appropriate format version string 		
         if ((rawData.format) && (rawData.format == my.ProjectData.Drivers.JSONFormatString)) {
             var entities = [];
             entities.push.apply(entities, dojo.map(rawData.content || [], my.ProjectData.Drivers._projectEntityLoadFixup));
@@ -1323,7 +1302,7 @@ my.ProjectData.Drivers = {
 				return paths.projectURI;
 			}
             
-            // TODO: Possibly, set per-file permissions: http://www.mozilla.org/projects/security/components/per-file.html
+            // FUTURE: Possibly, set per-file permissions: http://www.mozilla.org/projects/security/components/per-file.html
             this.load = function(createNew) {
                 //    If the application is on a file URL, then I can assume I
                 //    *might* be able to get local file access and xdomain access.
@@ -1350,13 +1329,6 @@ my.ProjectData.Drivers = {
                             try {
                                 content = my.LocalFileAccess.load(projectFile);
                             } catch (e) {
-                                // TODO: If the file is not there, will I get an error, or will
-                                // I get null content? This may differ based on platform. Until
-                                // then, I'm assuming that if I get an error, the file doesn't exist.
-                                // Only throw that error if I don't have a 'createNew'.
-                                // -- Confirmation: Mozilla gives me 'null'.
-                                // -- IE?
-                                // -- Java?
                                 if (createNew) {
                                     content = null;
                                 } else {
@@ -1471,7 +1443,7 @@ my.ProjectData.Drivers = {
 			}
             
             this.load = function() {
-                // TODO: Need some way of specifying user and password if
+                // FUTURE: Need some way of specifying user and password if
                 // the site implements security. I'd like to do a 'fallback'
                 // where I get a status which indicates this and then ask
                 // for the user and password, but it'd also be nice to be
@@ -1498,7 +1470,6 @@ my.ProjectData.Drivers = {
             }
             
             this.loadCLOB = function(id) {
-                // TODO: Also need some way of specifying user and password.
                 return dojo.xhrGet({
                     url: paths.getCLOBURI(id),
                     handleAs: "text",

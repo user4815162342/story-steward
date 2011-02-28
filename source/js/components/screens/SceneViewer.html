@@ -52,7 +52,6 @@
                         <label>
                             Begins:
                         </label>
-                        <!-- TODO: Link up the buttons, or create a new widget. Also give the buttons some nice icons. --><span dojoAttachPoint="_beginDate" bindField="begins" width="70px" dojoType="dijit.InlineEditBox" editor="dijit.form.TextBox" title="Edit Scene Start Time"></span>
                         <div dojoType="dijit.form.DropDownButton" iconClass="iconSetDate">
                             <div dojoType="dijit.Calendar">
                             </div>
@@ -196,7 +195,6 @@
                         <span dojoAttachPoint="_importance" bindField="importance" width="100px" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.Customizations.Scene.Importances, searchAttr: 'name', autoComplete: true }" title="Choose Scene Importance"></span>
                     </p>
                     <h3>Ratings:</h3>
-                    <!-- TODO: This should have a dynamic length, not sure exactly how... Also, the title should somehow be more dynamic. -->
                     <p>
                         <label>
                             <span dojoAttachPoint="_rating0Label" bindField="rating0" bindFormatForGui="DataViewerFormat_SceneRatingName0"></span>:

@@ -13,17 +13,6 @@
  3) Fall back to a manual copy of content if no copyFile is available on
  the driver.
  
- TODO: Changes I would like to make:
- The primary reason these changes can't be made is currently lack of functionality
- in TiddlySaver.jar, which would make these features unavailable on anything but
- IE and Firefox. However, I could consider that only web-based access is supported
- on Opera, Safari and Chrome. Alternatively, I could write my own java class,
- but the primary obstacle with that is making sure it gets signed properly,
- which I believe require me to buy a certificate.
- 1) TODO: Add 'exists' to check if a given file already exists.
- 2) TODO: Add 'browse' to open a dialog for browsing for a file.
- 3) TODO: Add 'delete' to delete a file.
- 
  I've marked the code that has changed in a way that will make it easier to see
  with a diff program:
  //- is at the beginning of removed lines

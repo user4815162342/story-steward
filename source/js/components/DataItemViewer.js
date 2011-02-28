@@ -11,8 +11,6 @@
  limitations under the License.
  */
 dojo.provide("my.DataItemViewer");
-// TODO: Have to find a way to require these from the template instead
-// of this file, so I can use widgets which I don't know about.
 dojo.require("dijit._Widget");
 dojo.require("dijit._Templated");
 dojo.require("dijit.layout.ContentPane");
@@ -317,8 +315,6 @@ dojo.declare("my.DataItemViewer", [dijit.layout.ContentPane, dijit._Templated], 
     },
     
     DeleteDataItem: function() {
-		// TODO: This should be moved into the forms, and called as with
-		// the build manuscript button onContentContainerView.
         // NOTE: Have to call this on controller, since delete does
         // not call onDelete for all of the children, so the controller
         // has no way to know whether tabs open for those children should
@@ -370,13 +366,12 @@ dojo.declare("my.DataItemViewer", [dijit.layout.ContentPane, dijit._Templated], 
     
     // Let it bind as well. When this is bound to a given dataItem and
     // mapping, it actually binds to the first item of the attribute instead.
-    // TODO: I think I can get rid of this, this is just done in the base.
     _dataItemBind: function(dataStore, dataItem, formatterScope, viewer) {
         var dataField = this.bindField;
         var items = dataStore.getValues(dataItem, dataField);
         var childItem;
         if (items.length == 0) {
-            // TODO: Test this sometime.
+            // FUTURE: Test this sometime.
             
             if (dataStore.getFeatures()['dojo.data.api.Write']) {
                 if (this.createNewItem && typeof this.createNewItem == "string") {
@@ -467,7 +462,6 @@ dojo.extend(dijit._Widget, {
         var dataCanWrite = this._dataItemGet && this.onChange && (dataStore.getFeatures()['dojo.data.api.Write'] == true);
         var dataCanNotify = dataStore.getFeatures()['dojo.data.api.Notification'] == true;
         
-        // TODO: Fix these once I get rid of mappings.
         var formatForGui = this.bindFormatForGui;
         var formatForData = this.bindFormatForData;
         if (formatForGui && typeof formatForGui == "string") {
@@ -669,7 +663,6 @@ dojo.extend(dijit.Editor, {
     
     _dataItemSetDisabled: function() {
         // this.set('disabled', true);
-        // TODO: I think I can just tell it to close, and it will work... try it.
         this.set("disabled", true);
         dojo.style(this.header, "display", "none");
     },
@@ -735,11 +728,11 @@ dojo.extend(dojox.grid.DataGrid, {
         return this._dataItemIsEditing;
     },
     _dataItemSave: function() {
-        // TODO: Maybe someday...
+        // FUTURE: Maybe someday...
     },
     
     _dataItemCancel: function() {
-        // TODO: Maybe someday...	
+        // FUTURE: Maybe someday...	
     }
     
     

@@ -34,7 +34,7 @@ var classPath = jarPath + "js.jar;" + jarPath + "shrinksafe.jar";
 
 
 if (isDevTarget || isRelTarget) {
-    // TODO: Pre-build, perhaps go through source and find dojo.requires and build 
+    // FUTURE: Pre-build, perhaps go through source and find dojo.requires and build 
     // my own profile file.
 }
 /*
@@ -47,12 +47,10 @@ if (isDevTarget || isRelTarget) {
 if (isDevTarget) {
     logger.info("Building dojo for development");
     RunProcess(["java", "-classpath", classPath, "org.mozilla.javascript.tools.shell.Main", "build.js", "optimize=comments", "layerOptimize=comments", "cssOptimize=comments.keepLines", "mini=true", "profileFile=../../../../build/dojo-profile.js", "action=clean,release", "releaseDir=../../../../development/js"], buildScriptsPath)
-    // TODO: Delete all of the files I don't need...	
 }
 if (isRelTarget) {
     logger.info("Building dojo for release");
     RunProcess(["java", "-classpath", classPath, "org.mozilla.javascript.tools.shell.Main", "build.js", "optimize=shrinksafe", "copyTests=false", "layerOptimize=shrinksafe", "cssOptimize=comments", "mini=true", "stripConsole=warn", "profileFile=../../../../build/dojo-profile.js", "action=clean,release", "releaseDir=../../../../release/js"], buildScriptsPath);
-    // TODO: Delete all of the files I don't need...	
 }
 logger.info("Dojo built.")
 
