@@ -20,7 +20,7 @@ limitations under the License.
         <!-- required for grids -->
         <link rel="stylesheet" href="js/dojo/dojox/grid/resources/Grid.css"/>
         <link rel="stylesheet" href="js/dojo/dojox/grid/resources/tundraGrid.css"/>
-		<link rel="stylesheet" href="desktop.css"/>
+        <link rel="stylesheet" href="desktop.css"/>
         <script type="text/javascript" src="js/appinfo.js">
         </script>
         <script type="text/javascript" src="js/Math.uuid.js">
@@ -140,7 +140,9 @@ limitations under the License.
                             <label for="openProjectDialogTextBox" id="openProjectDialog-prompt">
                                 File URL:
                             </label>
-                            <input type="text" name="openProjectDialogTextBox" dojoType="dijit.form.TextBox" id="openProjectDialog-value" style="width:220px"/>
+                            <!--<input type="text" name="openProjectDialogTextBox" dojoType="dijit.form.TextBox" id="openProjectDialog-value" style="width:220px"/>-->
+                            <select dojoType="dijit.form.ComboBox" searchAttr="uri" name="openProjectDialogTextBox" id="openProjectDialog-value" style="width:220px">
+                            </select>
                             <p id="openProjectDialog-error" style="color: red;">
                             </p>
                         </div>
@@ -325,15 +327,6 @@ limitations under the License.
                         </div>
                     </div>
                     <div dojoType="dijit.layout.ContentPane" region="center">
-                        Tools menu will go here: 
-                        - storyboard  
-                        - reports 
-                        - automatically add characters, locations, items to scenes where they are mentioned.
-                        - work with orphan, duplicate scenes.
-                        - word usage count
-                        - export?
-                        - backup
-                        - system settings.
                         <button dojoType="dijit.form.Button" id="failSafeButton" type="button">
                             Trigger Fail-safe
                             <script type="dojo/method" event="onClick" args="evt">
@@ -356,7 +349,7 @@ limitations under the License.
             </div>
             <div dojoType="dijit.layout.TabContainer" region="center" id="contentTabs" tabStrip="true" useSlider="true" useMenu="true">
             </div>
-            <div dojoType="dijit.layout.TabContainer" class="hideOnFullScreen" tabPosition="right-h" minSize="35" style="width:35px"  id="rightSidebar" region="trailing" splitter="true">
+            <div dojoType="dijit.layout.TabContainer" class="hideOnFullScreen" tabPosition="right-h" minSize="35" style="width:35px" id="rightSidebar" region="trailing" splitter="true">
                 <div class="sidebarPane" dojoType="dijit.layout.BorderContainer" showTitle="false" title="Search" iconClass="iconSearchFiles" gutters="false">
                     <div class="dijitTitlePaneTitle dijitFixedOpen" dojoType="dijit.layout.ContentPane" region="top">
                         <div class="dijitTitlePaneTitleFocus">

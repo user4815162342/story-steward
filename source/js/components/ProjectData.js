@@ -204,6 +204,7 @@ dojo.declare("my.ProjectData", null, {
                 return value;
             }
         }
+		
         
         
         this.ProjectStore._serializeItem = function(item) {
@@ -474,6 +475,13 @@ dojo.declare("my.ProjectData", null, {
     },
     
     _handler: null,
+	
+	GetURI: function() {
+		if (this._handler) {
+			return this._handler.getUri();
+		}
+		return null;
+	},
     
     _createIOHandler: function(uriString) {
         var scheme = uriString.split('://')[0];
@@ -1310,6 +1318,10 @@ my.ProjectData.Drivers = {
                 state.count++;
                 
             }
+			
+			this.getUri = function() {
+				return paths.projectURI;
+			}
             
             // TODO: Possibly, set per-file permissions: http://www.mozilla.org/projects/security/components/per-file.html
             this.load = function(createNew) {
@@ -1454,6 +1466,10 @@ my.ProjectData.Drivers = {
         
         var HttpIOHandler = function(uriString, httpFallback) {
         
+			this.getUri = function() {
+				return paths.projectURI;
+			}
+            
             this.load = function() {
                 // TODO: Need some way of specifying user and password if
                 // the site implements security. I'd like to do a 'fallback'
@@ -1712,6 +1728,10 @@ my.ProjectData.Drivers = {
         
         var SampleIOHandler = function(databaseName, readonly) {
         
+			this.getUri = function() {
+				return uriString;
+			}
+            
             this.load = function() {
                 var result = new dojo.Deferred();
                 if (SampleDatabases.hasOwnProperty(databaseName)) {

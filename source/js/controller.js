@@ -30,7 +30,35 @@ var Controller = new function() {
     var goalsTree = null;
     var openProjectDialog = null;
     
-    var projectSettings = null;
+    var userSettings = null;
+    
+    var mruStore = new dojo.data.ItemFileWriteStore({
+        data: {
+            identifier: "uri",
+            label: "uri",
+            items: []
+        }
+    });
+    mruStore._saveCustom = function(callback, errback) {
+        var saveData = [];
+        var lastUsed;
+        this.fetch({
+            onItem: dojo.hitch(this, function(item) {
+                saveData.push({
+                    uri: this.getIdentity(item),
+                    lastUsed: dojo.date.stamp.toISOString(this.getValue(item, "lastUsed", new Date()))
+                })
+            }),
+            onComplete: dojo.hitch(this, function() {
+                userSettings.recentProjects = saveData;
+                my.Settings.save();
+                callback();
+            }),
+            onError: function(ex) {
+                errback(ex);
+            }
+        })
+    }
     
     this.ProjectData = null;
     
@@ -166,6 +194,43 @@ var Controller = new function() {
             // NOTE: The following allows us to turn on and off escape handling.			
             openProjectDialog = dijit.byId("openProjectDialog");
             openProjectDialog._originalOnKey = openProjectDialog._onKey;
+            var openProjectCombo = dijit.byId("openProjectDialog-value");
+            openProjectCombo.set('fetchProperties', {
+                sort: {
+                    attribute: "lastUsed",
+                    descending: true
+                }
+            });
+            openProjectCombo.set('store', mruStore);
+            
+            
+            dojo.when(my.Settings.get(), function(data) {
+                userSettings = data;
+                // load recent projects...
+                if (!userSettings.recentProjects) {
+                    userSettings.recentProjects = [];
+                }
+                // sort them descending by date.
+                userSettings.recentProjects.sort(function(a, b) {
+                    if (b.lastUsed > a.lastUsed) {
+                        return 1;
+                    }
+                    if (a.lastUsed > b.lastUsed) {
+                        return -1;
+                    }
+                    return 0;
+                })
+                for (var i = 0; i < userSettings.recentProjects.length; i++) {
+                    var item = userSettings.recentProjects[i];
+                    mruStore.newItem({
+                        uri: item.uri,
+                        lastUsed: dojo.date.stamp.fromISOString(item.lastUsed)
+                    })
+                }
+                
+            }, function(ex) {
+                alert("While loading settings: " + ex);
+            })
             
         }
     }
@@ -938,6 +1003,61 @@ var Controller = new function() {
         
     }
     
+    this._updateMRU = function() {
+        var newUri = this.ProjectData.GetURI();
+        var foundItem = false;
+        var mruCount = 0;
+        mruStore.fetch({
+            onBegin: function(count) {
+                mruCount = count;
+            },
+            onItem: dojo.hitch(this, function(item) {
+                if (mruStore.getValue(item, "uri", "") == newUri) {
+                    foundItem = true;
+                    mruStore.setValue(item, "lastUsed", new Date());
+                }
+            }),
+            onComplete: dojo.hitch(this, function() {
+                if (!foundItem) {
+                    mruStore.newItem({
+                        uri: newUri,
+                        lastUsed: new Date()
+                    });
+                    // If we've reached the max projects, we need to delete some.
+                    var diff = (mruCount + 1) - (userSettings.recentProjectsMax || 20);
+                    if (diff > 0) {
+                        var deleteItems = [];
+                        mruStore.fetch({
+                            sort: {
+                                attribute: "lastUsed",
+                                descending: false
+                            },
+                            onItem: dojo.hitch(this, function(item) {
+                                if (diff > 0) {
+                                    deleteItems.push(item);
+                                    diff--;
+                                }
+                                
+                            }),
+                            onComplete: dojo.hitch(this, function() {
+                                while (deleteItems.length) {
+                                    mruStore.deleteItem(deleteItems.pop());
+                                }
+                                mruStore.save();
+                            })
+                        })
+                    } else {
+                        mruStore.save();
+                        
+                    }
+                } else {
+                    mruStore.save();
+                }
+            })
+        })
+        
+    }
+    
     this._projectEndLoad = function() {
         if (this.ProjectData.ReadOnly) {
             dojo.addClass(dojo.body(), "readOnly");
@@ -959,6 +1079,9 @@ var Controller = new function() {
                 alert("Error fetching project title");
             }
         });
+        
+        // update the MRU store:
+        setTimeout(dojo.hitch(this, this._updateMRU), 0);
         
         // TODO: At this point, should also set user interface positions,
         // open previously opened tabs, etc.
@@ -1660,6 +1783,7 @@ dojo.addOnLoad(function() {
         
         // app-specific widgets.
         dojo.require("my.LocalFileAccess");
+        dojo.require("my.Settings");
         dojo.require("my.ProjectData")
         dojo.require("my.DataItemViewer");
         dojo.require("my.extensions");
