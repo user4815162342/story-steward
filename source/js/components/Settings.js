@@ -34,8 +34,11 @@ dojo.getObject("my.Settings", true);
                 url: driver.fileUri,
                 handleAs: "json",
             }).then(function(data) {
-                var cookie = dojo.cookie(driver.cookieName);
-                dojo.mixin(data, dojo.fromJson(cookie));
+				var cookie = dojo.cookie(driver.cookieName);
+				if (cookie) {
+					dojo.mixin(data, dojo.fromJson(cookie));
+				}
+				return data;
             });
         }
     } else if (dojo.global.location.href.indexOf("file:") == 0) {

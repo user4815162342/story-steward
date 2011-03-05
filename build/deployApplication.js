@@ -62,5 +62,5 @@ if (isRelTarget) {
     CreatePackage(list, scriptPath + "../deploy/" + filename + ".zip");
 }
 logger.info("Packages Created.");
-fileUtil.saveFile(scriptPath + "build-number.txt","" + (AppInfo.Version.Build++));
+fileUtil.saveFile(scriptPath + "build-number.txt", "" + (AppInfo.Version.Build + 1));
 logger.info("Build number incremented.")
