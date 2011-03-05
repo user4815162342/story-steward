@@ -6,6 +6,6 @@ You will find a demo version of Story Steward [http://townsedgetechnology.com/st
 
 = Details =
 
-The demo consists of exactly the same source code that would run on your machine. Because it is being served over the internet instead of off of your local drive, it does not have access to local files. However, you can open the sample database to get an idea of how it works. Changes in the sample database will not actually be saved.
+The demo consists of the same source code that would run on your machine. Because it is being served over the internet instead of off of your local drive, it does not have access to local files. However, you can open the sample database to get an idea of how it works. Changes in the sample database will not actually be saved.
 
 The version used for the demo may not be exactly the same version that is currently available on the downloads page, and there may be minor features available in one that are not available in the other.
