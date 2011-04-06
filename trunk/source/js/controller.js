@@ -180,6 +180,7 @@ var Controller = new function() {
             dojo.connect(this.ProjectData, "onEndSave", this, this._projectEndSave)
             dojo.connect(this.ProjectData, "onTitleChange", this, this._projectTitleChange);
             dojo.connect(this.ProjectData, "onDirtyChange", this, this._projectDirtyChange);
+            dojo.connect(this.ProjectData, "onMessage", this, this._projectMessage);
             dojo.connect(dojo.global, "onresize", this, this._windowResize);
             
             dojo.addOnBeforeUnload(dojo.hitch(this, function() {
@@ -1000,6 +1001,19 @@ var Controller = new function() {
         
     }
     
+    var msgTimeout = null;
+    
+    this._projectMessage = function(msg) {
+        if (msgTimeout) {
+            clearTimeout(msgTimeout);
+        }
+        dojo.byId("statusPanel-message").innerHTML = msg;
+        msgTimeout = setTimeout(dojo.hitch(this, function() {
+            dojo.byId("statusPanel-message").innerHTML = "";
+            msgTimeout = null;
+        }), 10000);
+    }
+    
     this._updateMRU = function() {
         var newUri = this.ProjectData.GetURI();
         var foundItem = false;
@@ -1102,7 +1116,7 @@ var Controller = new function() {
             }
         }
         this._destroyTrees();
-        dojo.byId("statusPanel-totalWordCount").innerHTML = "";
+        dojo.byId("statusPanel-totalWordCount").innerHTML = "Words: ?";
         
     }
     
@@ -1214,7 +1228,7 @@ var Controller = new function() {
             }),
             onComplete: function() {
                 // FUTURE: Is this really the right place to do this?
-                dojo.byId("statusPanel-totalWordCount").innerHTML = "Last Word Count: " + totalCount;
+                dojo.byId("statusPanel-totalWordCount").innerHTML = "Words: " + totalCount;
                 result.callback(totalCount);
             },
             onError: function(ex) {

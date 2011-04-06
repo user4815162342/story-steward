@@ -482,10 +482,14 @@ dojo.declare("my.ProjectData", null, {
     _createIOHandler: function(uriString) {
         var scheme = uriString.split('://')[0];
         if (my.ProjectData.Drivers.hasOwnProperty(scheme)) {
-            return my.ProjectData.Drivers[scheme](uriString, this);
+            return my.ProjectData.Drivers[scheme](uriString, this, dojo.hitch(this,this.onMessage));
         }
         return null;
     },
+	
+	onMessage: function(msg) {
+		// NOTE: This is only here for someone to listen to.
+	},
     
     _createNewProject: function(defaultName) {
         var now = new Date(); // for creating UID's.
@@ -1228,7 +1232,7 @@ my.ProjectData.Drivers = {
         return result;
     },
     
-    file: function(uriString, ProjectData) {
+    file: function(uriString, ProjectData, logCallback) {
     
         var FileIOHandler = function(uriString, httpFallback) {
         
@@ -1251,9 +1255,13 @@ my.ProjectData.Drivers = {
                     return this.clobStates[id];
                 }
             }
+			
+			this.displayMessage = function(message) {
+				// NOTE: Just an event to connect to.
+			}
             
             this._backup = function(CLOBid) {
-            
+                var me = this;
                 var lfa = my.LocalFileAccess;
                 var state = CLOBid ? backupState.getClobState(CLOBid) : backupState;
                 var copy = function(fromUri, toUri) {
@@ -1262,7 +1270,7 @@ my.ProjectData.Drivers = {
                     try {
                         lfa.copy(to, from);
                     } catch (ex) {
-                        console.log("Error backing up file [" + from + "] to [" + to + "]: " + ex);
+                        me.log("Error backing up file [" + from + "] to [" + to + "]: " + ex);
                         // don't do anything else, I want to let them try to save.
                     }
                 }
@@ -1300,6 +1308,13 @@ my.ProjectData.Drivers = {
 			
 			this.getUri = function() {
 				return paths.projectURI;
+			}
+			
+			this.log = function(msg) {
+				console.log(msg);
+				if (logCallback) {
+					logCallback(msg);
+				}
 			}
             
             // FUTURE: Possibly, set per-file permissions: http://www.mozilla.org/projects/security/components/per-file.html
@@ -1430,7 +1445,7 @@ my.ProjectData.Drivers = {
         
     },
     
-    http: function(uriString, ProjectData) {
+    http: function(uriString, ProjectData, logCallback) {
     
     
         var paths = my.ProjectData.Drivers._getStandardURIs(uriString);
@@ -1440,6 +1455,13 @@ my.ProjectData.Drivers = {
         
 			this.getUri = function() {
 				return paths.projectURI;
+			}
+            
+			this.log = function(msg) {
+				console.log(msg);
+				if (logCallback) {
+					logCallback(msg);
+				}
 			}
             
             this.load = function() {
@@ -1485,7 +1507,7 @@ my.ProjectData.Drivers = {
     },
     
     
-    sample: function(uriString, ProjectData) {
+    sample: function(uriString, ProjectData, logCallback) {
         var SampleDatabases = {
             TheDarkHorizon: function(readOnly) {
                 var now = new Date(); // for creating UID's.
@@ -1699,6 +1721,13 @@ my.ProjectData.Drivers = {
         
         var SampleIOHandler = function(databaseName, readonly) {
         
+			this.log = function(msg) {
+				console.log(msg);
+				if (logCallback) {
+					logCallback(msg);
+				}
+			}
+            
 			this.getUri = function() {
 				return uriString;
 			}

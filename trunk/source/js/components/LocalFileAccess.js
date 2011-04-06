@@ -250,9 +250,9 @@ dojo.getObject("my.LocalFileAccess", true);
                     var destfile = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile); //+
                     destfile.initWithPath(dest); //+
 					var destdir = destfile.parent; //+
-                    if (destfile.exists()) {
-						destfile.remove(false);
-					}
+                    if (destfile.exists()) { //+
+						destfile.remove(false); //+
+					} //+
 					srcfile.copyTo(destdir,destfile.leafName); //+
                 } catch (ex) { //+
                     throw "Can't copy file '" + source + "' to '" + dest + "': " + ex; //+
