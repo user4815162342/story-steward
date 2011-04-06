@@ -1262,7 +1262,7 @@ my.ProjectData.Drivers = {
                     try {
                         lfa.copy(to, from);
                     } catch (ex) {
-                        console.log("Error backing up file [" + fromFile + "] to [" + toFile + "]: " + ex);
+                        console.log("Error backing up file [" + from + "] to [" + to + "]: " + ex);
                         // don't do anything else, I want to let them try to save.
                     }
                 }

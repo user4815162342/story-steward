@@ -12,6 +12,7 @@
  they can be more easily differentiated from empty or missing file.
  3) Fall back to a manual copy of content if no copyFile is available on
  the driver.
+ 4) Added copyfile to mozilla driver.
  
  I've marked the code that has changed in a way that will make it easier to see
  with a diff program:
@@ -235,6 +236,30 @@ dojo.getObject("my.LocalFileAccess", true);
             }
             return null;
         },
+        copyFile: function(dest, source) { //+
+            // Returns false if source is not found, or true if successful //+
+            if (window.Components) { //+
+                try { //+
+                    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect"); //+
+                    var srcfile = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile); //+
+                    srcfile.initWithPath(source); //+
+                    if (!srcfile.exists()) //+ 
+                        return false; //+
+					// This works a little oddly, since I need to copy to the directory //+
+					// and filename, instead of just passing the filename. //+ 
+                    var destfile = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile); //+
+                    destfile.initWithPath(dest); //+
+					var destdir = destfile.parent; //+
+                    if (destfile.exists()) {
+						destfile.remove(false);
+					}
+					srcfile.copyTo(destdir,destfile.leafName); //+
+                } catch (ex) { //+
+                    throw "Can't copy file '" + source + "' to '" + dest + "': " + ex; //+
+                } //+
+            } //+
+            return true; //+
+        }, //+
         saveFile: function(filePath, content) {
             // Returns null if it can't do it, false if there's an error, true if it saved OK
             if (window.Components) {
