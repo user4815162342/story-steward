@@ -169,7 +169,7 @@ var Controller = new function() {
         
             document.title = ApplicationInfo.Title;
             
-            dojo.byId("statusPanel-appName").innerHTML = ApplicationInfo.Title + " " + ApplicationInfo.Version.Major + "." + ApplicationInfo.Version.Minor + "." + ApplicationInfo.Version.Build + "." + ApplicationInfo.Version.Revision;
+            dojo.byId("statusPanel-appName").innerHTML = ApplicationInfo.Title + " " + ApplicationInfo.Version.Major + "." + ApplicationInfo.Version.Minor + "." + ApplicationInfo.Version.Revision;
             
             this.ProjectData = new my.ProjectData();
             
@@ -1767,6 +1767,7 @@ dojo.addOnLoad(function() {
         dojo.require("dijit._TimePicker");
 		dojo.require("dojox.editor.plugins.TablePlugins");
 		dojo.require("dojox.editor.plugins.PrettyPrint");
+		dojo.require("dojo.io.script");
         dojo.require("my.Editors");
         
         

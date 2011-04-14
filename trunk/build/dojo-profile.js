@@ -66,7 +66,8 @@ dependencies = {
 		   "dojox.charting.widget.Chart2D",
 		   "dojox.charting.themes.Distinctive",
 		   "dojox.editor.plugins.TablePlugins",
-		   "dojox.editor.plugins.PrettyPrint"
+		   "dojox.editor.plugins.PrettyPrint",
+		   "dojo.io.script"
 		    ]
     
     }],

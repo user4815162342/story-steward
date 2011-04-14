@@ -36,7 +36,6 @@ var AppInfoText =
 "	Version: {\n" + 
 "		Major: \"" + AppInfo.Version.Major + "\",\n" + 
 "		Minor: \"" + AppInfo.Version.Minor + "\",\n" + 
-"		Build: \""+ AppInfo.Version.Build + "\",\n" + 
 "		Revision: \"" + AppInfo.Version.Revision + "\"\n" + 
 "	}\n" + 
 "}\n";
