@@ -10,6 +10,8 @@ dojo.getObject("my.Settings", true);
         return location + "/" + filename;
         
     }
+	
+	var defaultSettings = '{"recentProjects":[{"uri":"sample://TheDarkHorizon"}]}';
     
     var driver = {
         saveSerialized: function(content) {
@@ -30,7 +32,8 @@ dojo.getObject("my.Settings", true);
         driver.cookieName = "usersettings";
         driver.fileUri = getSiblingUri("usersettings.json");
         driver.loadObject = function() {
-            return dojo.xhrGet({
+			var result = new dojo.Deferred();
+            dojo.xhrGet({
                 url: driver.fileUri,
                 handleAs: "json",
             }).then(function(data) {
@@ -38,8 +41,15 @@ dojo.getObject("my.Settings", true);
 				if (cookie) {
 					dojo.mixin(data, dojo.fromJson(cookie));
 				}
-				return data;
-            });
+				result.callback(data);
+            }, function(ex,ioargs) {
+				if (ioargs.xhr.status == 404) {
+					result.callback(defaultSettings);					
+				} else {
+					result.errback(ex);
+				}
+			});
+			return result;
         }
     } else if (dojo.global.location.href.indexOf("file:") == 0) {
         driver.filePath = my.LocalFileAccess.convertUriToLocalPath(getSiblingUri("usersettings.json"));
@@ -47,7 +57,11 @@ dojo.getObject("my.Settings", true);
 			my.LocalFileAccess.save(driver.filePath,content)
         }
         driver.loadSerialized = function() {
-            return my.LocalFileAccess.load(driver.filePath);
+			var result = my.LocalFileAccess.load(driver.filePath);
+			if (result == null) {
+				result = defaultSettings;
+			} 
+            return result;
         }
         
     }
