@@ -1765,6 +1765,8 @@ dojo.addOnLoad(function() {
         dojo.require("dijit.form.DropDownButton");
         dojo.require("dijit.Calendar");
         dojo.require("dijit._TimePicker");
+		dojo.require("dojox.editor.plugins.TablePlugins");
+		dojo.require("dojox.editor.plugins.PrettyPrint");
         dojo.require("my.Editors");
         
         
