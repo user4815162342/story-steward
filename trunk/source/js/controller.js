@@ -201,7 +201,6 @@ var Controller = new function() {
             });
             openProjectCombo.set('store', mruStore);
             
-            
             dojo.when(my.Settings.get(), function(data) {
                 userSettings = data;
                 // load recent projects...
