@@ -28,7 +28,7 @@ dojo.declare("my.MemoEditor", [dijit.Editor], {
     
     plugins: [{
         name: 'dijit._editor.plugins.EnterKeyHandling',
-        blockModeForEnter: 'P'
+        blockNodeForEnter: 'P'
     }, 'prettyPrint', 'dijit._editor.plugins.AlwaysShowToolbar', 'undo', 'redo', '|', 'cut', 'copy', 'paste', '|', 'bold', 'italic'],
     
     _setValueAttr: function(value) {
@@ -103,7 +103,7 @@ dojo.declare("my.NoteEditor", [dijit.Editor], {
 
     plugins: [{
         name: 'dijit._editor.plugins.EnterKeyHandling',
-        blockModeForEnter: 'P'
+        blockNodeForEnter: 'P'
     }, 'prettyPrint', 'dijit._editor.plugins.AlwaysShowToolbar', 'undo', 'redo', '|', 'cut', 'copy', 'paste', '|', 'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'foreColor', 'hiliteColor', 'removeFormat', '|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'insertHorizontalRule', '|', 'justifyLeft', 'justifyRight', 'justifyCenter', 'justifyFull', '|', 'createLink', 'unlink', 'insertImage', '|', {
         name: 'dojox.editor.plugins.TablePlugins',
         command: 'insertTable'
@@ -139,7 +139,7 @@ dojo.declare("my.ContentEditor", [dijit.Editor], {
 
     plugins: [{
         name: 'dijit._editor.plugins.EnterKeyHandling',
-        blockModeForEnter: 'P'
+        blockNodeForEnter: 'P'
     }, 'prettyPrint', 'dijit._editor.plugins.AlwaysShowToolbar', 'undo', 'redo', '|', 'cut', 'copy', 'paste', '|', 'bold', 'italic', 'underline', 'strikethrough', 'hiliteColor', 'removeFormat', '|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', '|', 'fullscreen']
 
 });
