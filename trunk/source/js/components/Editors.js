@@ -16,6 +16,8 @@ dojo.require("dijit._editor.plugins.AlwaysShowToolbar");
 dojo.require("dijit._editor.plugins.LinkDialog");
 dojo.require("dijit._editor.plugins.TextColor");
 dojo.require("dijit._editor.plugins.FullScreen");
+dojo.require("dojox.editor.plugins.TablePlugins");
+dojo.require("dojox.editor.plugins.PrettyPrint");
 dojo.declare("my.MemoEditor", [dijit.Editor], {
 
     charLimit: 1000,
@@ -27,7 +29,7 @@ dojo.declare("my.MemoEditor", [dijit.Editor], {
     plugins: [{
         name: 'dijit._editor.plugins.EnterKeyHandling',
         blockModeForEnter: 'P'
-    }, 'dijit._editor.plugins.AlwaysShowToolbar', 'undo', 'redo', '|', 'cut', 'copy', 'paste', '|', 'bold', 'italic'],
+    }, 'prettyPrint', 'dijit._editor.plugins.AlwaysShowToolbar', 'undo', 'redo', '|', 'cut', 'copy', 'paste', '|', 'bold', 'italic'],
     
     _setValueAttr: function(value) {
         this.inherited(arguments);
@@ -47,14 +49,14 @@ dojo.declare("my.MemoEditor", [dijit.Editor], {
     // actually enforcing this limit. This is to prevent the description from being used for huge
     // amounts of notes, causing the project file to get too large and unwieldly, and the UI to
     // get ugly.
-	// NOTE: Naturally, this character limit is not exact, as the number also includes all of the
-	// html tags included as well. Although, since it still represents memory size, that should
-	// be appropriate, right? 
+    // NOTE: Naturally, this character limit is not exact, as the number also includes all of the
+    // html tags included as well. Although, since it still represents memory size, that should
+    // be appropriate, right? 
     // FUTURE: Future versions may actually enforce this limit, or it may remove this limit 
     // and find another way around the potential issues (fallback to clob?)    
     validate: function(text) {
         if ((text || this.get('value')).length > this.charLimit) {
-			this.validationMessage = "More than about " + this.charLimit + " characters in this field may be lost."; 
+            this.validationMessage = "More than about " + this.charLimit + " characters in this field may be lost.";
             this.displayMessage(this.validationMessage);
             if (this.editorObject) {
                 var content = (this.editorObject.contentWindow || this.editorObject.contentDocument);
@@ -65,7 +67,7 @@ dojo.declare("my.MemoEditor", [dijit.Editor], {
                 
             }
         } else {
-			this.validationMessage = "";
+            this.validationMessage = "";
             this.displayMessage(this.validationMessage);
             if (this.editorObject) {
                 var content = (this.editorObject.contentWindow || this.editorObject.contentDocument);
@@ -84,16 +86,16 @@ dojo.declare("my.MemoEditor", [dijit.Editor], {
     },
     
     _onBlur: function() {
-		this.inherited(arguments);
+        this.inherited(arguments);
         this.displayMessage('');
     },
-	
-	_onFocus: function() {
-		this.inherited(arguments);
-		this.displayMessage(this.validationMessage);
-	}
-	
-	
+    
+    _onFocus: function() {
+        this.inherited(arguments);
+        this.displayMessage(this.validationMessage);
+    }
+    
+    
     
 });
 
@@ -102,7 +104,34 @@ dojo.declare("my.NoteEditor", [dijit.Editor], {
     plugins: [{
         name: 'dijit._editor.plugins.EnterKeyHandling',
         blockModeForEnter: 'P'
-    }, 'dijit._editor.plugins.AlwaysShowToolbar', 'undo', 'redo', '|', 'cut', 'copy', 'paste', '|', 'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'foreColor', 'hiliteColor', 'removeFormat', '|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'insertHorizontalRule', '|', 'justifyLeft', 'justifyRight', 'justifyCenter', 'justifyFull', '|', 'createLink', 'unlink', 'insertImage', '|', 'fullscreen']
+    }, 'prettyPrint', 'dijit._editor.plugins.AlwaysShowToolbar', 'undo', 'redo', '|', 'cut', 'copy', 'paste', '|', 'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'foreColor', 'hiliteColor', 'removeFormat', '|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'insertHorizontalRule', '|', 'justifyLeft', 'justifyRight', 'justifyCenter', 'justifyFull', '|', 'createLink', 'unlink', 'insertImage', '|', {
+        name: 'dojox.editor.plugins.TablePlugins',
+        command: 'insertTable'
+    }, {
+        name: 'dojox.editor.plugins.TablePlugins',
+        command: 'modifyTable'
+    }, {
+        name: 'dojox.editor.plugins.TablePlugins',
+        command: 'InsertTableRowBefore'
+    }, {
+        name: 'dojox.editor.plugins.TablePlugins',
+        command: 'InsertTableRowAfter'
+    }, {
+        name: 'dojox.editor.plugins.TablePlugins',
+        command: 'insertTableColumnBefore'
+    }, {
+        name: 'dojox.editor.plugins.TablePlugins',
+        command: 'insertTableColumnAfter'
+    }, {
+        name: 'dojox.editor.plugins.TablePlugins',
+        command: 'deleteTableRow'
+    }, {
+        name: 'dojox.editor.plugins.TablePlugins',
+        command: 'deleteTableColumn'
+    }, {
+        name: 'dojox.editor.plugins.TablePlugins',
+        command: 'tableContextMenu'
+    }, '|', 'fullscreen']
 
 });
 
@@ -111,6 +140,6 @@ dojo.declare("my.ContentEditor", [dijit.Editor], {
     plugins: [{
         name: 'dijit._editor.plugins.EnterKeyHandling',
         blockModeForEnter: 'P'
-    }, 'dijit._editor.plugins.AlwaysShowToolbar', 'undo', 'redo', '|', 'cut', 'copy', 'paste', '|', 'bold', 'italic', 'underline', 'strikethrough', 'hiliteColor', 'removeFormat', '|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', '|', 'fullscreen']
+    }, 'prettyPrint', 'dijit._editor.plugins.AlwaysShowToolbar', 'undo', 'redo', '|', 'cut', 'copy', 'paste', '|', 'bold', 'italic', 'underline', 'strikethrough', 'hiliteColor', 'removeFormat', '|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', '|', 'fullscreen']
 
 });

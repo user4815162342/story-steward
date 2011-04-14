@@ -64,7 +64,9 @@ dependencies = {
 		   "dijit.ProgressBar",
 		   "dojox.gfx.svg", // Apparently required for Chart2D, but loaded dynamically.
 		   "dojox.charting.widget.Chart2D",
-		   "dojox.charting.themes.Distinctive"
+		   "dojox.charting.themes.Distinctive",
+		   "dojox.editor.plugins.TablePlugins",
+		   "dojox.editor.plugins.PrettyPrint"
 		    ]
     
     }],
