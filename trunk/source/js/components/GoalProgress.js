@@ -1,19 +1,14 @@
 /*
-   Copyright 2011 Neil M. Sheldon
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
-
+ Copyright 2011 Neil M. Sheldon
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
  */
 dojo.provide("my.GoalProgress");
 dojo.require("dijit._Widget");
@@ -37,7 +32,7 @@ dojo.declare("my.GoalProgress", [dijit.layout.ContentPane, dijit._Templated], {
     postCreate: function() {
         this.inherited(arguments);
     },
-    
+	
     _dataItemSetValues: function(newValues, attribute) {
     
         // only update if fields we are interested are changed.
@@ -86,7 +81,7 @@ dojo.declare("my.GoalProgress", [dijit.layout.ContentPane, dijit._Templated], {
             }
         }
         
-        var currentDay = dojo.date.difference(starting, null, "day");
+        var currentDay = dojo.date.difference(starting, null, "day") - 1;
         
         // look for an 'ending' date. If one isn't set, the goal 'ends' on the
         // last day of the history, or the starting date if there is no history.
@@ -128,10 +123,17 @@ dojo.declare("my.GoalProgress", [dijit.layout.ContentPane, dijit._Templated], {
             } else {
                 yesterday = today;
                 today = history[i];
-                if ((i == currentDay) && (history[i].actual < history[i].suggested)) {
-                    history[i].required = moreRequired && Math.round(history[i].actual + (Math.max(targetWords - history[i].actual, 0) / remainingDays));
-                    if (!requiredDailyCount && history[i].required) {
-                        requiredDailyCount = Math.round(Math.max(targetWords - history[i].actual, 0) / remainingDays);
+                if (i == currentDay) {
+                    if (history[i].actual < history[i].suggested) {
+                        history[i].required = moreRequired && Math.min(history[i].suggested,Math.round(history[i].actual + (Math.max(targetWords - history[i].actual, 0) / remainingDays)));
+                        if (!requiredDailyCount && history[i].required) {
+                            requiredDailyCount = Math.round(Math.max(targetWords - history[i].actual, 0) / remainingDays);
+                        }
+                    } else {
+                        history[i].required = moreRequired && history[i].suggested;
+                        if (!requiredDailyCount && history[i].required) {
+                            requiredDailyCount = Math.round(Math.max(targetWords - history[i].actual, 0) / remainingDays);
+                        }
                     }
                 } else {
                     history[i].required = null;
