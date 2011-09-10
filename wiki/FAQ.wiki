@@ -64,7 +64,7 @@ If I were to charge for this software, it would probably be as low as $10 or $20
 
 I have considered the possibility of some day charging for the software, which is one reason why I placed it under the Apache license instead of GPL. This would only happen after the software has matured, and gained the popularity it needs to allow me to charge.
 
-But, don't worry. Because I chose the Apache license, it will be easy for anyone who wants to grab the last "free" version and continue to distribute it, or even create a new project that would remain free. I promise that I'll give ample warning.
+But, don't worry. Because I chose the Apache license, it will be easy for anyone who wants to to grab the last "free" version and continue to distribute it, or even create a new project that would remain free. I promise that I'll give ample warning.
 
 === Why is it open source? ===
 
