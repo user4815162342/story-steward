@@ -1,0 +1,7 @@
+#summary Answers some questions you may already have
+
+= Introduction =
+
+Technically, most of these questions haven't actually been asked yet. However, these are some questions which I imagine other people may have about this project.
+
+= Details =
