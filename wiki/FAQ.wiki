@@ -5,3 +5,7 @@
 Technically, most of these questions haven't actually been asked yet. However, these are some questions which I imagine other people may have about this project.
 
 = Details =
+
+=== Why should I use this instead of a Word Processor? ===
+
+=== Why should I use this instead of (Some other novel writing software package I've heard about)? ===
