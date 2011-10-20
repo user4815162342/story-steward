@@ -24,6 +24,7 @@ var isRelTarget = arguments[2] == 1;
 
 buildScriptsPath = typeof buildScriptsPath == "undefined" ? scriptPath + "../vendor/dojo/util/buildscripts/" : buildScriptsPath;
 load(buildScriptsPath + "jslib/fileUtil.js");
+load(scriptPath + "fixFileUtil.js")
 load(buildScriptsPath + "jslib/logger.js");
 
 function cleanOutputDir(path) {

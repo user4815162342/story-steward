@@ -7,6 +7,6 @@ CurrentVersionInfo = {
 	Version: {
 		Major: "0",
 		Minor: "9",
-		Revision: "40"
+		Revision: "56M"
 	}
 }

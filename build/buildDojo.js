@@ -15,6 +15,9 @@
 
 
  */
+
+// TODO: The following link adds some stuff to the build process which might help:
+// http://asmodehn.wordpress.com/2011/09/07/dojo-toolkit-slim-build/
 var scriptPath = arguments[0];
 if (scriptPath.indexOf("/") == -1) {
     scriptPath = scriptPath.replace(/\\/g, "/");
@@ -37,6 +40,8 @@ if (isDevTarget || isRelTarget) {
     // FUTURE: Pre-build, perhaps go through source and find dojo.requires and build 
     // my own profile file.
 }
+
+
 /*
  * NOTE: Yes, I'm aware of rhino's runCommand. The problem is that that function does
  * not support setting the working directory. What I've done here to support these things

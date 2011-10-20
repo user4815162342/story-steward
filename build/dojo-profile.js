@@ -21,6 +21,7 @@ dependencies = {
 		// NOTE: I need to put this in a separate layer to ensure that I can
 		// include the dojofixup stuff prior to loading my required files.
         name: "my-dojo.js",
+		localeList: "en-gb,en-us",
         dependencies: [
 		   "dojo.parser", 
 		   "dijit.Dialog", 
