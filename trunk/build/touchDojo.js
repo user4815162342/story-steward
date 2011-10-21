@@ -26,11 +26,50 @@ var isRelTarget = arguments[2] == 1;
 
 buildScriptsPath = typeof buildScriptsPath == "undefined" ? scriptPath + "../vendor/dojo/util/buildscripts/" : buildScriptsPath;
 load(buildScriptsPath + "jslib/logger.js");
-load(scriptPath + "runprocess.js");
+//load(scriptPath + "runprocess.js");
 
+var sourcePath = scriptPath + "../vendor/dojo/";
+
+var excludeFiles = /(?:dijit\/themes\/tundra\/tundra\.css|dojo\/dojo\.js)$/
+
+var synchronizeTimestamps = function(source,dest,path,dirsAreJavaObjects) {
+
+
+    if (!dirsAreJavaObjects) {
+		source = new java.io.File(source);
+		dest = new java.io.File(dest);
+	}
+	path = path || "";
+	
+	if (source.getName().match(/^\./)) {
+		return;
+	}
+	
+	if (path && path.match(excludeFiles)) {
+		logger.info("Skipping " + path);
+		return;
+	}
+	
+	if (source.exists() && dest.exists()) {
+		if (source.isDirectory() && !source.getName().match(/^\./)) {
+			if (dest.isDirectory() && !source.getName().match(/^\./)) {
+				var files = source.listFiles();
+				for (var i = 0; i < files.length; i++) {
+					var file = files[i];
+					var name = file.getName();
+					synchronizeTimestamps(file,new java.io.File(dest,name),path + "/" + name,true);
+				}
+			}
+		} else if (!dest.isDirectory()) {
+//			logger.info("Synchronizing " + path);
+            dest.setLastModified(source.lastModified());
+		} 
+	}
+
+}
 
 /* First, figure out what OS this is on */
-var os = java.lang.System.getProperty("os.name");
+/*var os = java.lang.System.getProperty("os.name");
 var postBuildScript = ""
 var rsyncPathBase = scriptPath.substring(0,scriptPath.lastIndexOf("/",scriptPath.length - 2));
 
@@ -45,15 +84,17 @@ if (os.indexOf("Win") >= 0) {
 	// *nix: if  (os.indexOf( "nix") >=0 || os.indexOf( "nux") >=0)
     // although I suspect rsync will be in the path on either one.
  	throw "Build script not ready for this operating system (" + os + ") yet."
-}
+}*/
 
 if (isDevTarget) {
-    logger.info("Touching dojo for development");
-	RunProcess([postBuildScript, rsyncPathBase + "/vendor/dojo/", rsyncPathBase + "/development/js/dojo/"],scriptPath)
+    logger.info("Touching dojo for development...");
+	//RunProcess([postBuildScript, rsyncPathBase + "/vendor/dojo/", rsyncPathBase + "/development/js/dojo/"],scriptPath)
+	synchronizeTimestamps(sourcePath,scriptPath + "../development/js/dojo/");
 }
 if (isRelTarget) {
-    logger.info("Touching dojo for release");
-	RunProcess([postBuildScript, rsyncPathBase + "/vendor/dojo/", rsyncPathBase + "/release/js/dojo/"],scriptPath)
+    logger.info("Touching dojo for release...");
+	//RunProcess([postBuildScript, rsyncPathBase + "/vendor/dojo/", rsyncPathBase + "/release/js/dojo/"],scriptPath)
+	synchronizeTimestamps(sourcePath,scriptPath + "../release/js/dojo/");
 }
-logger.info("Dojo built.")
+logger.info("Dojo touched.")
 

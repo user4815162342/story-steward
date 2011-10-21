@@ -72,6 +72,11 @@ goto :EOF
 :justdojo
 rem just build dojo, no shrinking
 java -classpath ../vendor/dojo/util/shrinksafe/js.jar org.mozilla.javascript.tools.shell.Main buildDojo.js %~dp0 %devtarget% %reltarget%
+goto :EOF
+
+:justshrink
+java -classpath ../vendor/dojo/util/shrinksafe/js.jar org.mozilla.javascript.tools.shell.Main shrinkDojo.js %~dp0 %shrinkdev% %reltarget%
+goto :EOF
 
 :clean
 java -classpath ../vendor/dojo/util/shrinksafe/js.jar org.mozilla.javascript.tools.shell.Main cleanApplication.js %~dp0 %devtarget% %reltarget%

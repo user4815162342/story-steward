@@ -85,7 +85,7 @@ function shrinkDojo(target) {
 	
 	deleteAllBut(dojopath,"dojox/grid/",/^(?:resources)$/)
 	deleteAllBut(dojopath,"dojox/grid/resources/",/^(?:images|Grid.css|tundraGrid.css)$/)
-    logger.info("Dojo shrunken for " + target + ".");
+	logger.info("Dojo shrunken for " + target + ".");
     
 }
 
