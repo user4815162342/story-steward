@@ -68,32 +68,13 @@ var synchronizeTimestamps = function(source,dest,path,dirsAreJavaObjects) {
 
 }
 
-/* First, figure out what OS this is on */
-/*var os = java.lang.System.getProperty("os.name");
-var postBuildScript = ""
-var rsyncPathBase = scriptPath.substring(0,scriptPath.lastIndexOf("/",scriptPath.length - 2));
-
-if (os.indexOf("Win") >= 0) {
-	// windows
-	postBuildScript = "rsyncDojo.bat"
-	if (rsyncPathBase.indexOf(":") == 1) {
-		rsyncPathBase = "/cygdrive/" + rsyncPathBase.substring(0,1).toLowerCase() + rsyncPathBase.substring(2);
-	}
-} else {
-	// mac: if (os.indexOf( "mac" ) >= 0);
-	// *nix: if  (os.indexOf( "nix") >=0 || os.indexOf( "nux") >=0)
-    // although I suspect rsync will be in the path on either one.
- 	throw "Build script not ready for this operating system (" + os + ") yet."
-}*/
 
 if (isDevTarget) {
     logger.info("Touching dojo for development...");
-	//RunProcess([postBuildScript, rsyncPathBase + "/vendor/dojo/", rsyncPathBase + "/development/js/dojo/"],scriptPath)
 	synchronizeTimestamps(sourcePath,scriptPath + "../development/js/dojo/");
 }
 if (isRelTarget) {
     logger.info("Touching dojo for release...");
-	//RunProcess([postBuildScript, rsyncPathBase + "/vendor/dojo/", rsyncPathBase + "/release/js/dojo/"],scriptPath)
 	synchronizeTimestamps(sourcePath,scriptPath + "../release/js/dojo/");
 }
 logger.info("Dojo touched.")
