@@ -5,7 +5,7 @@ SET HOME=%APPDATA%
 SET CWOLDPATH=%PATH%
 SET PATH=%CWRSYNCHOME%\BIN;%PATH%
 
-SET BASEOPTS=-vrtO --progress --existing
+SET BASEOPTS=-vrtO --progress --existing --dry-run
 REM -v, --verbose               increase verbosity
 REM -r, --recursive             recurse into directories
 REM -t, --times                 preserve modification times
