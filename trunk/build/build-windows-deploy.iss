@@ -4,9 +4,15 @@
 ;
 ; SEE THE INNO-SETUP DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
+; If this is defined by command line params, then we don't need to override it.
+; NOTE: If it's not defined at the command line, it won't include the SVN data.
+#if Defined(MyAppVersion)
+#else
+  #define MyAppVersion "0.9"
+#endif
+
 ; Macros, change to your needs
 #define MyAppName "Story Steward"
-#define MyAppVersion "0.9"
 ; NMS: TODO: Not sure what to put here, yet, was "My Company, Inc."
 #define MyAppPublisher ""
 #define MyAppURL "http://code.google.com/p/story-steward/"
@@ -17,26 +23,6 @@
 #define MyFirefoxInstDir = "..\vendor\webrunner-components\firefox-6.0.2"
 #define MyWebAppHomeDir = "..\vendor\webrunner-components\story.steward@webrunner.app"
 #define MyStoryStewardReleaseDir = "..\release"
-
-; The process for getting the revision number. Unfortunately, there's no 'pipe'.
-#define _revisionCheck = Exec("revision.bat")
-#if _revisionCheck
-  #error Could not get svn revision number
-#else
-; Mark file for deletion
-  #expr DeleteFile("revision.txt")
-  #undef _revisionCheck
-#endif
-#define _revisionFile = FileOpen("revision.txt")
-#if _revisionFile
-  #define _revisionText = FileRead(_revisionFile)
-  #expr FileClose(_revisionFile)
-  #undef _revisionFile
-  #define MyAppRevision = Trim(_revisionText)
-  #undef _revisionText
-#else
-  #error Could not open revision number file
-#endif
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -51,13 +37,17 @@ AppSupportURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir={#MySetupOutputDir}
-OutputBaseFilename=StorySteward-{#MyAppVersion}.{#MyAppRevision}-windows
+; NMS: The build process specifies the output file, with version numbers, from command
+; line. If these are not set, then we are probably just 'testing' the compile. We don't
+; want this output.
+OutputBaseFilename=delete-me-inno-setup-test
 Compression=lzma2
 SolidCompression=yes
 PrivilegesRequired=none
 
 [Languages]
 Name: english; MessagesFile: compiler:Default.isl
+; NMS: I don't support German in the app yet, so I shouldn't support it in the install.
 ;Name: german; MessagesFile: compiler:Languages\German.isl
 
 [Tasks]
@@ -78,9 +68,10 @@ Source: {#MyWebAppHomeDir}\profile\extensions\webrunner@salsitasoft.com\stub\app
 Source: {#MyStoryStewardReleaseDir}\*; Flags: recursesubdirs ignoreversion; DestDir: {app}\storysteward
 
 [Icons]
-Name: {group}\{#MyAppName}; Filename: {app}\webapp\stub\webrunner.exe; Parameters: "-webapp ""{app}\webapp"""; WorkingDir: {app}; IconFilename: {app}\webapp\icons\default\main-window.ico; IconIndex: 0
-Name: {group}\{cm:UninstallProgram,{#MyAppName}}; Filename: {uninstallexe}
-Name: {commondesktop}\{#MyAppName}; Filename: {app}\webapp\stub\webrunner.exe; Tasks: desktopicon; Parameters: "-webapp ""{app}\webapp"""; WorkingDir: {app}; IconFilename: {app}\webapp\icons\default\main-window.ico; IconIndex: 0
+Name: {userprograms}\{groupname}\{#MyAppName}; Filename: {app}\webapp\stub\webrunner.exe; Parameters: "-webapp ""{app}\webapp"""; WorkingDir: {app}; IconFilename: {app}\webapp\icons\default\main-window.ico; IconIndex: 0
+Name: {userprograms}\{groupname}\{cm:UninstallProgram,{#MyAppName}}; Filename: {uninstallexe}
+Name: {userdesktop}\{#MyAppName}; Filename: {app}\webapp\stub\webrunner.exe; Tasks: desktopicon; Parameters: "-webapp ""{app}\webapp"""; WorkingDir: {app}; IconFilename: {app}\webapp\icons\default\main-window.ico; IconIndex: 0
+Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}; Filename: {app}\webapp\stub\webrunner.exe; Tasks: quicklaunchicon; Parameters: "-webapp ""{app}\webapp"""; WorkingDir: {app}; IconFilename: {app}\webapp\icons\default\main-window.ico; IconIndex: 0
 
 [Run]
 Filename: {app}\webapp\stub\webrunner.exe; Description: {cm:LaunchProgram,{#MyAppName}}; Flags: nowait postinstall skipifsilent; Parameters: "-webapp ""{app}\webapp"""; WorkingDir: {app}
