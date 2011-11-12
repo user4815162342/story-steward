@@ -1739,7 +1739,7 @@ dojo.addOnLoad(function() {
         // (i.e. dojo is retrieved from it's primary site instead) then
         // we have to make sure everything's loaded before we do the other
         // stuff.
-        dojo.registerModulePath("my", "../../components")
+        dojo.registerModulePath("my", "../my")
         
         dojo.require("dojo.parser");
         dojo.require("dijit.Dialog");
@@ -1767,10 +1767,10 @@ dojo.addOnLoad(function() {
 		dojo.require("dojox.editor.plugins.TablePlugins");
 		dojo.require("dojox.editor.plugins.PrettyPrint");
 		dojo.require("dojo.io.script");
-        dojo.require("my.Editors");
         
         
         // app-specific widgets.
+        dojo.require("my.Editors");
         dojo.require("my.LocalFileAccess");
         dojo.require("my.Settings");
         dojo.require("my.ProjectData")

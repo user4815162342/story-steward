@@ -20,26 +20,34 @@ dependencies = {
     layers: [{
 		// NOTE: I need to put this in a separate layer to ensure that I can
 		// include the dojofixup stuff prior to loading my required files.
-        name: "my-dojo.js",
+        name: "dojo-core.js",
 		localeList: "en-gb,en-us",
         dependencies: [
 		   "dojo.parser", 
+		   "dojo.data.ItemFileWriteStore",
+		   "dojo.date.locale",
+		   "dojo.data.ItemFileReadStore",
+		   "dojo.io.script"
+		    ]
+    
+    },{
+        name: "dijit.js",
+		layerDependencies: ["dojo-core.js"],
+		localeList: "en-gb,en-us",
+        dependencies: [
 		   "dijit.Dialog", 
 		   "dijit.layout.BorderContainer", 
 		   "dijit.layout.ContentPane", 
 		   "dijit.layout.AccordionContainer", 
 		   "dijit.layout.TabContainer",
 		   "dijit.Toolbar",
-		   "dojo.data.ItemFileWriteStore",
 		   "dijit.tree.ForestStoreModel",
 		   "dijit.Tree",
 		   "dijit.Declaration",
-		   "dojox.json.schema",
 		   "dijit.form.DropDownButton",
 		   "dijit.Menu",
 		   "dijit.tree.dndSource",
 		   "dijit.TitlePane",
-		   "dojox.grid.EnhancedGrid",
 		   "dijit._Widget",
 		   "dijit._Templated",
 		   "dijit.InlineEditBox",
@@ -52,17 +60,24 @@ dependencies = {
 		   "dijit.Calendar",
 		   "dijit._TimePicker",
 		   "dijit.form.HorizontalSlider",
-		   "dojo.date.locale",
 		   "dijit.Editor",
 		   "dijit._editor.plugins.AlwaysShowToolbar",
 		   "dijit._editor.plugins.LinkDialog",
 		   "dijit._editor.plugins.TextColor",
 		   "dijit._editor.plugins.FullScreen",
-		   "dojo.data.ItemFileReadStore",
 		   "dijit.form.MultiSelect",
 		   "dijit.form.ToggleButton",
 		   "dijit.form.ComboBox",
-		   "dijit.ProgressBar",
+		   "dijit.ProgressBar"
+		    ]
+    
+    },{
+        name: "dojox.js",
+		layerDependencies: ["dojo-core.js","dijit.js"],
+		localeList: "en-gb,en-us",
+        dependencies: [
+		   "dojox.json.schema",
+		   "dojox.grid.EnhancedGrid",
 		   "dojox.gfx.svg", // Apparently required for Chart2D, but loaded dynamically.
 		   "dojox.charting.widget.Chart2D",
 		   "dojox.charting.themes.Distinctive",

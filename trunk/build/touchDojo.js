@@ -30,7 +30,7 @@ load(buildScriptsPath + "jslib/logger.js");
 
 var sourcePath = scriptPath + "../vendor/dojo/";
 
-var excludeFiles = /(?:dijit\/themes\/tundra\/tundra\.css|dojo\/dojo\.js)$/
+var excludeFiles = /(?:dijit\/themes\/tundra\/tundra\.css|dojo\/dojo\.js|dojo\/dijit\.js|dojo\/dojox\.js|dojo\/dojo-core\.js|dojo\/storysteward\.js)$/
 
 var synchronizeTimestamps = function(source,dest,path,dirsAreJavaObjects) {
 

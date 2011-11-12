@@ -22,7 +22,6 @@ load(buildScriptsPath + "jslib/fileUtil.js");
 load(scriptPath + "fixFileUtil.js")
 load(buildScriptsPath + "jslib/logger.js");
 load(scriptPath + "fileIterator.js");
-load(scriptPath + "dojo-profile.js");
 
 // NOTE: Change these to add more possible locales
 var nlsMatch = /_(?:en|en-us|en-gb)\.js$/
@@ -46,10 +45,11 @@ function deleteAllBut(base,path,keepFiles,removeFiles,dryRun) {
 }
 
 function shrinkDojo(target) {
+    load(scriptPath + "dojo-profile-" + target + ".js");
     var dojopath = scriptPath + "../" + target + "/js/dojo/";
 	var nlsKeep = /^(?:.*_en\.js|.*_en-gb\.js|.*_en-us\.js|en|en-gb|en-us)$/;
 
-    deleteAllBut(dojopath,"dojo/",/^(?:dojo\.js|my-dojo\.js|LICENSE|build\.txt|resources|nls)$/);    
+    deleteAllBut(dojopath,"dojo/",/^(?:dojo\.js|dojo-core\.js|storysteward\.js|dijit\.js|dojox\.js|LICENSE|build\.txt|resources|nls)$/);    
     deleteAllBut(dojopath,"dojo/resources/",/^(?:dojo\.css|LICENSE)$/,/\.(?:js|css)$/);
 	deleteAllBut(dojopath,"dojo/nls/",nlsKeep);
 
@@ -85,6 +85,12 @@ function shrinkDojo(target) {
 	
 	deleteAllBut(dojopath,"dojox/grid/",/^(?:resources)$/)
 	deleteAllBut(dojopath,"dojox/grid/resources/",/^(?:images|Grid.css|tundraGrid.css)$/)
+	
+	if (target == "release") {
+		logger.info("deleting my components");
+		fileUtil.deleteFile(dojopath + "my");
+	}
+	
 	logger.info("Dojo shrunken for " + target + ".");
     
 }
