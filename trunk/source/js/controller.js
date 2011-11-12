@@ -366,17 +366,16 @@ var Controller = new function() {
                 type = this.ProjectData.ProjectStore.getValue(item, "subtype", "");
             }
             if (this.ProjectData.TypeLookup.hasOwnProperty(type)) {
-                var form = this.ProjectData.TypeLookup[type].form;
-                var args = {
+				var screen = this.ProjectData.TypeLookup[type].screenComponent;
+				var args = {
                     dataItem: item,
                     dataStore: this.ProjectData.ProjectStore,
                     closable: true,
-                    form: form,
                     title: this.ProjectData.TypeLookup[type].typeLabel,
                     iconClass: this.ProjectData.TypeLookup[type].iconClass,
                     bindScope: this
                 }
-                // NOTE: Putting a wait here because this is a slow process, and I want
+				// NOTE: Putting a wait here because this is a slow process, and I want
                 // some visual indication. Even though the dialog never actually shows up 
                 // because it's so quick.
                 // FUTURE: The thing that will really speed up the process, I think, is
@@ -384,7 +383,7 @@ var Controller = new function() {
                 // being loaded at runtime.
                 var wait = this.ShowWaitDialog("Opening...", "<p>Opening tab, please wait...</p>");
                 try {
-                    var viewer = new my.DataItemViewer(args);
+					var viewer = new screen(args);
                 } catch (ex) {
                     wait.hide();
                     if (ex.number && (ex.number === -2146697211)) {
