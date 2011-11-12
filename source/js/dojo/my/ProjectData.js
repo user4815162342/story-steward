@@ -12,6 +12,16 @@
  */
 dojo.provide("my.ProjectData");
 dojo.require("dojo.data.ItemFileWriteStore");
+dojo.require("my.screens.ContentContainerViewer");
+dojo.require("my.screens.CreditViewer");
+dojo.require("my.screens.GoalViewer");
+dojo.require("my.screens.JournalViewer");
+dojo.require("my.screens.NoteViewer");
+dojo.require("my.screens.PersonViewer");
+dojo.require("my.screens.PlaceViewer");
+dojo.require("my.screens.ProjectViewer");
+dojo.require("my.screens.SceneViewer");
+dojo.require("my.screens.ThingViewer");
 dojo.declare("my.ProjectData", null, {
 
     TypeLookup: {
@@ -19,7 +29,7 @@ dojo.declare("my.ProjectData", null, {
             isAbstract: true
         },
         "project": {
-            form: "ProjectViewer",
+            screenComponent: my.screens.ProjectViewer,
             baseType: "project",
             typeLabel: "Project",
             defaultValue: {},
@@ -29,7 +39,7 @@ dojo.declare("my.ProjectData", null, {
             iconClass: "iconEditProject"
         },
         "book": {
-            form: "ContentContainerViewer",
+			screenComponent: my.screens.ContentContainerViewer,
             baseType: "content",
             typeLabel: "Book",
             allowedParents: [],
@@ -40,7 +50,7 @@ dojo.declare("my.ProjectData", null, {
             titleTag: "h1"
         },
         "part": {
-            form: "ContentContainerViewer",
+			screenComponent: my.screens.ContentContainerViewer,
             baseType: "content",
             typeLabel: "Part",
             allowedParents: ["book"],
@@ -51,7 +61,7 @@ dojo.declare("my.ProjectData", null, {
             titleTag: "h2"
         },
         "chapter": {
-            form: "ContentContainerViewer",
+			screenComponent: my.screens.ContentContainerViewer,
             baseType: "content",
             typeLabel: "Chapter",
             allowedParents: ["book", "part"],
@@ -62,7 +72,7 @@ dojo.declare("my.ProjectData", null, {
             titleTag: "h3"
         },
         "scene": {
-            form: "SceneViewer",
+            screenComponent: my.screens.SceneViewer,
             baseType: "content",
             typeLabel: "Scene",
             allowedParents: ["book", "part", "chapter"],
@@ -77,7 +87,7 @@ dojo.declare("my.ProjectData", null, {
 			// to be titled.
         },
         "note": {
-            form: "NoteViewer",
+            screenComponent: my.screens.NoteViewer,
             baseType: "note",
             typeLabel: "Note",
             defaultValue: {},
@@ -87,7 +97,7 @@ dojo.declare("my.ProjectData", null, {
             iconClass: "iconNote"
         },
         "journal": {
-            form: "JournalViewer",
+            screenComponent: my.screens.JournalViewer,
             baseType: "journal",
             typeLabel: "Entry",
             defaultValue: {},
@@ -100,7 +110,7 @@ dojo.declare("my.ProjectData", null, {
             iconClass: "iconJournal"
         },
         "person": {
-            form: "PersonViewer",
+            screenComponent: my.screens.PersonViewer,
             baseType: "person",
             typeLabel: "Person",
             defaultValue: {},
@@ -110,7 +120,7 @@ dojo.declare("my.ProjectData", null, {
             iconClass: "iconPerson"
         },
         "place": {
-            form: "PlaceViewer",
+            screenComponent: my.screens.PlaceViewer,
             baseType: "place",
             typeLabel: "Place",
             defaultValue: {},
@@ -120,7 +130,7 @@ dojo.declare("my.ProjectData", null, {
             iconClass: "iconPlace"
         },
         "thing": {
-            form: "ThingViewer",
+            screenComponent: my.screens.ThingViewer,
             baseType: "thing",
             typeLabel: "Thing",
             defaultValue: {},
@@ -130,7 +140,7 @@ dojo.declare("my.ProjectData", null, {
             iconClass: "iconThing"
         },
         "goal": {
-            form: "GoalViewer",
+            screenComponent: my.screens.GoalViewer,
             baseType: "goal",
             typeLabel: "Goal",
             defaultValue: {},

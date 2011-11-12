@@ -28,9 +28,7 @@ dojo.require("my.TagEditor");
 
 dojo.declare("my.DataItemViewer", [dijit.layout.ContentPane, dijit._Templated], {
 
-    /* NOTE: Need this in order for the form attribute to be set declaratively */
-    form: "",
-    
+   
     bindScope: null,
     
     constructor: function(args) {
@@ -50,15 +48,8 @@ dojo.declare("my.DataItemViewer", [dijit.layout.ContentPane, dijit._Templated], 
         // values, and to retrieve values in onchange.
         this.dataItem = args.dataItem;
         this.dataStore = args.dataStore;
-        this.form = args.form;
         this.bindScope = args.bindScope;
-        //Establish template. this will be parsed later.
-        if (this.form) {
-            // NOTE: This is done to keep the custom builder from attempting
-            // to intern this template, and failing.
-            var dm = dojo.moduleUrl;
-            this.templatePath = dm("my.screens", this.form + ".html");
-        }
+        //NOTE: There is no template. Extend this class and set this in the descendant.
         
     },
     
