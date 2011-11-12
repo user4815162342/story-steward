@@ -58,7 +58,10 @@ if (isDevTarget) {
 }
 if (isRelTarget) {
 	logger.info("Copying source to release");
-    fileUtil.copyDir(scriptPath + "../source/", scriptPath + "../release/", /^(?:.*\.(?:html|js|htm|css|txt))|LICENSE|NOTICE$/g, true);
+    fileUtil.copyDir(scriptPath + "../source/", scriptPath + "../release/", {
+		include: /^(?:.*\.(?:html|js|htm|css|txt))|LICENSE|NOTICE$/g,
+		exclude: /^.*\/source\/js\/dojo\/my\/.*/g		
+	}, true);
 	logger.info("Copying resources to release");
     fileUtil.copyFile(scriptPath + "../resources/icons/icons.png", scriptPath + "../release/resources/icons.png", true);
     fileUtil.copyFile(scriptPath + "../resources/icons/readme.txt", scriptPath + "../release/resources/readme.txt", true);

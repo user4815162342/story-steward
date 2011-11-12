@@ -51,11 +51,11 @@ if (isDevTarget || isRelTarget) {
  */
 if (isDevTarget) {
     logger.info("Building dojo for development");
-    RunProcess(["java", "-classpath", classPath, "org.mozilla.javascript.tools.shell.Main", "build.js", "optimize=comments", "layerOptimize=comments", "cssOptimize=comments.keepLines", "mini=true", "profileFile=../../../../build/dojo-profile.js", "action=clean,release", "releaseDir=../../../../development/js"], buildScriptsPath)
+    RunProcess(["java", "-classpath", classPath, "org.mozilla.javascript.tools.shell.Main", "build.js", "optimize=comments", "layerOptimize=comments", "cssOptimize=comments.keepLines", "mini=true", "profileFile=../../../../build/dojo-profile-development.js", "action=clean,release", "releaseDir=../../../../development/js"], buildScriptsPath)
 }
 if (isRelTarget) {
     logger.info("Building dojo for release");
-    RunProcess(["java", "-classpath", classPath, "org.mozilla.javascript.tools.shell.Main", "build.js", "optimize=shrinksafe", "copyTests=false", "layerOptimize=shrinksafe", "cssOptimize=comments", "mini=true", "stripConsole=warn", "profileFile=../../../../build/dojo-profile.js", "action=clean,release", "releaseDir=../../../../release/js"], buildScriptsPath);
+    RunProcess(["java", "-classpath", classPath, "org.mozilla.javascript.tools.shell.Main", "build.js", "optimize=shrinksafe", "copyTests=false", "layerOptimize=shrinksafe", "cssOptimize=comments", "mini=true", "stripConsole=warn", "profileFile=../../../../build/dojo-profile-release.js", "action=clean,release", "releaseDir=../../../../release/js"], buildScriptsPath);
 }
 logger.info("Dojo built.")
 
