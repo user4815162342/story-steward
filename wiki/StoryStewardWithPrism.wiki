@@ -2,10 +2,16 @@
 
 = Introduction =
 
-[http://prism.mozillalabs.com/ Mozilla Prism] is an application from the creators of Firefox which lets you run any web page as a standalone application. It can do the same with Story Steward.
+This documentation is obsolete, for reasons described below. For information on running Story Steward as a stand-alone application, [StandaloneStorySteward look here].
+
+[http://prism.mozillalabs.com/ Mozilla Prism] was an application from the creators of Firefox which lets you run any web page as a standalone application. It can do the same with Story Steward.
 
 = Details =
 
-Prism is very easy to use, just go to the link above and download the Firefox extension or the full application. Then, follow the instructions for turning your copy of Story Steward into a standalone application.
+At one time, there was an extension for Firefox called Prism. This extension was discontinued, and no longer worked after Firefox 3. It was taken over by other developers, and became known as WebRunner. Unfortunately, this was also discontinued, and will no longer work after Firefox 6.
 
-More advanced users may want to review the [https://developer.mozilla.org/en/Prism/Configuration Prism Configuration File format] and make some additional tweaks. A particularly good one is the 'include' property, which ensures that links within Story Steward will open up in your regular browser.
+If you have one of the above browsers, and you had already installed said extensions prior to them being removed from Mozilla add-ons, then it's a fairly simple matter of creating a standalone application yourself.
+
+Prism/WebRunner is very easy to use, just use the menu choice "Create Web Application" to turn your copy of Story Steward into a standalone application.
+
+More advanced users may want to review the [https://developer.mozilla.org/en/Prism/Configuration Prism Configuration File format] (Apologies, and let me know, if this link is broken) and make some additional tweaks. A particularly good one is the 'include' property, which ensures that links within Story Steward will open up in your regular browser.
