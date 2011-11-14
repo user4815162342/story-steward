@@ -35,7 +35,7 @@ dojo.getObject("my.Settings", true);
 			var result = new dojo.Deferred();
             dojo.xhrGet({
                 url: driver.fileUri,
-                handleAs: "json",
+                handleAs: "json"
             }).then(function(data) {
 				var cookie = dojo.cookie(driver.cookieName);
 				if (cookie) {

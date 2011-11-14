@@ -18,7 +18,7 @@ dojo.declare("my.screens.PlaceViewer", [my.DataItemViewer], {
     constructor: function(args) {
 		this.templatePath = dojo.moduleUrl("my.screens","PlaceViewer.html")
         
-    },
+    }
     
     
 });

@@ -535,9 +535,9 @@ dojo.declare("my.ProjectData", null, {
             // until I allow them to be edited.
             GetTags: function() {
                 return [{
-                    name: "animal",
+                    name: "animal"
                 }, {
-                    name: "vegetable",
+                    name: "vegetable"
                 }, {
                     name: "mineral"
                 }]

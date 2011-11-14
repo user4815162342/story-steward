@@ -73,7 +73,7 @@ dojo.declare("my.GoalHistoryChart", [dojox.charting.widget.Chart2D], {
         this.chart.updateSeries("Suggested", suggested, {});
         this.chart.updateSeries("Required", required, {});
         this.chart.render();
-    },
+    }
 
 
 });

@@ -18,7 +18,7 @@ dojo.declare("my.screens.NoteViewer", [my.DataItemViewer], {
     constructor: function(args) {
 		this.templatePath = dojo.moduleUrl("my.screens","NoteViewer.html")
         
-    },
+    }
     
     
 });
