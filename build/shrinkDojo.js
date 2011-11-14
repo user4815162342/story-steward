@@ -61,7 +61,9 @@ function shrinkDojo(target) {
     // Clear out all dojox folders which aren't required. I wish I could do
     // something similar for the others, but their directory structures aren't
     // quite as expected...
-    var requireddojoxdirs = ["LICENSE"];
+	// the stuff in gfx is loaded dynamically depending on the browser, so it
+	// can't be built into everything.
+    var requireddojoxdirs = ["LICENSE","gfx"];
     for (var i = 0; i < dependencies.layers.length; i++) {
         for (var j = 0; j < dependencies.layers[i].dependencies.length; j++) {
             if (dependencies.layers[i].dependencies[j].indexOf("dojox.") == 0) {
@@ -69,7 +71,7 @@ function shrinkDojo(target) {
                 depdir = depdir.substring(0, depdir.indexOf("."));
 				// NOTE: I don't *really* need anything here:
 				// Add to this if more dependencies are added which we don't need.
-				if ((depdir != "gfx") && (depdir != "json") && (depdir != "charting")) {
+				if ((depdir != "json") && (depdir != "charting")) {
 					requireddojoxdirs.push(depdir);
 				}
                 requireddojoxdirs.push(depdir + ".js");
