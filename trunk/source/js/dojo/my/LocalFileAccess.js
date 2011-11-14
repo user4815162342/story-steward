@@ -140,18 +140,22 @@ dojo.getObject("my.LocalFileAccess", true);
             return true;
         },
         loadFile: function(filePath) {
-            // Returns null if it can't do it, false if there's an error, or a string of the content if successful
+            // Returns null if it can't do it (file doesn't exist), false if there's an error, or a string of the content if successful
             try {
                 var fso = new ActiveXObject("Scripting.FileSystemObject");
-                var file = fso.OpenTextFile(filePath, 1);
-                var content = file.ReadAll();
-                file.Close();
+				if (fso.FileExists(filePath)) {
+					var file = fso.OpenTextFile(filePath, 1);
+					var content = file.ReadAll();
+					file.Close();
+					return content;
+				} else {
+					return null;
+				}
             } catch (ex) {
                 //# alert("Exception while attempting to load\n\n" + ex.toString());
                 //- return null;
                 throw "Can't Load file '" + filePath + "': " + ex; //+
             }
-            return content;
         },
         createPath: function(path) {
             //# Remove the filename, if present. Use trailing slash (i.e. "foo\bar\") if no filename.

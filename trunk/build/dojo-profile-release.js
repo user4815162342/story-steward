@@ -78,7 +78,6 @@ dependencies = {
         dependencies: [
 		   "dojox.json.schema",
 		   "dojox.grid.EnhancedGrid",
-		   "dojox.gfx.svg", // Apparently required for Chart2D, but loaded dynamically.
 		   "dojox.charting.widget.Chart2D",
 		   "dojox.charting.themes.Distinctive",
 		   "dojox.editor.plugins.TablePlugins",
