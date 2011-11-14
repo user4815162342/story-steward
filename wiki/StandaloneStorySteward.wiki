@@ -1,0 +1,11 @@
+#summary How to Run Story Steward as a Stand-alone Application
+
+= Introduction =
+
+A Stand-alone Story Steward application is very useful. Such an application would have it's own window, run from it's own icon in your start menu or desktop, and would not be depending on your browser application staying alive. The latter is the most useful: if your browser crashes, or starts to slow down, you don't have to worry about Story Steward being effected at all.
+
+= Details =
+
+I have created an installer that sets up Story Steward as a stand-alone application. I am awaiting a few things before I make it available on her, but if you are interested in accelerating the process, [Contact] me.
+
+This installer includes copies of the binaries from Firefox 6, and an extension called `WebRunner`. Due to the size of this install, I am looking for a better solution.
