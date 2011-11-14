@@ -105,7 +105,7 @@ dependencies = {
     prefixes: [
        [ "dijit", "../dijit" ],
        [ "dojox", "../dojox" ],
-	   [ "my", "../../../source/js/dojo/my", "../../../source/js/dojo/my/copyright.txt" ]
+	   [ "my", "../../../source/js/dojo/my", "../../../../source/js/dojo/my/copyright.txt" ]
    ]
 
 }
