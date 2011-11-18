@@ -21,14 +21,6 @@ dojo.require("dojox.json.ref");
 
 /*
  * TODO: Need to come up with a 1.1 format. This format would make the following modifications:
- * - fix the numerous problems which came as a result of not checking against a schema
- * before (such as date times which still keep internal errors, and arrays put out as
- * scalar because there was only one item).
- * - make 'credits' descend from 'entity', to simplify the schema somewhat.
- * - extract 'history' from goals, and make it part of the project. It would be nice 
- * if we'd automatically extract these from the goals for older versions.
- * - possibly, make all 'root' level entities all in one array, rather than separate
- * ones for separate types.
  * TODO: Once that is done, rewrite the saving and validating code to make use of the
  * schema to determine how things should be saved. This means the schema has to
  * be publicly visible after all.
