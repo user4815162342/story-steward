@@ -1,7 +1,25 @@
 {
    "$schema":"http://json-schema.org/draft-03/schema#",
-   "title":"Story Steward Project File Format 1.0",
-   "description":"Specification for the 1.0 version of the format of the primary Story Steward Project JSON File",
+   "title":"Story Steward Project File Format 1.1",
+   "description":"Specification for the 1.1 version of the format of the primary Story Steward Project JSON File",
+   "__changeLog":{
+      "1.1":[
+         "Tags will only accept an array of strings now, lone strings are not valid.",
+		 "Tags are now includes as part of the entity, so all entities have tags, even if they aren't currently used.",
+         "Timestamp will only accept a string, objects with _type and _value properties are no longer valid.",
+         "Credit object now extends entity, since it already copies other fields, this makes the schema easier to understand.",
+         "Note.subnote will now only accept an array of notes, lone note entities are not valid.",
+         "History is no longer kept with each goal. A new global history structure has been added to avoid duplication of data, and to allow people to track their history without specifying a goal. This structure also supports grouping by book, part and scene status.",
+		 "Goal.what has been changed to status.",
+		 "Goal.where added to represent a book, part, chapter or scene to count in.",
+		 "Goal.what added to specify whether words, scenes or chapters should be counted.",
+		 "Goal.startingWordCount and targetWordCount changed to startingCount and targetCount.",
+		 "Goal.targetCount is now required." 
+      ],
+      "1.0":[
+         "Initial specification, based on actual use in Story Steward."
+      ]
+   },
    "types":[
       {
          "id":"project-data-memo",
@@ -31,44 +49,79 @@
          "id":"project-data-tags",
          "title":"List of tags",
          "description":"An array of strings used for marking entities with additional data.",
-         "__comment":"Have to do this union due to some issues with earlier versions which saved sole tags as strings.",
-         "type":[
-            {
-               "type":"array",
-               "items":{
-                  "type":"string"
-               }
-            },
-            {
-               "type":"string"
-            }
-         ],
-         "uniqueItems":true
+         "type":"array",
+         "items":{
+            "type":"string"
+         },
+		 "uniqueItems":true
       },
       {
          "id":"project-data-timestamp",
          "title":"Timestamp",
          "description":"A string representing a date and time in ISO 8601 format",
-         "__comment":"Another one that has to be done in a union due to issues with earlier versions which didn't clean up timestamps from their internal representation.",
-         "type":[
-            {
-               "type":"string",
-               "format":"date-time"
+         "type":"string",
+         "format":"date-time"
+      },
+      {
+         "id":"project-data-history-entry",
+         "title":"History Log Entry",
+         "description":"Represents a count history for a given day. Counts are grouped by Book, Part and status, totals can be calculated by these groups.",
+         "type":"object",
+         "properties":{
+            "uid":{
+               "$ref":"project-data-uid"
             },
-            {
-               "type":"object",
-               "properties":{
-                  "_type":{
-                     "type":"string",
-                     "pattern":"^Date$"
-                  },
-                  "_value":{
-                     "type":"string",
-                     "format":"date-time"
+            "when":{
+               "$ref":"project-data-timestamp"
+            },
+            "byBookOrPart":{
+               "description":"Counts grouped by the Book or Part they occurred in. Counts per Book refer only to counts from Chapters or Scenes not also inside a Part in the Book.",
+               "type":"array",
+               "items":{
+                  "type":"object",
+                  "properties":{
+                     "subject":{
+                        "description":"The Book or Part for which the counts apply.",
+                        "type":{
+                           "$ref":"project-data-uid-ref"
+                        }
+                     },
+                     "chapters":{
+                        "title":"Chapter Count",
+                        "description":"The number of chapters counted in the current Book or Part.",
+                        "type":"integer",
+                        "minimum":0
+                     },
+                     "byStatus":{
+                        "description":"Counts grouped by the status of the scene.",
+                        "type":"array",
+                        "items":{
+                           "type":"object",
+                           "properties":{
+                              "status":{
+                                 "title":"Scene Status",
+                                 "description":"The scene status for which the counts apply.",
+                                 "type":"string"
+                              },
+                              "scenes":{
+                                 "title":"Scene Count",
+                                 "description":"The number of scenes with the current status, in the current Book or Part.",
+                                 "type":"integer",
+                                 "minimum":0
+                              },
+                              "words":{
+                                 "title":"Word Count",
+                                 "description":"The number of words in all scenes with the current status, in the current Book or Part.",
+                                 "type":"integer",
+                                 "minimum":0
+                              }
+                           }
+                        }
+                     }
                   }
                }
             }
-         ]
+         }
       },
       {
          "id":"project-data-entity",
@@ -101,8 +154,10 @@
             },
             "name":{
                "description":"A human-language name for the entity, for display in the application user interface",
-               "type":"string",
-               "required":false
+               "type":"string"
+            },
+            "tags":{
+               "$ref":"project-data-tags"
             }
          }
       },
@@ -111,23 +166,12 @@
          "title":"Credit structure",
          "description":"An object representing data referring to an original contributor to the manuscripts defined by the project",
          "type":"object",
-         "__comment":[
-            "This vaguely resembles an entity, but it isn't really an entity, ",
-            "as it can't appear at the 'root' of the project. Therefore it doesn't ",
-            "need all of the properties"
-         ],
+         "extends":{
+            "$ref":"project-data-entity"
+         },
          "properties":{
-            "created":{
-               "$ref":"project-data-entity.properties.created"
-            },
-            "modified":{
-               "$ref":"project-data-entity.properties.created"
-            },
-            "uid":{
-               "$ref":"project-data-entity.properties.uid"
-            },
-            "name":{
-               "$ref":"project-data-entity.properties.name"
+            "type":{
+               "pattern":"^credit$"
             },
             "biography":{
                "$ref":"project-data-memo"
@@ -162,9 +206,6 @@
             },
             "doNotPublish":{
                "type":"boolean"
-            },
-            "tags":{
-               "$ref":"project-data-tags"
             }
          }
       },
@@ -215,9 +256,6 @@
             },
             "lastWordCount":{
                "type":"integer"
-            },
-            "tags":{
-               "$ref":"project-data-tags"
             },
             "status":{
                "type":"string"
@@ -277,8 +315,7 @@
                         "$ref":"project-data-scene"
                      }
                   ]
-               },
-               "additionalItems":false
+               }
             }
          }
       },
@@ -303,8 +340,7 @@
                         "$ref":"project-data-scene"
                      }
                   ]
-               },
-               "additionalItems":false
+               }
             }
          }
       },
@@ -332,8 +368,7 @@
                         "$ref":"project-data-scene"
                      }
                   ]
-               },
-               "additionalItems":false
+               }
             }
          }
       },
@@ -354,9 +389,6 @@
             },
             "text":{
                "$ref":"project-data-file-ref"
-            },
-            "tags":{
-               "$ref":"project-data-tags"
             }
          }
       },
@@ -374,21 +406,10 @@
                "$ref":"project-data-file-ref"
             },
             "subnotes":{
-               "__comments":"Yet another issue with older versions saving single items as arrays",
-               "type":[
-                  {
-                     "type":"array",
-                     "items":{
-                        "$ref":"project-data-note"
-                     }
-                  },
-                  {
-                     "$ref":"project-data-note"
-                  }
-               ]
-            },
-            "tags":{
-               "$ref":"project-data-tags"
+               "type":"array",
+               "items":{
+                  "$ref":"project-data-note"
+               }
             }
          }
       },
@@ -445,9 +466,6 @@
             },
             "epiphany":{
                "$ref":"project-data-memo"
-            },
-            "tags":{
-               "$ref":"project-data-tags"
             }
          }
       },
@@ -469,9 +487,6 @@
             },
             "notes":{
                "$ref":"project-data-file-ref"
-            },
-            "tags":{
-               "$ref":"project-data-tags"
             }
          }
       },
@@ -493,9 +508,6 @@
             },
             "notes":{
                "$ref":"project-data-file-ref"
-            },
-            "tags":{
-               "$ref":"project-data-tags"
             }
          }
       },
@@ -509,13 +521,32 @@
             "type":{
                "pattern":"^goal$"
             },
-            "what":{
+            "status":{
+			   "description":"Allows specifying a specific scene which the scenes must have in order to be counted.",
                "type":{
                   "$ref":"project-data-uid-ref"
                }
             },
+			"where":{
+			   "description":"Allows specification of a specific book, part, chapter or scene in which the wordcount must exist.",
+               "type":{
+                  "$ref":"project-data-uid-ref"
+               }
+			},
+			"what":{
+			   "description":"Allows specifying what should be counted.",
+			   "type":"string",
+			   "enum":[
+			      "words",
+				  "scenes",
+				  "chapters" 
+			   ],
+			   "default":"words"
+			},
             "comments":{
-               "$ref":"project-data-memo"
+			   "type": {
+                  "$ref":"project-data-memo"
+			   }
             },
             "starting":{
                "type":{
@@ -527,40 +558,12 @@
                   "$ref":"project-data-timestamp"
                }
             },
-            "startingWordCount":{
+            "startingCount":{
                "type":"integer"
             },
-            "targetWordCount":{
-               "type":"integer"
-            },
-            "history":{
-               "__comment":"This is necessary for similar formatting bugs as starting and ending",
-               "type":[
-                  {
-                     "type":"array",
-                     "items":{
-                        "id":"project-data-goal-history",
-                        "type":"object",
-                        "properties":{
-                           "uid":{
-                              "$ref":"project-data-uid"
-                           },
-                           "when":{
-                              "type":{
-                                 "$ref":"project-data-timestamp"
-                              }
-                           },
-                           "wordCount":{
-                              "type":"integer"
-                           }
-                        }
-                     },
-                     "additionalItems":false
-                  },
-                  {
-                     "$ref":"project-data-goal-history"
-                  }
-               ]
+            "targetCount":{
+               "type":"integer",
+			   "required":true
             }
          }
       }
@@ -589,9 +592,7 @@
          "type":"array",
          "items":{
             "$ref":"project-data-credit"
-         },
-         "additionalItems":false,
-         "required":false
+         }
       },
       "content":{
          "type":"array",
@@ -610,57 +611,49 @@
                   "$ref":"project-data-scene"
                }
             ]
-         },
-         "additionalItems":false,
-         "required":false
+         }
       },
       "notes":{
          "type":"array",
          "items":{
             "$ref":"project-data-note"
-         },
-         "additionalItems":false,
-         "required":false
+         }
       },
       "journal":{
          "type":"array",
          "items":{
             "$ref":"project-data-journal-entry"
-         },
-         "additionalItems":false,
-         "required":false
+         }
       },
       "persons":{
          "type":"array",
          "items":{
             "$ref":"project-data-person"
-         },
-         "additionalItems":false,
-         "required":false
+         }
       },
       "places":{
          "type":"array",
          "items":{
             "$ref":"project-data-place"
-         },
-         "additionalItems":false,
-         "required":false
+         }
       },
       "things":{
          "type":"array",
          "items":{
             "$ref":"project-data-thing"
-         },
-         "additionalItems":false,
-         "required":false
+         }
       },
       "goals":{
          "type":"array",
          "items":{
             "$ref":"project-data-goal"
-         },
-         "additionalItems":false,
-         "required":false
+         }
+      },
+      "history":{
+         "type":"array",
+         "items":{
+            "$ref":"project-data-history-entry"
+         }
       },
       "customizations":{
          "type":"object",
@@ -672,32 +665,27 @@
                      "type":"array",
                      "items":{
                         "type":"string"
-                     },
-                     "required":false
+                     }
                   },
                   "structures":{
                      "type":"array",
                      "items":{
                         "type":"string"
-                     },
-                     "required":false
+                     }
                   },
                   "importances":{
                      "type":"array",
                      "items":{
                         "type":"string"
-                     },
-                     "required":false
+                     }
                   },
                   "ratings":{
                      "type":"array",
                      "items":{
                         "type":"string"
-                     },
-                     "required":false
+                     }
                   }
-               },
-               "required":false
+               }
             },
             "person":{
                "type":"object",
@@ -706,32 +694,32 @@
                      "type":"array",
                      "items":{
                         "type":"string"
-                     },
-                     "required":false
+                     }
                   },
                   "importances":{
                      "type":"array",
                      "items":{
                         "type":"string"
-                     },
-                     "required":false
+                     }
                   },
                   "ratings":{
                      "type":"array",
                      "items":{
                         "type":"string"
-                     },
-                     "required":false
+                     }
                   }
-               },
-               "required":false
-            }
-         },
-         "required":false
+               }
+            },
+			"tags": {
+			   "type":"array",
+			   "items": {
+			      "type":"string"
+			   }			   
+			}
+         }
       },
       "interface":{
-         "type":"object",
-         "required":false
+         "type":"object"
       }
    }
 }
