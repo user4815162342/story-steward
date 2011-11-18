@@ -22,6 +22,7 @@ dojo.require("my.screens.PlaceViewer");
 dojo.require("my.screens.ProjectViewer");
 dojo.require("my.screens.SceneViewer");
 dojo.require("my.screens.ThingViewer");
+dojo.require("my.schemas.ProjectDataValidator");
 dojo.declare("my.ProjectData", null, {
 
     TypeLookup: {
@@ -617,10 +618,10 @@ dojo.declare("my.ProjectData", null, {
         
     },
     
-    GetJSON: function() {
+    GetJSON: function(options) {
         // FUTURE: At some point in the future, it might be nice to have a 'SetJSON' as well.
         try {
-            return my.ProjectData.Drivers._writeStandardJSONFormat(this.ProjectStore._getSaver());
+            return my.ProjectData.Drivers._writeStandardJSONFormat(this.ProjectStore._getSaver(),options && options.validate);
         } catch (ex) {
             var result = new dojo.Deferred();
             result.errback(ex);
@@ -1033,9 +1034,9 @@ my.ProjectData.Drivers = {
         
     },
     
-    JSONFormatString: ApplicationInfo.ID + "-1.0",
+    //JSONFormatString: ApplicationInfo.ID + "-1.0",
     
-    _writeStandardJSONFormat: function(dataReader) {
+    _writeStandardJSONFormat: function(dataReader,validate) {
         var result = new dojo.Deferred();
         try {
         
@@ -1080,7 +1081,9 @@ my.ProjectData.Drivers = {
                 }
             }
             var rawData = project;
-            rawData.format = my.ProjectData.Drivers.JSONFormatString;
+            rawData.format = my.schemas.ProjectDataValidator.versions.current.name + "-" + 
+			                 my.schemas.ProjectDataValidator.versions.current.major + "." +
+							 my.schemas.ProjectDataValidator.versions.current.minor;
             rawData.content = content;
             rawData.notes = notes;
             rawData.journals = journals;
@@ -1129,7 +1132,26 @@ my.ProjectData.Drivers = {
             })];
             var list = new dojo.DeferredList(deferreds);
             list.then(function() {
-                result.callback(rawData);
+				try {
+					if (validate !== false) {
+						var validation = my.schemas.ProjectDataValidator.validate(rawData, my.schemas.ProjectDataValidator.versions.storySteward10);
+						if (validation.valid) {
+							result.callback(rawData);
+						} else {
+							// NOTE: This shouldn't happen if we're doing things correctly.
+							var msg = "A valid project file could not be produced\n\n" +
+							"Details:\n-------\n";
+							for (var i = 0; i < validation.errors.length; i++) {
+								msg += validation.errors[i].property + " " + validation.errors[i].message + "\n";
+							}
+							result.errback(msg);
+						}
+					} else {
+						result.callback(rawData);
+					}
+				} catch (ex) {
+					result.errback(ex);
+				}
             }, function(ex) {
                 result.errback(ex);
             })
@@ -1141,82 +1163,92 @@ my.ProjectData.Drivers = {
     },
     
     _readStandardJSONFormat: function(rawData, readOnly) {
-        if ((rawData.format) && (rawData.format == my.ProjectData.Drivers.JSONFormatString)) {
-            var entities = [];
-            entities.push.apply(entities, dojo.map(rawData.content || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-            delete rawData.content;
-            entities.push.apply(entities, dojo.map(rawData.notes || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-            delete rawData.notes;
-            entities.push.apply(entities, dojo.map(rawData.journals || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-            delete rawData.journals;
-            entities.push.apply(entities, dojo.map(rawData.people || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-            delete rawData.people;
-            entities.push.apply(entities, dojo.map(rawData.places || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-            delete rawData.places;
-            entities.push.apply(entities, dojo.map(rawData.things || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-            delete rawData.things;
-            entities.push.apply(entities, dojo.map(rawData.goals || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-            delete rawData.goals;
-            
-            var customizations = rawData.customizations || {};
-            delete rawData.customizations;
-            var interfaceSettings = rawData.interfaceSettings || {};
-            delete rawData.interfaceSettings;
-            
-            // The 'project' entity is the base of the format.
-            entities.push(my.ProjectData.Drivers._projectEntityLoadFixup(rawData));
-            
-            var stringToLookupEntity = function(value) {
-                return {
-                    name: value
-                };
-            }
-            
-            return {
-                IsReadOnly: function() {
-                    return readOnly;
-                },
-                GetTags: function() {
-                    return dojo.map(customizations.tags || [], stringToLookupEntity);
-                },
-                GetSceneStatuses: function() {
-                    return dojo.map((customizations.scene && customizations.scene.statuses) || [], stringToLookupEntity)
-                },
-                GetSceneStructures: function() {
-                    return dojo.map((customizations.scene && customizations.scene.structures) || [], stringToLookupEntity)
-                    
-                },
-                GetSceneImportances: function() {
-                    return dojo.map((customizations.scene && customizations.scene.importances) || [], stringToLookupEntity)
-                    
-                },
-                GetSceneRatings: function() {
-                    return dojo.map((customizations.scene && customizations.scene.ratings) || [], stringToLookupEntity)
-                    
-                },
-                GetPersonRoles: function() {
-                    return dojo.map((customizations.person && customizations.person.roles) || [], stringToLookupEntity)
-                    
-                },
-                GetPersonImportances: function() {
-                    return dojo.map((customizations.person && customizations.person.importances) || [], stringToLookupEntity)
-                    
-                },
-                GetPersonRatings: function() {
-                    return dojo.map((customizations.person && customizations.person.ratings) || [], stringToLookupEntity)
-                    
-                },
-                GetInterfaceSettings: function() {
-                    return interfaceSettings;
-                },
-                GetEntities: function() {
-                    return entities;
-                }
-            }
-        } else {
-            throw "Invalid manuscript project format."
-        }
-    },
+		var validation = my.schemas.ProjectDataValidator.validate(rawData);
+		if (validation.valid) {
+			if (validation.format == my.schemas.ProjectDataValidator.versions.storySteward10) {
+				var entities = [];
+				entities.push.apply(entities, dojo.map(rawData.content || [], my.ProjectData.Drivers._projectEntityLoadFixup));
+				delete rawData.content;
+				entities.push.apply(entities, dojo.map(rawData.notes || [], my.ProjectData.Drivers._projectEntityLoadFixup));
+				delete rawData.notes;
+				entities.push.apply(entities, dojo.map(rawData.journals || [], my.ProjectData.Drivers._projectEntityLoadFixup));
+				delete rawData.journals;
+				entities.push.apply(entities, dojo.map(rawData.people || [], my.ProjectData.Drivers._projectEntityLoadFixup));
+				delete rawData.people;
+				entities.push.apply(entities, dojo.map(rawData.places || [], my.ProjectData.Drivers._projectEntityLoadFixup));
+				delete rawData.places;
+				entities.push.apply(entities, dojo.map(rawData.things || [], my.ProjectData.Drivers._projectEntityLoadFixup));
+				delete rawData.things;
+				entities.push.apply(entities, dojo.map(rawData.goals || [], my.ProjectData.Drivers._projectEntityLoadFixup));
+				delete rawData.goals;
+				
+				var customizations = rawData.customizations || {};
+				delete rawData.customizations;
+				var interfaceSettings = rawData.interfaceSettings || {};
+				delete rawData.interfaceSettings;
+				
+				// The 'project' entity is the base of the format.
+				entities.push(my.ProjectData.Drivers._projectEntityLoadFixup(rawData));
+				
+				var stringToLookupEntity = function(value) {
+					return {
+						name: value
+					};
+				}
+				
+				return {
+					IsReadOnly: function() {
+						return readOnly;
+					},
+					GetTags: function() {
+						return dojo.map(customizations.tags || [], stringToLookupEntity);
+					},
+					GetSceneStatuses: function() {
+						return dojo.map((customizations.scene && customizations.scene.statuses) || [], stringToLookupEntity)
+					},
+					GetSceneStructures: function() {
+						return dojo.map((customizations.scene && customizations.scene.structures) || [], stringToLookupEntity)
+						
+					},
+					GetSceneImportances: function() {
+						return dojo.map((customizations.scene && customizations.scene.importances) || [], stringToLookupEntity)
+						
+					},
+					GetSceneRatings: function() {
+						return dojo.map((customizations.scene && customizations.scene.ratings) || [], stringToLookupEntity)
+						
+					},
+					GetPersonRoles: function() {
+						return dojo.map((customizations.person && customizations.person.roles) || [], stringToLookupEntity)
+						
+					},
+					GetPersonImportances: function() {
+						return dojo.map((customizations.person && customizations.person.importances) || [], stringToLookupEntity)
+						
+					},
+					GetPersonRatings: function() {
+						return dojo.map((customizations.person && customizations.person.ratings) || [], stringToLookupEntity)
+						
+					},
+					GetInterfaceSettings: function() {
+						return interfaceSettings;
+					},
+					GetEntities: function() {
+						return entities;
+					}
+				}
+			} else {
+				throw "Project format not yet supported.";
+			}
+		} else {
+			var msg = "Project file is not an appropriate format\n\n" +
+			          "Details:\n-------\n";
+			for (var i = 0; i < validation.errors.length; i++) {
+				msg += validation.errors[i].property + " " + validation.errors[i].message + "\n";
+			}
+			throw msg;
+		}
+	},
     
     _getStandardURIs: function(uriString) {
         var result = {};
@@ -1361,7 +1393,7 @@ my.ProjectData.Drivers = {
                                 }
                             }
                             if (content) {
-                                var rawData = dojo.fromJson(content);
+								var rawData = dojo.fromJson(content);
                                 data = my.ProjectData.Drivers._readStandardJSONFormat(rawData, false);
                             } else if (createNew) {
                                 data = createNew(paths.fileName);
@@ -1535,6 +1567,8 @@ my.ProjectData.Drivers = {
                             description: "<p>A monumental foray into the desparate realms of cross-platform software development using HTML and JavaScript.</p>",
                             credits: [{
                                 uid: ProjectData.CreateDataUID(),
+								created: now,
+								modified: now,
                                 name: "Neil M. Sheldon",
                                 biography: "<p>Stunted by unprofessionalism, Neil has yet to publish a single word.</p>",
                                 role: "Author"

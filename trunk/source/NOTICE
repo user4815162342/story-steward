@@ -21,5 +21,7 @@ code licensed under the MIT License, and copyright
 UnaMesa Association. The original source is available
 at http://jquery.tiddlywiki.org/twFile.html.
 
-
-
+Code for validating and working with JSON Schemas is 
+licensed under the MIT License, and copyright Kris Zyp
+of SitePen. The original source is available at
+https://github.com/kriszyp/json-schema.
