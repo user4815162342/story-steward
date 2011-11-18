@@ -713,7 +713,7 @@ var Controller = new function() {
     }
     
     this.SaveProject = function() {
-        var wait = this.ShowWaitDialog("Saving...", "<p>Saving Project, please wait...</p>");
+		var wait = this.ShowWaitDialog("Saving...", "<p>Saving Project, please wait...</p>");
         var result = new dojo.Deferred();
         var tabSavers = [];
         for (var uid in openTabs) {
@@ -750,7 +750,7 @@ var Controller = new function() {
         // window.
         var wait = this.ShowWaitDialog("Exporting Content...", "<p>Exporting open data into other browser windows...</p>");
         try {
-            var result = this.ProjectData.GetJSON();
+            var result = this.ProjectData.GetJSON({ validate: false });
             result.then(dojo.hitch(this, function(data) {
                 var content = dojo.toJson(data, true);
                 var newWindow = window.open();
