@@ -5,16 +5,18 @@
    "__changeLog":{
       "1.1":[
          "Tags will only accept an array of strings now, lone strings are not valid.",
-		 "Tags are now includes as part of the entity, so all entities have tags, even if they aren't currently used.",
+         "Tags are now includes as part of the entity, so all entities have tags, even if they aren't currently used.",
          "Timestamp will only accept a string, objects with _type and _value properties are no longer valid.",
          "Credit object now extends entity, since it already copies other fields, this makes the schema easier to understand.",
          "Note.subnote will now only accept an array of notes, lone note entities are not valid.",
          "History is no longer kept with each goal. A new global history structure has been added to avoid duplication of data, and to allow people to track their history without specifying a goal. This structure also supports grouping by book, part and scene status.",
-		 "Goal.what has been changed to status.",
-		 "Goal.where added to represent a book, part, chapter or scene to count in.",
-		 "Goal.what added to specify whether words, scenes or chapters should be counted.",
-		 "Goal.startingWordCount and targetWordCount changed to startingCount and targetCount.",
-		 "Goal.targetCount is now required." 
+         "Goal.targetStatus has been changed to whatStatus.",
+		 "Goal.what has been changed to Goal.where, and has been more clearly defined.",
+         "New Goal.what added to specify whether words, scenes or chapters should be counted.",
+         "Goal.startingWordCount and targetWordCount changed to startingCount and targetCount.",
+         "Goal.targetCount is now required.",
+         "Reorganized the types of entities into three groups on the project (Content, Notes, Work), instead of seven (Content, Notes, People, Places, Things, Journal, Goals)",
+         "Added task entity for tracking tasks"
       ],
       "1.0":[
          "Initial specification, based on actual use in Story Steward."
@@ -53,14 +55,23 @@
          "items":{
             "type":"string"
          },
-		 "uniqueItems":true
+         "uniqueItems":true
       },
       {
          "id":"project-data-timestamp",
          "title":"Timestamp",
-         "description":"A string representing a date and time in ISO 8601 format",
+         "description":"A string representing a date and time in a subset of ISO 8601 format. Accuracy is at most down to the second. All times are UTC.",
          "type":"string",
-         "format":"date-time"
+         "format":"date-time",
+         "pattern":"^(?:[+-]\\d*)?\\d{4}-(?:0\\d|1[0-2])-(?:[0-2]\\d|3[01])T(?:(?:[01]\\d|2[0-3])\\:(?:[0-5]\\d)\\:(?:[0-5]\\d)|24\\:00\\:00)Z$"
+      },
+      {
+         "id":"project-data-date",
+         "title":"Date",
+         "description":"A string representing a date in a subset of ISO 8601 format.",
+         "type":"string",
+         "format":"date",
+         "pattern":"^(?:[+-]\\d*)?\\d{4}-(?:0\\d|1[0-2])-(?:[0-2]\\d|3[01])$"
       },
       {
          "id":"project-data-history-entry",
@@ -72,7 +83,7 @@
                "$ref":"project-data-uid"
             },
             "when":{
-               "$ref":"project-data-timestamp"
+               "$ref":"project-data-date"
             },
             "byBookOrPart":{
                "description":"Counts grouped by the Book or Part they occurred in. Counts per Book refer only to counts from Chapters or Scenes not also inside a Part in the Book.",
@@ -81,7 +92,7 @@
                   "type":"object",
                   "properties":{
                      "subject":{
-                        "description":"The Book or Part for which the counts apply.",
+                        "description":"The Book or Part for which the counts apply. If this is missing, then the history applies to scenes and chapters outside of any book, or it is legacy data from an older format",
                         "type":{
                            "$ref":"project-data-uid-ref"
                         }
@@ -100,7 +111,7 @@
                            "properties":{
                               "status":{
                                  "title":"Scene Status",
-                                 "description":"The scene status for which the counts apply.",
+                                 "description":"The scene status for which the counts apply. This may be a status that has been deleted from the list of statuses.",
                                  "type":"string"
                               },
                               "scenes":{
@@ -120,6 +131,31 @@
                      }
                   }
                }
+            }
+         }
+      },
+      {
+         "id":"project-data-history",
+         "title":"History",
+         "description":"Tracks historical summary data for user's reference.",
+         "type":"object",
+         "properties":{
+            "log":{
+               "type":"array",
+               "items":{
+                  "$ref":"project-data-history-entry"
+               }
+            },
+            "monthIndex":{
+               "description":"Used to help find items in the log. Each property name represents the year and the month in ISO 8601 format. The value represents an index into the array of log entries for the first date recorded in the specified month, or -1 if the year and month are not found. If found, the index must be kept up to date by the application.",
+               "type":"object",
+               "patternProperties":{
+			      "^(?:[+-]\\d*)?\\d{4}-(?:0\\d|1[0-2])$":{
+                     "type":"integer",
+                     "minimumValue":0
+                  }
+               },
+               "additionalProperties":false
             }
          }
       },
@@ -258,6 +294,7 @@
                "type":"integer"
             },
             "status":{
+			   "description":"Although new statuses should be picked from the current list of statuses, this value may be a status that has been deleted from the list of statuses.",
                "type":"string"
             },
             "structure":{
@@ -521,41 +558,39 @@
             "type":{
                "pattern":"^goal$"
             },
-            "status":{
-			   "description":"Allows specifying a specific scene which the scenes must have in order to be counted.",
+            "whatStatus":{
+               "description":"Allows specifying a specific scene which the scenes must have in order to be counted.  This may be a status that has been deleted from the list of statuses.",
+               "type": "string"
+            },
+            "where":{
+               "description":"Allows specification of a specific book, part, chapter or scene in which the wordcount must exist.",
                "type":{
                   "$ref":"project-data-uid-ref"
                }
             },
-			"where":{
-			   "description":"Allows specification of a specific book, part, chapter or scene in which the wordcount must exist.",
-               "type":{
-                  "$ref":"project-data-uid-ref"
-               }
-			},
-			"what":{
-			   "description":"Allows specifying what should be counted.",
-			   "type":"string",
-			   "enum":[
-			      "words",
-				  "scenes",
-				  "chapters" 
-			   ],
-			   "default":"words"
-			},
+            "what":{
+               "description":"Allows specifying what should be counted.",
+               "type":"string",
+               "enum":[
+                  "words",
+                  "scenes",
+                  "chapters"
+               ],
+               "default":"words"
+            },
             "comments":{
-			   "type": {
+               "type":{
                   "$ref":"project-data-memo"
-			   }
+               }
             },
             "starting":{
                "type":{
-                  "$ref":"project-data-timestamp"
+                  "$ref":"project-data-date"
                }
             },
             "ending":{
                "type":{
-                  "$ref":"project-data-timestamp"
+                  "$ref":"project-data-date"
                }
             },
             "startingCount":{
@@ -563,7 +598,45 @@
             },
             "targetCount":{
                "type":"integer",
-			   "required":true
+               "required":true
+            }
+         }
+      },
+      {
+         "id":"project-data-task",
+         "title":"Task entity",
+         "extends":{
+            "$ref":"project-data-entity"
+         },
+         "properties":{
+            "type":{
+               "pattern":"^task$"
+            },
+            "progress":{
+               "description":"Allows tracking progress on the task. Set to 100 when task is completed.",
+               "type":"integer",
+               "minimum":0,
+               "maximum":100
+            },
+            "description":{
+               "type":{
+                  "$ref":"project-data-memo"
+               }
+            },
+            "starting":{
+               "type":{
+                  "$ref":"project-data-date"
+               }
+            },
+            "due":{
+               "type":{
+                  "$ref":"project-data-date"
+               }
+            },
+            "dateCompleted":{
+               "type":{
+                  "$ref":"project-data-date"
+               }
             }
          }
       }
@@ -582,7 +655,7 @@
       },
       "format":{
          "type":"string",
-         "pattern":"^story-steward-1\\.0$",
+         "pattern":"^story-steward-1\\.1$",
          "required":true
       },
       "description":{
@@ -595,6 +668,7 @@
          }
       },
       "content":{
+         "description":"Entities which indicate the actual publishable content, sorted in the order in which they will appear.",
          "type":"array",
          "items":{
             "type":[
@@ -614,46 +688,44 @@
          }
       },
       "notes":{
+         "description":"Entities which indicate research notes and background information, in no particular order.",
          "type":"array",
          "items":{
-            "$ref":"project-data-note"
+            "type":[
+               {
+                  "$ref":"project-data-note"
+               },
+               {
+                  "$ref":"project-data-person"
+               },
+               {
+                  "$ref":"project-data-place"
+               },
+               {
+                  "$ref":"project-data-thing"
+               }
+            ]
          }
       },
-      "journal":{
+      "work":{
+         "description":"Entities which are used for planning and tracking progress, in no particular order.",
          "type":"array",
          "items":{
-            "$ref":"project-data-journal-entry"
-         }
-      },
-      "persons":{
-         "type":"array",
-         "items":{
-            "$ref":"project-data-person"
-         }
-      },
-      "places":{
-         "type":"array",
-         "items":{
-            "$ref":"project-data-place"
-         }
-      },
-      "things":{
-         "type":"array",
-         "items":{
-            "$ref":"project-data-thing"
-         }
-      },
-      "goals":{
-         "type":"array",
-         "items":{
-            "$ref":"project-data-goal"
+            "type":[
+               {
+                  "$ref":"project-data-journal-entry"
+               },
+               {
+                  "$ref":"project-data-goal"
+               },
+               {
+                  "$ref":"project-data-task"
+               }
+            ]
          }
       },
       "history":{
-         "type":"array",
-         "items":{
-            "$ref":"project-data-history-entry"
-         }
+         "$ref":"project-data-history"
       },
       "customizations":{
          "type":"object",
@@ -710,12 +782,12 @@
                   }
                }
             },
-			"tags": {
-			   "type":"array",
-			   "items": {
-			      "type":"string"
-			   }			   
-			}
+            "tags":{
+               "type":"array",
+               "items":{
+                  "type":"string"
+               }
+            }
          }
       },
       "interface":{
