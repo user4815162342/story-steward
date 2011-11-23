@@ -425,11 +425,6 @@ dojo.declare("my.ProjectData", null, {
         
     },
     
-    CreateDataUID: function() {
-        // NOTE: This requires Math.uuid.js.
-        return Math.uuid(10);
-    },
-    
     _assertIsOpen: function() {
         if (!this.isOpen) {
             throw "Project Data has not been opened."
@@ -440,7 +435,7 @@ dojo.declare("my.ProjectData", null, {
         // history entries aren't 'typed', so...
         this._assertIsOpen();
         var base = {
-            uid: this.CreateDataUID(),
+            uid: my.ProjectData.CreateDataUID(),
             when: when
         }
         var parentInfo = {
@@ -463,7 +458,7 @@ dojo.declare("my.ProjectData", null, {
             if (type != base.type) {
                 base.subtype = type;
             }
-            base.uid = this.CreateDataUID();
+            base.uid = my.ProjectData.CreateDataUID();
             base.created = new Date();
             base.modified = new Date();
             if (!base.tags) {
@@ -519,7 +514,7 @@ dojo.declare("my.ProjectData", null, {
                     credits: [{
                         created: now,
                         modified: now,
-                        uid: me.CreateDataUID(),
+                        uid: my.ProjectData.CreateDataUID(),
                         role: "Author"
                     }]
                 
@@ -528,7 +523,7 @@ dojo.declare("my.ProjectData", null, {
                     modified: now,
                     type: "content",
                     subtype: "book",
-                    uid: me.CreateDataUID(),
+                    uid: my.ProjectData.CreateDataUID(),
                     name: defaultName
                 }]
             },
@@ -758,7 +753,7 @@ dojo.declare("my.ProjectData", null, {
     },
     
     CreateCLOB: function() {
-        return this.CreateDataUID();
+        return my.ProjectData.CreateDataUID();
     },
     
     GetCLOB: function(clobID) {
@@ -858,6 +853,13 @@ dojo.declare("my.ProjectData", null, {
     
 });
 
+my.ProjectData.CreateDataUID = function() {
+	// NOTE: This requires Math.uuid.js.
+	return Math.uuid(10);
+}
+    
+
+
 /*
  *
  formatHandler.IsReadOnly();
@@ -874,223 +876,205 @@ dojo.declare("my.ProjectData", null, {
 // initialize the drivers array.
 my.ProjectData.Drivers = {
 	
-	_readDate: function(date) {
-		
-	},
-
-    _projectEntityLoadFixup: function(entity) {
-        if (entity.created) {
-            entity.created = {
-                _type: "Date",
-                _value: entity.created
-            }
-        }
-        if (entity.modified) {
-            entity.modified = {
-                _type: "Date",
-                _value: entity.modified
-            }
-        }
-        if ((entity.type == "content") && entity.content) {
-            if (dojo.isArray(entity.content)) {
-                for (var i = 0; i < entity.content.length; i++) {
-                    entity.content[i] = my.ProjectData.Drivers._projectEntityLoadFixup(entity.content[i]);
-                }
-            } else {
-                entity.content = [my.ProjectData.Drivers._projectEntityLoadFixup(entity.content)];
-            }
-        }
-        if (entity.credits) {
-            if (dojo.isArray(entity.credits)) {
-                for (var i = 0; i < entity.credits.length; i++) {
-                    entity.credits[i] = my.ProjectData.Drivers._projectEntityLoadFixup(entity.credits[i]);
-                }
-            } else {
-                entity.credits = [my.ProjectData.Drivers._projectEntityLoadFixup(entity.credits)];
-            }
-            
-        }
-        if (entity.subtype && entity.subtype == "scene") {
-            if (entity.viewpoint) {
-                entity.viewpoint = {
-                    _reference: entity.viewpoint
-                }
-            }
-            if (entity.setting) {
-                entity.setting = {
-                    _reference: entity.setting
-                }
-            }
-            if (entity.people) {
-                entity.people = dojo.map(entity.people, function(item) {
-                    return {
-                        _reference: item
-                    }
-                })
-            }
-            if (entity.places) {
-                entity.places = dojo.map(entity.places, function(item) {
-                    return {
-                        _reference: item
-                    }
-                })
-            }
-            if (entity.things) {
-                entity.things = dojo.map(entity.things, function(item) {
-                    return {
-                        _reference: item
-                    }
-                })
-            }
-            if (entity.ratings) {
-                for (var i = 0; i < entity.ratings.length; i++) {
-                    entity["rating" + i] = entity.ratings[i];
-                }
-                delete entity.ratings;
-            }
-        }
-        if (entity.type == "person") {
-            if (entity.ratings) {
-                for (var i = 0; i < entity.ratings.length; i++) {
-                    entity["rating" + i] = entity.ratings[i];
-                }
-                delete entity.ratings;
-            }
-        }
-        if (entity.type == "goal") {
-            if (entity.what) {
-                entity.what = {
-                    _reference: entity.what
-                }
-            }
-        }
-        return entity;
-        
-    },
-    
-    _projectEntitySaveFixup: function(entity) {
-        if (entity.created) {
-            entity.created = entity.created._value;
-        }
-        if (entity.modified) {
-            entity.modified = entity.modified._value;
-        }
-        if ((entity.type == "content") && entity.content) {
-            if (dojo.isArray(entity.content)) {
-                for (var i = 0; i < entity.content.length; i++) {
-                    entity.content[i] = my.ProjectData.Drivers._projectEntitySaveFixup(entity.content[i]);
-                }
-            } else {
-                entity.content = [my.ProjectData.Drivers._projectEntitySaveFixup(entity.content)];
-            }
-        }
-        if (entity.credits) {
-            if (dojo.isArray(entity.credits)) {
-                for (var i = 0; i < entity.credits.length; i++) {
-                    entity.credits[i] = my.ProjectData.Drivers._projectEntitySaveFixup(entity.credits[i]);
-                }
-            } else {
-                entity.credits = [my.ProjectData.Drivers._projectEntitySaveFixup(entity.credits)];
-            }
-            
-        }
-        if (entity.subtype && entity.subtype == "scene") {
-            if (entity.viewpoint) {
-                entity.viewpoint = entity.viewpoint._reference;
-            }
-            if (entity.setting) {
-                entity.setting = entity.setting._reference;
-            }
-            if (entity.people) {
-                entity.people = dojo.map(entity.people, function(item) {
-                    return item._reference;
-                })
-            }
-            if (entity.places) {
-                entity.places = dojo.map(entity.places, function(item) {
-                    return item._reference;
-                })
-            }
-            if (entity.things) {
-                entity.things = dojo.map(entity.things, function(item) {
-                    return item._reference;
-                })
-            }
-            if (entity.rating0 || entity.rating1 || entity.rating2 || entity.rating3) {
-                entity.ratings = [entity.rating0 || 0, entity.rating1 || 0, entity.rating2 || 0, entity.rating3 || 0];
-            }
-        }
-        if (entity.type == "person") {
-            if (entity.rating0 || entity.rating1 || entity.rating2 || entity.rating3) {
-                entity.ratings = [entity.rating0 || 0, entity.rating1 || 0, entity.rating2 || 0, entity.rating3 || 0];
-            }
-        }
-        if (entity.type == "goal") {
-            if (entity.what) {
-                entity.what = entity.what._reference;
-            }
-        }
-        return entity;
-        
-    },
-    
     //JSONFormatString: ApplicationInfo.ID + "-1.0",
+	CurrentVersion: "story-steward-1.1",
     
     _writeStandardJSONFormat: function(dataReader,validate) {
         var result = new dojo.Deferred();
         try {
         
+			var fixUp = function(data) {
+				if (data.type) {
+					data.created = fixUp.dateTime(data.created);
+					data.modified = fixUp.dateTime(data.modified);
+					if (data.tags) {
+						data.tags = fixUp.tags(data.tags);
+					}
+					if (fixUp[data.type]) {
+						fixUp[data.type](data);
+					}
+				}
+				return data;
+			}
+			
+			fixUp.tags = function(data) {
+				if (!dojo.isArray(data)) {
+					return [data];
+				}
+				return data;
+			}
+			
+			fixUp.dateTime = function(data) {
+				return data._value;
+			}
+			
+			fixUp.date = function(data) {
+				return data._value.substr(0, data._value.indexOf("T"));
+			}
+			
+			fixUp.project = function(data) {
+				if (data.credits && !dojo.isArray(data.credits)) {
+					data.credits = [data.credits];
+				}
+				dojo.forEach(data.credits || [], fixUp);
+				fixUp.history(data.history);
+			}
+			
+			fixUp.uidReference = function(data) {
+				return data._reference;
+			}
+			
+			fixUp.content = function(data) {
+				if (data.credits && !dojo.isArray(data.credits)) {
+					data.credits = [data.credits];
+				}
+				dojo.forEach(data.credits || [], fixUp);
+				if (data.content && !dojo.isArray(data.content)) {
+					data.content = [data.content];
+				}
+				dojo.forEach(data.content || [], fixUp);
+				if (data.subtype == "scene") {
+					if (data.viewpoint) {
+						data.viewpoint = fixUp.uidReference(data.viewpoint);
+					}
+					if (data.setting) {
+						data.setting = fixUp.uidReference(data.setting);
+					}
+					if (data.people) {
+						data.people = dojo.map(data.people, fixUp.uidReference);
+					}
+					if (data.places) {
+						data.places = dojo.map(data.places, fixUp.uidReference);
+					}
+					if (data.things) {
+						data.things = dojo.map(data.things, fixUp.uidReference);
+					}
+					if (data.ratings) {
+						if (data.rating0 || data.rating1 || data.rating2 || data.rating3) {
+							data.ratings = [];
+							dojo.forEach([0, 1, 2, 3], function(num) {
+								data.ratings[num] = data["rating" + num] || 0;
+								delete data["rating" + num];
+							})
+						}
+					}
+				}
+			}
+			
+			fixUp.journal = function(data) {
+				data.posted = fixUp.dateTime(data.posted);
+			}
+			
+			fixUp.note = function(data) {
+				if (data.subnotes && !dojo.isArray(data.subnotes)) {
+					data.subnotes = [data.subnotes];
+				}
+				dojo.forEach(data.subnotes || [], fixUp);
+			}
+			
+			fixUp.person = function(data) {
+				if (data.ratings) {
+					if (data.rating0 || data.rating1 || data.rating2 || data.rating3) {
+						data.ratings = [];
+						dojo.forEach([0, 1, 2, 3], function(num) {
+							data.ratings[num] = data["rating" + num] || 0;
+							delete data["rating" + num];
+						})
+					}
+				}
+			}
+			
+			fixUp.goal = function(data) {
+				if (data.starting) {
+					data.starting = fixUp.date(data.starting);
+				}
+				if (data.ending) {
+					data.ending = fixUp.date(data.ending);
+				}
+				if (data.where) {
+					data.where = fixUp.uidReference(data.where);
+				}
+			}
+			
+			fixUp.task = function(data) {
+				if (data.starting) {
+					data.starting = fixUp.date(data.starting);
+				}
+				if (data.due) {
+					data.due = fixUp.date(data.due);
+				}
+				if (data.dateCompleted) {
+					data.dateCompleted = fixUp.date(data.dateCompleted);
+				}
+			}
+			
+			fixUp.history = function(data) {
+				// NOTE: the uids are necessary everywhere in order to use the ItemFileWriteStore
+				delete data.uid;
+				delete data.monthIndex.uid;
+				if (data.log && !dojo.isArray(data.log)) {
+					data.log = [data.log];
+				}
+				dojo.forEach(data.log || [], function(entry) {
+					entry.when = fixUp.date(entry.when);
+					if (entry.byBookOrPart && !dojo.isArray(entry.byBookOrPart)) {
+						entry.byBookOrPart = [entry.byBookOrPart];
+					}
+					dojo.forEach(entry.byBookOrPart || [], function(group) {
+						delete group.uid;
+						if (group.subject) {
+							group.subject = fixUp.uidReference(group.subject);
+						}
+						if (group.byStatus && !dojo.isArray(group.byStatus)) {
+							group.byStatus = [group.byStatus];
+						}
+						dojo.forEach(group.byStatus || [], function(item) {
+							delete item.uid;
+						})
+					})
+				})
+			}
+			
+			fixUp.lookup = function(data) {
+				return data.name;
+			}
+            
+						
             var content = [];
             var notes = [];
-            var journals = [];
-            var people = [];
-            var places = [];
-            var things = [];
-            var goals = [];
+            var work = [];
             var project = null;
             var entities = dataReader.GetEntities();
-            for (var i = 0; i < entities.length; i++) {
-                switch (entities[i].type) {
-                    case "content":
-                        content.push(my.ProjectData.Drivers._projectEntitySaveFixup(entities[i]));
-                        break;
-                    case "note":
-                        notes.push(my.ProjectData.Drivers._projectEntitySaveFixup(entities[i]));
-                        break;
-                    case "journal":
-                        journals.push(my.ProjectData.Drivers._projectEntitySaveFixup(entities[i]));
-                        break;
-                    case "person":
-                        people.push(my.ProjectData.Drivers._projectEntitySaveFixup(entities[i]));
-                        break;
-                    case "place":
-                        places.push(my.ProjectData.Drivers._projectEntitySaveFixup(entities[i]));
-                        break;
-                    case "thing":
-                        things.push(my.ProjectData.Drivers._projectEntitySaveFixup(entities[i]));
-                        break;
-                    case "goal":
-                        goals.push(my.ProjectData.Drivers._projectEntitySaveFixup(entities[i]));
-                        break;
-                    case "project":
-                        if (project) {
-                            throw "Invalid project format."
-                        }
-                        project = my.ProjectData.Drivers._projectEntitySaveFixup(entities[i]);
-                        break;
-                }
-            }
+			dojo.forEach(dataReader.GetEntities(),function(entity) {
+				fixUp(entity);
+				switch (entity.type) {
+					case "content":
+						content.push(entity);
+						break;
+					case "note":
+					case "person":
+					case "place":
+					case "thing":
+					    notes.push(entity);
+						break;
+					case "journal":
+					case "goal":
+					case "task":
+					    work.push(entity);
+						break;
+					case "project":
+					    if (project) {
+							throw "Two projects found while saving!";
+						}
+					    project = entity;
+						break;
+				}
+			})
             var rawData = project;
-            rawData.format = my.schemas.ProjectDataValidator.versions.current.name + "-" + 
-			                 my.schemas.ProjectDataValidator.versions.current.major + "." +
-							 my.schemas.ProjectDataValidator.versions.current.minor;
+            rawData.format = my.ProjectData.Drivers.CurrentVersion;
             rawData.content = content;
             rawData.notes = notes;
-            rawData.journals = journals;
-            rawData.people = people;
-            rawData.places = places;
-            rawData.things = things;
-            rawData.goals = goals;
+            rawData.work = work;
             
             rawData.interfaceSettings = dataReader.GetInterfaceSettings();
             
@@ -1109,36 +1093,33 @@ my.ProjectData.Drivers = {
             }
             
             
-            var lookupEntityToString = function(value) {
-                return value.name;
-            }
-            
             var deferreds = [dataReader.GetTags().then(function(arr) {
-                rawData.customizations.tags = dojo.map(arr, lookupEntityToString);
+                rawData.customizations.tags = dojo.map(arr, fixUp.lookup);
             }), dataReader.GetSceneStatuses().then(function(arr) {
-                rawData.customizations.scene.statuses = dojo.map(arr, lookupEntityToString);
+                rawData.customizations.scene.statuses = dojo.map(arr, fixUp.lookup);
             }), dataReader.GetSceneStructures().then(function(arr) {
-                rawData.customizations.scene.structures = dojo.map(arr, lookupEntityToString);
+                rawData.customizations.scene.structures = dojo.map(arr, fixUp.lookup);
             }), dataReader.GetSceneImportances().then(function(arr) {
-                rawData.customizations.scene.importances = dojo.map(arr, lookupEntityToString);
+                rawData.customizations.scene.importances = dojo.map(arr, fixUp.lookup);
             }), dataReader.GetSceneRatings().then(function(arr) {
-                rawData.customizations.scene.ratings = dojo.map(arr, lookupEntityToString);
+                rawData.customizations.scene.ratings = dojo.map(arr, fixUp.lookup);
             }), dataReader.GetPersonRoles().then(function(arr) {
-                rawData.customizations.person.roles = dojo.map(arr, lookupEntityToString);
+                rawData.customizations.person.roles = dojo.map(arr, fixUp.lookup);
             }), dataReader.GetPersonImportances().then(function(arr) {
-                rawData.customizations.person.importances = dojo.map(arr, lookupEntityToString);
+                rawData.customizations.person.importances = dojo.map(arr, fixUp.lookup);
             }), dataReader.GetPersonRatings().then(function(arr) {
-                rawData.customizations.person.ratings = dojo.map(arr, lookupEntityToString);
+                rawData.customizations.person.ratings = dojo.map(arr, fixUp.lookup);
             })];
             var list = new dojo.DeferredList(deferreds);
             list.then(function() {
 				try {
 					if (validate !== false) {
-						var validation = my.schemas.ProjectDataValidator.validate(rawData, my.schemas.ProjectDataValidator.versions.storySteward10);
+						var validation = my.schemas.ProjectDataValidator.validate(rawData, my.schemas.ProjectDataValidator.versions[my.ProjectData.Drivers.CurrentVersion]);
 						if (validation.valid) {
 							result.callback(rawData);
 						} else {
-							// NOTE: This shouldn't happen if we're doing things correctly.
+							// NOTE: This shouldn't happen if we're doing things correctly,
+							// but this makes it idiot-proof.
 							var msg = "A valid project file could not be produced\n\n" +
 							"Details:\n-------\n";
 							for (var i = 0; i < validation.errors.length; i++) {
@@ -1165,84 +1146,198 @@ my.ProjectData.Drivers = {
     _readStandardJSONFormat: function(rawData, readOnly) {
 		var validation = my.schemas.ProjectDataValidator.validate(rawData);
 		if (validation.valid) {
-			if (validation.format == my.schemas.ProjectDataValidator.versions.storySteward10) {
-				var entities = [];
-				entities.push.apply(entities, dojo.map(rawData.content || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-				delete rawData.content;
-				entities.push.apply(entities, dojo.map(rawData.notes || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-				delete rawData.notes;
-				entities.push.apply(entities, dojo.map(rawData.journals || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-				delete rawData.journals;
-				entities.push.apply(entities, dojo.map(rawData.people || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-				delete rawData.people;
-				entities.push.apply(entities, dojo.map(rawData.places || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-				delete rawData.places;
-				entities.push.apply(entities, dojo.map(rawData.things || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-				delete rawData.things;
-				entities.push.apply(entities, dojo.map(rawData.goals || [], my.ProjectData.Drivers._projectEntityLoadFixup));
-				delete rawData.goals;
-				
-				var customizations = rawData.customizations || {};
-				delete rawData.customizations;
-				var interfaceSettings = rawData.interfaceSettings || {};
-				delete rawData.interfaceSettings;
-				
-				// The 'project' entity is the base of the format.
-				entities.push(my.ProjectData.Drivers._projectEntityLoadFixup(rawData));
-				
-				var stringToLookupEntity = function(value) {
-					return {
-						name: value
-					};
+			if (validation.format != my.schemas.ProjectDataValidator.versions[my.ProjectData.Drivers.CurrentVersion]) {
+				if (!my.schemas.ProjectDataValidator.convert(validation.format, my.schemas.ProjectDataValidator.versions[my.ProjectData.Drivers.CurrentVersion], rawData)) {
+					throw "File format is not supported (" + my.schemas.ProjectDataValidator.getVersionInfoString(validation.format) + ")";
 				}
-				
-				return {
-					IsReadOnly: function() {
-						return readOnly;
-					},
-					GetTags: function() {
-						return dojo.map(customizations.tags || [], stringToLookupEntity);
-					},
-					GetSceneStatuses: function() {
-						return dojo.map((customizations.scene && customizations.scene.statuses) || [], stringToLookupEntity)
-					},
-					GetSceneStructures: function() {
-						return dojo.map((customizations.scene && customizations.scene.structures) || [], stringToLookupEntity)
-						
-					},
-					GetSceneImportances: function() {
-						return dojo.map((customizations.scene && customizations.scene.importances) || [], stringToLookupEntity)
-						
-					},
-					GetSceneRatings: function() {
-						return dojo.map((customizations.scene && customizations.scene.ratings) || [], stringToLookupEntity)
-						
-					},
-					GetPersonRoles: function() {
-						return dojo.map((customizations.person && customizations.person.roles) || [], stringToLookupEntity)
-						
-					},
-					GetPersonImportances: function() {
-						return dojo.map((customizations.person && customizations.person.importances) || [], stringToLookupEntity)
-						
-					},
-					GetPersonRatings: function() {
-						return dojo.map((customizations.person && customizations.person.ratings) || [], stringToLookupEntity)
-						
-					},
-					GetInterfaceSettings: function() {
-						return interfaceSettings;
-					},
-					GetEntities: function() {
-						return entities;
+			}
+			
+			var fixUp = function(data) {
+				if (data.type) {
+					data.created = fixUp.dateTime(data.created);
+					data.modified = fixUp.dateTime(data.modified);
+					if (fixUp[data.type]) {
+						fixUp[data.type](data);
 					}
 				}
-			} else {
-				throw "Project format not yet supported.";
+				return data;
+			}
+			
+			fixUp.dateTime = function(data) {
+				return {
+					_type: "Date",
+					_value: data
+				}
+			}
+			
+			fixUp.project = function(data) {
+				dojo.forEach(data.credits || [], fixUp);
+				fixUp.history(data.history);
+			}
+			
+			fixUp.uidReference = function(data) {
+				return {
+					_reference: data
+				}
+			}
+			
+			fixUp.content = function(data) {
+				dojo.forEach(data.credits || [], fixUp);
+				dojo.forEach(data.content || [], fixUp);
+				if (data.subtype == "scene") {
+					if (data.viewpoint) {
+						data.viewpoint = fixUp.uidReference(data.viewpoint);
+					}
+					if (data.setting) {
+						data.setting = fixUp.uidReference(data.setting);
+					}
+					if (data.people) {
+						data.people = dojo.map(data.people, fixUp.uidReference);
+					}
+					if (data.places) {
+						data.places = dojo.map(data.places, fixUp.uidReference);
+					}
+					if (data.things) {
+						data.things = dojo.map(data.things, fixUp.uidReference);
+					}
+					if (data.ratings) {
+						dojo.forEach(data.ratings, function(rating, i) {
+							data["rating" + i] = rating;
+						})
+						delete data.ratings;
+					}
+				}
+			}
+			
+			fixUp.journal = function(data) {
+				data.posted = fixUp.dateTime(data.posted);
+			}
+			
+			fixUp.note = function(data) {
+				dojo.forEach(data.subnotes || [], fixUp);
+			}
+			
+			fixUp.person = function(data) {
+				if (data.ratings) {
+					dojo.forEach(data.ratings, function(rating, i) {
+						data["rating" + i] = rating;
+					})
+					delete data.ratings;
+				}
+				
+			}
+			
+			fixUp.goal = function(data) {
+				if (data.starting) {
+					data.starting = fixUp.dateTime(data.starting);
+				}
+				if (data.ending) {
+					data.ending = fixUp.dateTime(data.ending);
+				}
+				if (data.where) {
+					data.where = fixUp.uidReference(data.where);
+				}
+			}
+			
+			fixUp.task = function(data) {
+				if (data.starting) {
+					data.starting = fixUp.dateTime(data.starting);
+				}
+				if (data.due) {
+					data.due = fixUp.dateTime(data.due);
+				}
+				if (data.dateCompleted) {
+					data.dateCompleted = fixUp.dateTime(data.dateCompleted);
+				}
+			}
+			
+			fixUp.history = function(data) {
+				// NOTE: the uids are necessary everywhere in order to use the ItemFileWriteStore
+				data.uid = my.ProjectData.CreateDataUID();
+				data.monthIndex.uid = my.ProjectData.CreateDataUID();
+				dojo.forEach(data.log || [], function(entry) {
+					entry.when = fixUp.dateTime(entry.when);
+					dojo.forEach(entry.byBookOrPart || [], function(group) {
+						group.uid = my.ProjectData.CreateDataUID();
+						if (group.subject) {
+							group.subject = fixUp.uidReference(group.subject);
+						}
+						dojo.forEach(group.byStatus || [], function(item) {
+							item.uid = my.ProjectData.CreateDataUID();
+						})
+					})
+				})
+			}
+			
+			fixUp.lookup = function(data) {
+				return {
+					name: data
+				};
+			}
+			
+			
+			var entities = [];
+			entities.push.apply(entities, dojo.map(rawData.content || [], fixUp));
+			delete rawData.content;
+			entities.push.apply(entities, dojo.map(rawData.notes || [], fixUp));
+			delete rawData.notes;
+			entities.push.apply(entities, dojo.map(rawData.journals || [], fixUp));
+			delete rawData.work;
+			
+			var customizations = rawData.customizations || {};
+			delete rawData.customizations;
+			var interfaceSettings = rawData.interfaceSettings || {};
+			delete rawData.interfaceSettings;
+			
+			// The 'project' entity is the base of the format.
+			entities.push(fixUp(rawData));
+			
+			// TODO: Still need to fix up history and return it in the formatter.
+	
+			return {
+				IsReadOnly: function() {
+					return readOnly;
+				},
+				GetTags: function() {
+					return dojo.map(customizations.tags || [], fixUp.lookup);
+				},
+				GetSceneStatuses: function() {
+					return dojo.map((customizations.scene && customizations.scene.statuses) || [], fixUp.lookup)
+				},
+				GetSceneStructures: function() {
+					return dojo.map((customizations.scene && customizations.scene.structures) || [], fixUp.lookup)
+					
+				},
+				GetSceneImportances: function() {
+					return dojo.map((customizations.scene && customizations.scene.importances) || [], fixUp.lookup)
+					
+				},
+				GetSceneRatings: function() {
+					return dojo.map((customizations.scene && customizations.scene.ratings) || [], fixUp.lookup)
+					
+				},
+				GetPersonRoles: function() {
+					return dojo.map((customizations.person && customizations.person.roles) || [], fixUp.lookup)
+					
+				},
+				GetPersonImportances: function() {
+					return dojo.map((customizations.person && customizations.person.importances) || [], fixUp.lookup)
+					
+				},
+				GetPersonRatings: function() {
+					return dojo.map((customizations.person && customizations.person.ratings) || [], fixUp.lookup)
+					
+				},
+				GetInterfaceSettings: function() {
+					return interfaceSettings;
+				},
+				GetEntities: function() {
+					return entities;
+				}
 			}
 		} else {
 			var msg = "Project file is not an appropriate format\n\n" +
-			          "Details:\n-------\n";
+			"Details:\n-------\n";
 			for (var i = 0; i < validation.errors.length; i++) {
 				msg += validation.errors[i].property + " " + validation.errors[i].message + "\n";
 			}
@@ -1566,7 +1661,7 @@ my.ProjectData.Drivers = {
                             name: "Branch by Nigel",
                             description: "<p>A monumental foray into the desparate realms of cross-platform software development using HTML and JavaScript.</p>",
                             credits: [{
-                                uid: ProjectData.CreateDataUID(),
+                                uid: my.ProjectData.CreateDataUID(),
 								created: now,
 								modified: now,
                                 name: "Neil M. Sheldon",
@@ -1575,7 +1670,7 @@ my.ProjectData.Drivers = {
                             }]
                         
                         }, {
-                            uid: ProjectData.CreateDataUID(),
+                            uid: my.ProjectData.CreateDataUID(),
                             name: "The Dark Horizon...",
                             type: "content",
                             subtype: "book",
@@ -1583,7 +1678,7 @@ my.ProjectData.Drivers = {
                             modified: now,
                             tags: [],
                             content: [{
-                                uid: ProjectData.CreateDataUID(),
+                                uid: my.ProjectData.CreateDataUID(),
                                 created: now,
                                 modified: now,
                                 type: "content",
@@ -1593,7 +1688,7 @@ my.ProjectData.Drivers = {
                                 text: ProjectData.CreateCLOB(),
                                 tags: []
                             }, {
-                                uid: ProjectData.CreateDataUID(),
+                                uid: my.ProjectData.CreateDataUID(),
                                 name: "...And the brightness beyond.",
                                 created: now,
                                 modified: now,
@@ -1601,7 +1696,7 @@ my.ProjectData.Drivers = {
                                 subtype: "part",
                                 tags: [],
                                 content: [{
-                                    uid: ProjectData.CreateDataUID(),
+                                    uid: my.ProjectData.CreateDataUID(),
                                     created: now,
                                     modified: now,
                                     type: "content",
@@ -1610,7 +1705,7 @@ my.ProjectData.Drivers = {
                                     description: "<p>In which our hero begins his journey and destroys the chalice.</p>",
                                     tags: [],
                                     content: [{
-                                        uid: ProjectData.CreateDataUID(),
+                                        uid: my.ProjectData.CreateDataUID(),
                                         created: now,
                                         modified: now,
                                         type: "content",
@@ -1621,7 +1716,7 @@ my.ProjectData.Drivers = {
                                         lastWordCount: 350,
                                         tags: []
                                     },{
-                                        uid: ProjectData.CreateDataUID(),
+                                        uid: my.ProjectData.CreateDataUID(),
                                         created: now,
                                         modified: now,
                                         type: "content",
@@ -1634,7 +1729,7 @@ my.ProjectData.Drivers = {
                                 
                                 }]
                             }, {
-                                uid: ProjectData.CreateDataUID(),
+                                uid: my.ProjectData.CreateDataUID(),
                                 created: now,
                                 modified: now,
                                 type: "content",
@@ -1645,7 +1740,7 @@ my.ProjectData.Drivers = {
                                 tags: []
                             }]
                         }, {
-                            uid: ProjectData.CreateDataUID(),
+                            uid: my.ProjectData.CreateDataUID(),
                             type: "note",
                             created: now,
                             modified: now,
@@ -1653,7 +1748,7 @@ my.ProjectData.Drivers = {
                             name: "Here's the Truth about the Island."
                         
                         }, {
-                            uid: ProjectData.CreateDataUID(),
+                            uid: my.ProjectData.CreateDataUID(),
                             type: "goal",
                             created: now,
                             modified: now,
@@ -1662,7 +1757,7 @@ my.ProjectData.Drivers = {
                             ending: dojo.date.add(now, "month", 1),
                             targetWordCount: 500
                         }, {
-                            uid: ProjectData.CreateDataUID(),
+                            uid: my.ProjectData.CreateDataUID(),
                             type: "goal",
                             created: now,
                             modified: now,
@@ -1672,7 +1767,7 @@ my.ProjectData.Drivers = {
                             startingWordCount: 100,
                             targetWordCount: 500,
                             history: [{
-                                uid: ProjectData.CreateDataUID(),
+                                uid: my.ProjectData.CreateDataUID(),
                                 when: dojo.date.add(now, "day", -6),
                                 wordCount: 350
                             }]
