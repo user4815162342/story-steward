@@ -16,7 +16,8 @@
          "Goal.startingWordCount and targetWordCount changed to startingCount and targetCount.",
          "Goal.targetCount is now required.",
          "Reorganized the types of entities into three groups on the project (Content, Notes, Work), instead of seven (Content, Notes, People, Places, Things, Journal, Goals)",
-         "Added task entity for tracking tasks"
+         "Added task entity for tracking tasks",
+         "Removed subtype from content entities, replaced with differentiated values for type"
       ],
       "1.0":[
          "Initial specification, based on actual use in Story Steward."
@@ -99,7 +100,7 @@
                      },
                      "chapters":{
                         "title":"Chapter Count",
-                        "description":"The number of chapters counted in the current Book or Part.",
+                        "description":"The number of chapters counted in the current Book or Part. This can not be grouped by status since a single chapter can have multiple statuses.",
                         "type":"integer",
                         "minimum":0
                      },
@@ -131,31 +132,6 @@
                      }
                   }
                }
-            }
-         }
-      },
-      {
-         "id":"project-data-history",
-         "title":"History",
-         "description":"Tracks historical summary data for user's reference.",
-         "type":"object",
-         "properties":{
-            "log":{
-               "type":"array",
-               "items":{
-                  "$ref":"project-data-history-entry"
-               }
-            },
-            "monthIndex":{
-               "description":"Used to help find items in the log. Each property name represents the year and the month in ISO 8601 format. The value represents an index into the array of log entries for the first date recorded in the specified month, or -1 if the year and month are not found. If found, the index must be kept up to date by the application.",
-               "type":"object",
-               "patternProperties":{
-			      "^(?:[+-]\\d*)?\\d{4}-(?:0\\d|1[0-2])$":{
-                     "type":"integer",
-                     "minimumValue":0
-                  }
-               },
-               "additionalProperties":false
             }
          }
       },
@@ -225,12 +201,6 @@
             "$ref":"project-data-entity"
          },
          "properties":{
-            "type":{
-               "pattern":"^content$"
-            },
-            "subtype":{
-               "type":"string"
-            },
             "description":{
                "$ref":"project-data-memo"
             },
@@ -252,7 +222,7 @@
             "$ref":"project-data-content"
          },
          "properties":{
-            "subtype":{
+            "type":{
                "pattern":"^scene$"
             },
             "begins":{
@@ -341,7 +311,7 @@
             "$ref":"project-data-content"
          },
          "properties":{
-            "subtype":{
+            "type":{
                "pattern":"^chapter$"
             },
             "content":{
@@ -363,7 +333,7 @@
             "$ref":"project-data-content"
          },
          "properties":{
-            "subtype":{
+            "type":{
                "pattern":"^part$"
             },
             "content":{
@@ -388,7 +358,7 @@
             "$ref":"project-data-content"
          },
          "properties":{
-            "subtype":{
+            "type":{
                "pattern":"^book$"
             },
             "content":{
@@ -724,8 +694,13 @@
             ]
          }
       },
-      "history":{
-         "$ref":"project-data-history"
+      "history": {
+         "title":"History",
+         "description":"Tracks historical summary data for user's reference.",
+         "type":"array",
+         "items":{
+             "$ref":"project-data-history-entry"
+         }
       },
       "customizations":{
          "type":"object",

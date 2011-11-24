@@ -233,8 +233,11 @@ dojo.require("dojox.json.ref");
 						
 					},
 					"goal": function(data) {
+						debugger;
 						convertEntity(data);
-						data.whatStatus = data.targetStatus;
+						if (data.targetStatus) {
+							data.whatStatus = data.targetStatus;
+						}
 						delete data.targetStatus;
 						// No need to fix what/where, since that wasn't used
 						// previously.
@@ -271,6 +274,9 @@ dojo.require("dojox.json.ref");
 								dojo.forEach(data.content || [], convertObject);
 								break;
 						}
+						// new format doesn't bother with subtype
+						data.type = data.subtype;
+						delete data.subtype;
 						
 					}
 				}
@@ -290,9 +296,9 @@ dojo.require("dojox.json.ref");
 				
 				data.format = this.version.name + "-" + this.version.major + "." + this.version.minor;
 				
-					dojo.forEach(data.credits || [], convert.credit);
+				dojo.forEach(data.credits || [], convert.credit);
 				
-					dojo.forEach(data.content || [], convertObject);
+				dojo.forEach(data.content || [], convertObject);
 				if (data.notes) {
 					dojo.forEach(data.notes, convertObject);
 				} else {
@@ -322,10 +328,7 @@ dojo.require("dojox.json.ref");
 					return a.when < b.when ? -1 : (a.when > b.when ? 1 : 0);
 				})
 				
-				data.history = {
-					log: [],
-					monthIndex: {}
-				}
+				data.history = []
 				
 				if (history.length > 0) {
 					function convertHistory(data) {
@@ -344,19 +347,13 @@ dojo.require("dojox.json.ref");
 						
 					}
 					
-					function getIndexValue(when) {
-						return /^(?:[+-]\d*)?\d{4}-(?:0\d|1[0-2])/.exec(when)[0];
-					}
-					
 					var last = convertHistory(history[0]);
-					data.history.log.push(last);
-					var lastIndex = getIndexValue(last.when);
-					data.history.monthIndex[lastIndex] = data.history.log.length - 1;
+					data.history.push(last);
 					for (var i = 1; i < history.length; i++) {
 						if (history[i].when == last.when) {
 							var statuses = last.byBookOrPart[0].byStatus;
 							var found = false;
-							var subtract = (history[i].status == "Unknown"); 
+							var subtract = (history[i].status == "Unknown");
 							for (var j = 0; j < statuses.length; j++) {
 								if (subtract) {
 									history[i].wordCount -= statuses[j].words;
@@ -374,12 +371,7 @@ dojo.require("dojox.json.ref");
 							}
 						} else {
 							last = convertHistory(history[i]);
-							data.history.log.push(last);
-							var nextIndex = getIndexValue(last.when);
-							if (nextIndex != lastIndex) {
-								lastIndex = nextIndex;
-								data.history.monthIndex[lastIndex] = data.history.log.length - 1;
-							}
+							data.history.push(last);
 						}
 					}
 				}
