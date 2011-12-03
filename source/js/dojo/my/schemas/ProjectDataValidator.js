@@ -253,7 +253,7 @@ dojo.require("dojox.json.ref");
 						}
 						for (var i = 0; i < data.history.length; i++) {
 							data.history[i].when = convertTimestampToDate(data.history[i].when);
-							data.history[i].status = data.whatStatus || "Unknown";
+							data.history[i].status = data.whatStatus || null;
 							history.push(data.history[i]);
 						}
 						delete data.history;
@@ -332,42 +332,64 @@ dojo.require("dojox.json.ref");
 				
 				if (history.length > 0) {
 					function convertHistory(data) {
-						return {
+						var result = {
 							uid: data.uid,
 							when: data.when,
-							byBookOrPart: [{
+							noBookOrPart: {
 								chapters: 0,
-								byStatus: [{
-									status: data.status,
-									scenes: 0,
-									words: data.wordCount
-								}]
-							}]
+								statuses: {
+									
+								}
+							}
 						}
-						
+						if (data.status) {
+							result.noBookOrPart.statuses[data.status] = {
+								scenes: 0,
+								words: data.wordCount
+							}
+						} else {
+							result.noBookOrPart.noStatus = {
+								scenes: 0,
+								words: data.wordCount
+							}
+						}
+						return result;
 					}
 					
 					var last = convertHistory(history[0]);
 					data.history.push(last);
 					for (var i = 1; i < history.length; i++) {
 						if (history[i].when == last.when) {
-							var statuses = last.byBookOrPart[0].byStatus;
+							var statuses = last.noBookOrPart.statuses;
 							var found = false;
-							var subtract = (history[i].status == "Unknown");
-							for (var j = 0; j < statuses.length; j++) {
-								if (subtract) {
-									history[i].wordCount -= statuses[j].words;
-								}
-								if (!found && (statuses[j].status == history[i].status)) {
-									found = true;
+							var subtract = (history[i].status === null);
+							if (subtract && last.noBookOrPart.noStatus) {
+								history[i].wordCount -= last.noBookOrPart.noStatus.words;
+								found = true;
+							}
+							for (var status in statuses) {
+								if (statuses.hasOwnProperty(status)) {
+									if (subtract) {
+										history[i].wordCount -= last.noBookOrPart.statuses[status].words;
+									}
+									if (!found && status === history[i].status) {
+										found = true;
+									}
 								}
 							}
 							if (!found) {
-								statuses.push({
-									status: history[i].status,
-									scenes: 0,
-									words: history[i].wordCount
-								})
+								if (history[i].status === null) {
+								   last.noBookOrPart.noStatus = {
+								   	   scenes: 0,
+									   words: history[i].wordCount
+								   }
+								} else {
+									statuses[history[i].status] = {
+										status: history[i].status,
+										scenes: 0,
+										words: history[i].wordCount
+									};
+								}
 							}
 						} else {
 							last = convertHistory(history[i]);

@@ -11,7 +11,7 @@
          "Note.subnote will now only accept an array of notes, lone note entities are not valid.",
          "History is no longer kept with each goal. A new global history structure has been added to avoid duplication of data, and to allow people to track their history without specifying a goal. This structure also supports grouping by book, part and scene status.",
          "Goal.targetStatus has been changed to whatStatus.",
-		 "Goal.what has been changed to Goal.where, and has been more clearly defined.",
+         "Goal.what has been changed to Goal.where, and has been more clearly defined.",
          "New Goal.what added to specify whether words, scenes or chapters should be counted.",
          "Goal.startingWordCount and targetWordCount changed to startingCount and targetCount.",
          "Goal.targetCount is now required.",
@@ -86,52 +86,60 @@
             "when":{
                "$ref":"project-data-date"
             },
-            "byBookOrPart":{
-               "description":"Counts grouped by the Book or Part they occurred in. Counts per Book refer only to counts from Chapters or Scenes not also inside a Part in the Book.",
-               "type":"array",
-               "items":{
-                  "type":"object",
-                  "properties":{
-                     "subject":{
-                        "description":"The Book or Part for which the counts apply. If this is missing, then the history applies to scenes and chapters outside of any book, or it is legacy data from an older format",
-                        "type":{
-                           "$ref":"project-data-uid-ref"
-                        }
-                     },
-                     "chapters":{
-                        "title":"Chapter Count",
-                        "description":"The number of chapters counted in the current Book or Part. This can not be grouped by status since a single chapter can have multiple statuses.",
-                        "type":"integer",
-                        "minimum":0
-                     },
-                     "byStatus":{
-                        "description":"Counts grouped by the status of the scene.",
-                        "type":"array",
-                        "items":{
+            "booksAndParts":{
+               "description":"Counts statistics grouped by the Book or Part they occurred in. Counts per Book refer only to counts from Chapters or Scenes not also inside a Part in the Book.",
+               "type":"object",
+               "patternProperties":{
+                  "^(?!uid).*|uid.+$":{
+                     "id":"project-data-history-entry-book-group",
+                     "description":"Property is the uid for a book or part for which summary data is found. For future compatibility, the name 'uid' is not allowed.",
+                     "type":"object",
+                     "properties":{
+                        "parent":{
+                           "description":"The containing parent of the book or part. This allows tracking this history when content has moved to different books. If this is missing, then the subject is at the root.",
+                           "type":{
+                              "$ref":"project-data-uid-ref"
+                           }
+                        },
+                        "chapters":{
+                           "title":"Chapter Count",
+                           "description":"The number of chapters counted in the current Book or Part. This can not be grouped by status since a single chapter can have multiple statuses.",
+                           "type":"integer",
+                           "minimum":0
+                        },
+                        "statuses":{
+                           "description":"Counts grouped by the status of the scene.",
                            "type":"object",
-                           "properties":{
-                              "status":{
-                                 "title":"Scene Status",
-                                 "description":"The scene status for which the counts apply. This may be a status that has been deleted from the list of statuses.",
-                                 "type":"string"
-                              },
-                              "scenes":{
-                                 "title":"Scene Count",
-                                 "description":"The number of scenes with the current status, in the current Book or Part.",
-                                 "type":"integer",
-                                 "minimum":0
-                              },
-                              "words":{
-                                 "title":"Word Count",
-                                 "description":"The number of words in all scenes with the current status, in the current Book or Part.",
-                                 "type":"integer",
-                                 "minimum":0
+                           "patternProperties":{
+                              "^(?!uid).*|uid.+$":{
+                                 "id":"project-data-history-entry-status-group",
+                                 "description":"Property is a valid scene status for which summary data is found. For future compatibility, the name 'uid' is not allowed.",
+                                 "properties":{
+                                    "scenes":{
+                                       "title":"Scene Count",
+                                       "description":"The number of scenes with the current status, in the current Book or Part.",
+                                       "type":"integer",
+                                       "minimum":0
+                                    },
+                                    "words":{
+                                       "title":"Word Count",
+                                       "description":"The number of words in all scenes with the current status, in the current Book or Part.",
+                                       "type":"integer",
+                                       "minimum":0
+                                    }
+                                 }
                               }
                            }
+                        },
+                        "noStatus":{
+                           "$ref":"project-data-history-entry-status-group"
                         }
                      }
                   }
                }
+            },
+            "noBookOrPart":{
+               "$ref":"project-data-history-entry-book-group"
             }
          }
       },
@@ -264,7 +272,7 @@
                "type":"integer"
             },
             "status":{
-			   "description":"Although new statuses should be picked from the current list of statuses, this value may be a status that has been deleted from the list of statuses.",
+               "description":"Although new statuses should be picked from the current list of statuses, this value may be a status that has been deleted from the list of statuses.",
                "type":"string"
             },
             "structure":{
@@ -530,7 +538,7 @@
             },
             "whatStatus":{
                "description":"Allows specifying a specific scene which the scenes must have in order to be counted.  This may be a status that has been deleted from the list of statuses.",
-               "type": "string"
+               "type":"string"
             },
             "where":{
                "description":"Allows specification of a specific book, part, chapter or scene in which the wordcount must exist.",
@@ -694,12 +702,12 @@
             ]
          }
       },
-      "history": {
+      "history":{
          "title":"History",
          "description":"Tracks historical summary data for user's reference.",
          "type":"array",
          "items":{
-             "$ref":"project-data-history-entry"
+            "$ref":"project-data-history-entry"
          }
       },
       "customizations":{

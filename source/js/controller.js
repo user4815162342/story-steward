@@ -275,18 +275,12 @@ var Controller = new function() {
     
     
     this.ShowProjectProperties = function() {
-        this.ProjectData.ProjectStore.fetch({
-            query: {
-                uid: 'project'
-            },
-            onItem: function(item) {
-                Controller.ShowDataItem(item);
-            },
-            onError: function() {
-                alert("Error fetch project properties.");
-            }
-        });
-    };
+		this.ProjectData.GetProject().then(function(item) {
+			Controller.ShowDataItem(item);
+		}, function(ex) {
+			alert("Error showing project properties: " + ex);
+		});
+	};
     
     this._getTreeNodeIconClass = function(item, opened) {
         if (this.ProjectData.ProjectStore.isItem(item)) {
@@ -671,7 +665,7 @@ var Controller = new function() {
         var result = new dojo.Deferred();
         var me = this;
         this.ProjectData.LoadProject(uri, mightBeNew, forceReadOnly).then(function() {
-            me.StartupGoals().then(function() {
+			me.UpdateTotalWordCountStatus(false).then(function() {
                 result.callback(true);
             }, function(e) {
                 result.errback(e);
@@ -726,7 +720,7 @@ var Controller = new function() {
         var deferredApplies = new dojo.DeferredList(tabSavers, false, true);
         var me = this;
         deferredApplies.then(function() {
-            me.UpdateGoals().then(function() {
+			me.UpdateTotalWordCountStatus(true).then(function() {
                 me.ProjectData.SaveProject().then(function() {
                     result.callback(true);
                 }, function(ex) {
@@ -1118,196 +1112,27 @@ var Controller = new function() {
         
     }
     
-    this.UpdateGoals = function() {
-        var result = new dojo.Deferred();
-        var today = new Date();
-        today.setHours(0, 0, 0, 0);
-        var store = this.ProjectData.ProjectStore;
-        var project = this.ProjectData;
-        var totalWordCount = null;
-        var deferreds = [];
-        
-        var UpdateGoal = dojo.hitch(this, function(goal) {
-            var ending = store.getValue(goal, "ending", null);
-            // if the ending point of the goal has not been reached,
-            // or if ending is null (meaning the ending is eternity)
-            if ((!ending) || (dojo.date.compare(ending, today, "date") >= 0)) {
-                var starting = store.getValue(goal, "starting", null);
-                // if the starting point of the goal has been reached,
-                // or if the starting point is null (meaning the start was when the
-                // goal was created).
-                if ((!starting) || (dojo.date.compare(starting, today, "date") <= 0)) {
-                    var history = store.getValues(goal, "history");
-                    var entry = null;
-                    for (var i = 0; i < history.length; i++) {
-                        var historyDate = store.getValue(history[i], "when");
-                        if (dojo.date.compare(historyDate, today, "date") == 0) {
-                            entry = history[i];
-                        }
-                        
-                    }
-                    if (!entry) {
-                        entry = project.NewGoalHistoryEntry(goal, today);
-                    }
-                    if (totalWordCount === null) {
-                        var result = this.CalculateTotalWordCount();
-                        result.then(function(value) {
-                            totalWordCount = value;
-                            store.setValue(entry, "wordCount", value)
-                            
-                        });
-                        return result;
-                    } else {
-                        store.setValue(entry, "wordCount", totalWordCount);
-                    }
-                    return null;
-                }
-            }
-            return null;
-        });
-        
-        
-        this.ProjectData.ProjectStore.fetch({
-            query: {
-                type: 'goal'
-            },
-            onItem: function(item) {
-                try {
-                    var task = UpdateGoal(item);
-                    if (task) {
-                        deferreds.push(task);
-                    }
-                } catch (ex) {
-                    result.errback("Error updating goal: " + ex);
-                }
-            },
-            onComplete: dojo.hitch(this, function() {
-                var list = new dojo.DeferredList(deferreds, false, true);
-                list.then(function() {
-                    result.callback();
-                }, function(ex) {
-                    result.errback(ex);
-                })
-            }),
-            onError: function(ex) {
-                result.errback("Error fetching goals for processing: " + ex);
-            }
-        });
-        return result;
-    }
+	this.UpdateTotalWordCountStatus = function(forceUpdate) {
+		var result = new dojo.Deferred();
+		try {
+			if (forceUpdate) {
+				this.ProjectData.History.updateOrCreateCurrentEntry().then(function(answer) {
+					dojo.byId("statusPanel-totalWordCount").innerHTML = "Words: " + answer.getTotalWordCount();
+					result.callback();
+				}, function(ex) {
+					result.errback(ex);
+				})
+			} else {
+				var answer = this.ProjectData.History.getCurrentOrPriorEntry();
+				dojo.byId("statusPanel-totalWordCount").innerHTML = "Words: " + ((answer && answer.getTotalWordCount()) || 0);
+				result.callback();
+			}
+		} catch (ex) {
+			result.errback(ex);
+		}
+		return result;
+	}
     
-    this.CalculateTotalWordCount = function() {
-        var result = new dojo.Deferred();
-        var totalCount = 0;
-        var store = this.ProjectData.ProjectStore;
-        var addWordCount = function(item) {
-            var doNotPublish = store.getValue(item, "doNotPublish", false);
-            if (doNotPublish) {
-                return;
-            }
-            var subtype = store.getValue(item, "subtype", null);
-            if (subtype) {
-                if (subtype == "scene") {
-                    totalCount += store.getValue(item, "lastWordCount", 0);
-                } else {
-                    var contents = store.getValues(item, "content");
-                    for (var i = 0; i < contents.length; i++) {
-                        addWordCount(contents[i]);
-                    }
-                }
-            }
-        }
-        store.fetch({
-            query: {
-                type: 'content'
-            },
-            onItem: dojo.hitch(this, function(item) {
-                addWordCount(item);
-            }),
-            onComplete: function() {
-                // FUTURE: Is this really the right place to do this?
-                dojo.byId("statusPanel-totalWordCount").innerHTML = "Words: " + totalCount;
-                result.callback(totalCount);
-            },
-            onError: function(ex) {
-                result.errback("Error fetching contents for calculating word count: " + ex);
-            }
-        });
-        return result;
-    }
-    
-    
-    this.StartupGoals = function() {
-        var result = new dojo.Deferred();
-        var today = new Date();
-        today.setHours(0, 0, 0, 0);
-        var store = this.ProjectData.ProjectStore;
-        var totalWordCount = null;
-        var deferreds = [];
-        
-        var StartupGoal = dojo.hitch(this, function(goal) {
-            var ending = store.getValue(goal, "ending", null);
-            // if the ending point of the goal has not been reached,
-            // or if ending is null (meaning the ending is eternity)
-            if ((!ending) || (dojo.date.compare(ending, today, "date") >= 0)) {
-                var starting = store.getValue(goal, "starting", null);
-                var startingCount = store.getValue(goal, "startingWordCount", null);
-                // if the starting point of the goal has not been reached,
-                // (if starting is null then the goal started as soon as it
-                // was created)
-                // or if the startingCount has not been set...
-                if ((starting && (dojo.date.compare(starting, today, "date") >= 0)) ||
-                (startingCount === null)) {
-                    //     calculate the total word count for the goal and put
-                    //     it in startingWordCount.
-                    if (totalWordCount === null) {
-                        var result = this.CalculateTotalWordCount();
-                        result.then(function(value) {
-                            totalWordCount = value;
-                            store.setValue(goal, "startingWordCount", value)
-                            
-                        });
-                        return result;
-                    } else {
-                        store.setValue(goal, "startingWordCount", totalWordCount);
-                    }
-                    return null;
-                    
-                }
-            }
-            return null;
-        });
-        
-        
-        this.ProjectData.ProjectStore.fetch({
-            query: {
-                type: 'goal'
-            },
-            onItem: function(item) {
-                try {
-                    var task = StartupGoal(item);
-                    if (task) {
-                        deferreds.push(task);
-                    }
-                } catch (ex) {
-                    result.errback("Error updating goal: " + ex);
-                    throw ex;
-                }
-            },
-            onComplete: dojo.hitch(this, function() {
-                var list = new dojo.DeferredList(deferreds, false, true);
-                list.then(function() {
-                    result.callback();
-                }, function(ex) {
-                    result.errback(ex);
-                })
-            }),
-            onError: function(ex) {
-                result.errback("Error fetching goals for processing: " + ex);
-            }
-        });
-        return result;
-    }
     
     this.UpdateWordCount = function(dataItem, text) {
         // http://www.electrictoolbox.com/count-words-fckeditor-javascript/

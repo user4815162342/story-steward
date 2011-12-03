@@ -23,6 +23,8 @@ dojo.require("my.screens.ProjectViewer");
 dojo.require("my.screens.SceneViewer");
 dojo.require("my.screens.ThingViewer");
 dojo.require("my.schemas.ProjectDataValidator");
+dojo.require("my.utilities");
+dojo.require("my.data.History");
 dojo.declare("my.ProjectData", null, {
 
     TypeLookup: {
@@ -164,6 +166,11 @@ dojo.declare("my.ProjectData", null, {
             data: this._createProjectData(),
             typeMap: this.genericDataStoreTypeMap
         });
+		
+		this.History = new my.data.History({
+			projectData: this
+		});
+				
         // add save action
         var projectData = this;
         
@@ -329,6 +336,9 @@ dojo.declare("my.ProjectData", null, {
                 GetInterfaceSettings: function() {
                     return projectData.InterfaceSettings;
                 },
+				GetHistory: function() {
+					return projectData.History.serialize();
+				},
                 GetEntities: function() {
                     return store._getFileContent();
                 }
@@ -432,115 +442,67 @@ dojo.declare("my.ProjectData", null, {
     },
 	
 	GetProject: function() {
-		// TODO: Should use this in controller.
-        this._assertIsOpen();
 		var result = new dojo.Deferred();
-        this.ProjectStore.fetch({
-            query: {
-                uid: 'project'
-            },
-            onItem: function(item) {
-				result.callback(item);
-            },
-            onError: function(ex) {
-				result.errback(ex);
-            }
-        });
-		return result;
-	},
-	
-	GetHistory: function(starting, ending) {
-		this._assertIsOpen();
-		var result = new dojo.Deferred();
-		this.GetProject().then(dojo.hitch(this, function(project) {
-
-            // TODO: This would be a good search function.		
-		    function search(arr, value, comparator, showLessThan) {
-				// Basically a binary search, but returns the index at which
-				// the item should be inserted if it isn't there.
-				// Oh, Dear Supreme Computer, I hope I've done this correctly...
-				
-				var bottom = -1;
-				var top = arr.length;
-				var middle;
-				var comparison;
-				
-				while ((top - bottom) > 1) {
-					middle = (bottom + top) >> 1;
-					comparison = comparator(arr[middle], value);
-					if (comparison < 0) {
-						bottom = middle;
-					} else if (comparison > 0) {
-						top = middle;
-					} else {
-						return middle;
-					}
+		try {
+			this._assertIsOpen();
+			this.ProjectStore.fetch({
+				query: {
+					uid: 'project'
+				},
+				onItem: function(item) {
+					result.callback(item);
+				},
+				onError: function(ex) {
+					result.errback(ex);
 				}
-				return showLessThan ? bottom : top;;
-				
-			}
-			// Need to build a regex string that matches all dates within the range.
-			starting = starting || new Date(0);
-			ending = ending || new Date();
-			
-			// NOTE: It'd be nice to do a query, but there are no options
-			// for date ranges, and it would be just as quick for me to just
-			// iterate through the items myself.
-			var entries = this.ProjectStore.getValues(project, "history");
-			// ...err... that is, do a binary search.
-			var compare = dojo.hitch(this,function(a,b) {
-				return dojo.date.compare(this.ProjectStore.getValue(a,"when"),b,"date");
-			})
-			
-			var returnValue = {
-				project: project,
-				entries: []
-			};
-			
-			var startIndex = search(entries,starting,compare);
-			if (startIndex < entries.length) {
-				var endIndex = search(entries, ending, compare, true);
-				if ((endIndex >= 0) && (endIndex >= startIndex)) {
-					returnValue.entries = entries.slice(starting,endIndex);
-				} // else end is before entire range
-			} // else start is after entire range
-			
-			result.callback(returnValue)
-			
-		}), function(ex) {
+			});
+		} catch (ex) {
 			result.errback(ex);
-		})
+		}
 		return result;
 	},
 	
-	GetCurrentHistoryEntry: function() {
-		this._assertIsOpen();
-		var result = new dojo.Deferred();
-		var now = new Date();
-		now = new Date(now.getUTCFullYear(),now.getUTCMonth,now.getUTCDate(),0,0,0,0)
-		this.GetHistory(now,now).then(dojo.hitch(this,function(data) {
-			if (data.entries.length) {
-				result.callback(data.entries[0])
-			} else {
-				result.callback(
-				   this.ProjectStore.newItem({
-				   	  uid: my.ProjectData.CreateDataUID(),
-					  when: now,
-					  byBookOrPart: []
-				   },
-				   {
-				   	  parent: data.project,
-					  attribute: "history"
-				   })
-				)
-				
+	IterateContent: function(request) {
+		var _iterate = dojo.hitch(this, function(item) {
+			switch (this.ProjectStore.getValue(item, "subtype")) {
+				case "book":
+					request.onBook && request.onBook(item);
+					dojo.forEach(this.ProjectStore.getValues(item, "content"), _iterate);
+					request.onBookComplete && request.onBookComplete(item);
+					break;
+				case "part":
+					request.onPart && request.onPart(item);
+					dojo.forEach(this.ProjectStore.getValues(item, "content"), _iterate);
+					request.onPartComplete && request.onPartComplete(item);
+					break;
+				case "chapter":
+					request.onChapter && request.onChapter(item);
+					dojo.forEach(this.ProjectStore.getValues(item, "content"), _iterate);
+					request.onChapterComplete && request.onChapterComplete(item);
+					break;
+				case "scene":
+					request.onScene && request.onScene(item);
 			}
-		}),function(ex){
-			result.errback(ex);
 		})
-		return result;
+		
+		this._assertIsOpen();
+		this.ProjectStore.fetch({
+			query: {
+				type: 'content'
+			},
+			onBegin: function() {
+				request.onBegin && request.onBegin();
+			},
+			onItem: _iterate,
+			onComplete: function() {
+				request.onComplete && request.onComplete()
+			},
+			onError: function(ex) {
+				request.onError && request.onError(ex);
+			}
+		})
 	},
-    
+	
     NewDataItem: function(type, base, parentInfo) {
         this._assertIsOpen();
         if (this.TypeLookup.hasOwnProperty(type)) {
@@ -824,6 +786,8 @@ dojo.declare("my.ProjectData", null, {
             }
             this.InterfaceSettings = formatHandler.GetInterfaceSettings();
             
+			this.History.deserialize(formatHandler.GetHistory());
+			
             // assign the project data here.
             // Have to jump through some hoops to 'refresh' the data.
             this.ProjectStore.clearOnClose = true;
@@ -1013,7 +977,6 @@ my.ProjectData.Drivers = {
 					data.credits = [data.credits];
 				}
 				dojo.forEach(data.credits || [], fixUp);
-				fixUp.history(data.history);
 			}
 			
 			fixUp.uidReference = function(data) {
@@ -1114,31 +1077,6 @@ my.ProjectData.Drivers = {
 				}
 			}
 			
-			fixUp.history = function(data) {
-				// NOTE: the uids are necessary everywhere in order to use the ItemFileWriteStore
-				if (!dojo.isArray(data)) {
-					data = [data];
-				}
-				dojo.forEach(data || [], function(entry) {
-					entry.when = fixUp.date(entry.when);
-					if (entry.byBookOrPart && !dojo.isArray(entry.byBookOrPart)) {
-						entry.byBookOrPart = [entry.byBookOrPart];
-					}
-					dojo.forEach(entry.byBookOrPart || [], function(group) {
-						delete group.uid;
-						if (group.subject) {
-							group.subject = fixUp.uidReference(group.subject);
-						}
-						if (group.byStatus && !dojo.isArray(group.byStatus)) {
-							group.byStatus = [group.byStatus];
-						}
-						dojo.forEach(group.byStatus || [], function(item) {
-							delete item.uid;
-						})
-					})
-				})
-			}
-			
 			fixUp.lookup = function(data) {
 				return data.name;
 			}
@@ -1182,6 +1120,8 @@ my.ProjectData.Drivers = {
             rawData.content = content;
             rawData.notes = notes;
             rawData.work = work;
+			
+			rawData.history = dataReader.GetHistory();
             
             rawData.interfaceSettings = dataReader.GetInterfaceSettings();
             
@@ -1279,7 +1219,6 @@ my.ProjectData.Drivers = {
 			
 			fixUp.project = function(data) {
 				dojo.forEach(data.credits || [], fixUp);
-				fixUp.history(data.history);
 			}
 			
 			fixUp.uidReference = function(data) {
@@ -1364,22 +1303,6 @@ my.ProjectData.Drivers = {
 				}
 			}
 			
-			fixUp.history = function(data) {
-				// NOTE: the uids are necessary everywhere in order to use the ItemFileWriteStore
-				dojo.forEach(data || [], function(entry) {
-					entry.when = fixUp.dateTime(entry.when);
-					dojo.forEach(entry.byBookOrPart || [], function(group) {
-						group.uid = my.ProjectData.CreateDataUID();
-						if (group.subject) {
-							group.subject = fixUp.uidReference(group.subject);
-						}
-						dojo.forEach(group.byStatus || [], function(item) {
-							item.uid = my.ProjectData.CreateDataUID();
-						})
-					})
-				})
-			}
-			
 			fixUp.lookup = function(data) {
 				return {
 					name: data
@@ -1388,13 +1311,15 @@ my.ProjectData.Drivers = {
 			
 			
 			var entities = [];
-			debugger;
 			entities.push.apply(entities, dojo.map(rawData.content || [], fixUp));
 			delete rawData.content;
 			entities.push.apply(entities, dojo.map(rawData.notes || [], fixUp));
 			delete rawData.notes;
 			entities.push.apply(entities, dojo.map(rawData.work || [], fixUp));
 			delete rawData.work;
+			
+			var history = rawData.history;
+			delete rawData.history;
 			
 			var customizations = rawData.customizations || {};
 			delete rawData.customizations;
@@ -1443,7 +1368,10 @@ my.ProjectData.Drivers = {
 				},
 				GetEntities: function() {
 					return entities;
-				}
+				},
+				GetHistory: function() {
+					return history;
+				},
 			}
 		} else {
 			var msg = "Project file is not an appropriate format\n\n" +
@@ -1758,13 +1686,33 @@ my.ProjectData.Drivers = {
         var SampleDatabases = {
             TheDarkHorizon: function(readOnly) {
                 var now = new Date(); // for creating UID's.
-                var today = new Date(now.getFullYear(),now.getMonth(),now.getDate(),0,0,0,0);
-				var historyWhen = dojo.date.add(today, "day", -6);
+                var today = new Date(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate(),0,0,0,0);
+				var historyWhen = dojo.date.stamp.toISOString(dojo.date.add(today, "day", -6),{
+					selector: "date"
+				});
+				
 				var bookId = my.ProjectData.CreateDataUID();
+				var booksAndParts = {};
+				booksAndParts[bookId] = {
+					chapters: 0,
+					statuses: {
+						draft: {
+							scenes: 1,
+							words: 350
+						}
+					}
+				}
                 var result = {
                     IsReadOnly: function() {
                         return readOnly;
                     },
+					GetHistory: function() {
+						return [{
+							uid: my.ProjectData.CreateDataUID(),
+							when: historyWhen,
+							booksAndParts: booksAndParts
+						}];
+					},
                     GetEntities: function() {
                         return [{
 							created: now,
@@ -1781,24 +1729,7 @@ my.ProjectData.Drivers = {
 								name: "Neil M. Sheldon",
 								biography: "<p>Stunted by unprofessionalism, Neil has yet to publish a single word.</p>",
 								role: "Author"
-							}],
-							history: [{
-								uid: my.ProjectData.CreateDataUID(),
-								when: historyWhen,
-								byBookOrPart: [{
-									uid: my.ProjectData.CreateDataUID(),
-									subject: bookId,
-									chapters: 0,
-									byStatus: [{
-										uid: my.ProjectData.CreateDataUID(),
-										status: "draft",
-										scenes: 1,
-										words: 350
-									}]
-								
-								}]
 							}]
-						
 						}, {
                             uid: my.ProjectData.CreateDataUID(),
                             name: "The Dark Horizon...",
