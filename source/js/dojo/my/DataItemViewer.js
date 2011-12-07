@@ -505,7 +505,7 @@ dojo.extend(dijit._Widget, {
             }
         } 
         // initialize the data...
-        dataStoreOnSet.apply(this, [dataItem, dataField, null, dataStore.getValues(dataItem, dataField)]);
+		dataStoreOnSet.apply(this, [dataItem, dataField, null, dataStore.getValues(dataItem, dataField)]);
         if (dataCanWrite) {
             this.connect(this, "onChange", onChange)
         }

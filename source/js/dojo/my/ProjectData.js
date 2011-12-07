@@ -367,33 +367,38 @@ dojo.declare("my.ProjectData", null, {
         
         // add triggers.
         this._connects = [dojo.connect(this.ProjectStore, "onSet", this, function(item, attribute, oldValue, newValue) {
-            if ((item)) {
-                switch (attribute) {
-                    case "modified":
-                        // make sure we don't end up in an infinite loop, and
-                        // make sure the item is actually set.
-                        break;
-                    case "name":
-                        if (this.ProjectStore.getValue(item, "type", null) == "project") {
-                            var value = newValue;
-                            if (dojo.isArray(value)) {
-                                if (dojo.length) {
-                                    value = value[0];
-                                } else {
-                                    value = null;
-                                }
-                            }
-                            this.onTitleChange(value);
-                        }
-                    default:
-                        this.ProjectStore.setValue(item, "modified", new Date());
-                }
-            }
-            if (!this.isDirty) {
-                this.isDirty = this.ProjectStore.isDirty();
-                this.onDirtyChange();
-            }
-        }), dojo.connect(this.ProjectStore, "onNew", this, function() {
+			if (oldValue != newValue) {
+				if ((oldValue instanceof Date) && (dojo.date.compare(oldValue, newValue) === 0)) {
+					return;
+				}
+				if ((item)) {
+					switch (attribute) {
+						case "modified":
+							// make sure we don't end up in an infinite loop, and
+							// make sure the item is actually set.
+							break;
+						case "name":
+							if (this.ProjectStore.getValue(item, "type", null) == "project") {
+								var value = newValue;
+								if (dojo.isArray(value)) {
+									if (dojo.length) {
+										value = value[0];
+									} else {
+										value = null;
+									}
+								}
+								this.onTitleChange(value);
+							}
+						default:
+							this.ProjectStore.setValue(item, "modified", new Date());
+					}
+				}
+				if (!this.isDirty) {
+					this.isDirty = this.ProjectStore.isDirty();
+					this.onDirtyChange();
+				}
+			}
+		}), dojo.connect(this.ProjectStore, "onNew", this, function() {
             if (!this.isDirty) {
                 this.isDirty = this.ProjectStore.isDirty();
                 this.onDirtyChange();
@@ -464,6 +469,9 @@ dojo.declare("my.ProjectData", null, {
 	
 	IterateContent: function(request) {
 		var _iterate = dojo.hitch(this, function(item) {
+			if (request.publishableOnly && this.ProjectStore.getValue(item,"doNotPublish",false)) {
+				return;
+			}
 			switch (this.ProjectStore.getValue(item, "subtype")) {
 				case "book":
 					request.onBook && request.onBook(item);
@@ -683,7 +691,7 @@ dojo.declare("my.ProjectData", null, {
     },
     
     SaveProject: function() {
-        var result = new dojo.Deferred();
+		var result = new dojo.Deferred();
         try {
             this._assertIsOpen();
             if (this.ReadOnly) {
@@ -1057,11 +1065,21 @@ my.ProjectData.Drivers = {
 				if (data.starting) {
 					data.starting = fixUp.date(data.starting);
 				}
+				if (!data.starting) {
+					delete data.starting;
+				}
 				if (data.ending) {
 					data.ending = fixUp.date(data.ending);
 				}
+				if (!data.ending) {
+					delete data.ending;
+				}
 				if (data.where) {
 					data.where = fixUp.uidReference(data.where);
+				}
+				if (!data.targetCount) {
+					// this can be NaN if the user left a blank in the numbertextbox. 
+					delete data.targetCount;
 				}
 			}
 			
@@ -1069,11 +1087,20 @@ my.ProjectData.Drivers = {
 				if (data.starting) {
 					data.starting = fixUp.date(data.starting);
 				}
+				if (data.starting === null) {
+					delete data.starting;
+				}
 				if (data.due) {
 					data.due = fixUp.date(data.due);
 				}
-				if (data.dateCompleted) {
-					data.dateCompleted = fixUp.date(data.dateCompleted);
+				if (data.due === null) {
+					delete data.due;
+				}
+				if (data.completed) {
+					data.completed = fixUp.date(data.completed);
+				}
+				if (data.completed === null) {
+					delete data.completed;
 				}
 			}
 			
@@ -1194,8 +1221,14 @@ my.ProjectData.Drivers = {
 		var validation = my.schemas.ProjectDataValidator.validate(rawData);
 		if (validation.valid) {
 			if (validation.format != my.schemas.ProjectDataValidator.versions[my.ProjectData.Drivers.CurrentVersion]) {
-				if (!my.schemas.ProjectDataValidator.convert(validation.format, my.schemas.ProjectDataValidator.versions[my.ProjectData.Drivers.CurrentVersion], rawData)) {
-					throw "File format is not supported (" + my.schemas.ProjectDataValidator.getVersionInfoString(validation.format) + ")";
+				// NOTE: Yes, I'm uncomfortable with this UI decision, but it seems like I should do something and I 
+				// don't want to spend too long trying to figure out a better way.
+				if (confirm("Your project was created with an earlier version of Story Steward.\nNo data should be lost while converting to the new format, but you may want to make a backup first.\nDo you want to convert the file now?")) {
+					if (!my.schemas.ProjectDataValidator.convert(validation.format, my.schemas.ProjectDataValidator.versions[my.ProjectData.Drivers.CurrentVersion], rawData)) {
+						throw "File format is not supported (" + my.schemas.ProjectDataValidator.getVersionInfoString(validation.format) + ")";
+					}
+				} else {
+					throw "User cancelled conversion request."
 				}
 			}
 			
@@ -1298,8 +1331,8 @@ my.ProjectData.Drivers = {
 				if (data.due) {
 					data.due = fixUp.dateTime(data.due);
 				}
-				if (data.dateCompleted) {
-					data.dateCompleted = fixUp.dateTime(data.dateCompleted);
+				if (data.completed) {
+					data.completed = fixUp.dateTime(data.completed);
 				}
 			}
 			
@@ -1687,9 +1720,6 @@ my.ProjectData.Drivers = {
             TheDarkHorizon: function(readOnly) {
                 var now = new Date(); // for creating UID's.
                 var today = new Date(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate(),0,0,0,0);
-				var historyWhen = dojo.date.stamp.toISOString(dojo.date.add(today, "day", -6),{
-					selector: "date"
-				});
 				
 				var bookId = my.ProjectData.CreateDataUID();
 				var booksAndParts = {};
@@ -1708,9 +1738,495 @@ my.ProjectData.Drivers = {
                     },
 					GetHistory: function() {
 						return [{
-							uid: my.ProjectData.CreateDataUID(),
-							when: historyWhen,
-							booksAndParts: booksAndParts
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -44)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 1980,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -43)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 2924,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -42)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 4954,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -41)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 5817,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -40)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 8167,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -39)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 8795,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -38)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 12004,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -37)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 13185,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -36)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 14215,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -35)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 17174,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -34)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 20108,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -33)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 21140,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -32)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 23951,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -31)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 24367,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -30)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 27185,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -29)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 29385,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -28)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 32044,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -27)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 34072,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -26)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 34264,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -25)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 35168,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -24)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 36426,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -23)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 39311,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -22)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 40925,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -21)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 40925,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -20)),
+							"noBookOrPart": {
+								"noStatus": {
+									"words": 0,
+									"scenes": 0
+								},
+								"statuses": {
+									"draft": {
+										"words": 42431,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -19)),
+							"noBookOrPart": {
+								"noStatus": {
+									"words": 0,
+									"scenes": 0
+								},
+								"statuses": {
+									"draft": {
+										"words": 42962,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -18)),
+							"noBookOrPart": {
+								"noStatus": {
+									"words": 0,
+									"scenes": 0
+								},
+								"statuses": {
+									"draft": {
+										"words": 47307,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -17)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 49127,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -16)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 52807,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -15)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 52884,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -14)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 52884,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -13)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 56802,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -12)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 58822,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -11)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 61435,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -10)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 64086,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -9)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 65477,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -8)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 65921,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -7)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 65908,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -6)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 67149,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -5)),
+							"noBookOrPart": {
+								"statuses": {
+									"draft": {
+										"words": 70414,
+										"scenes": 0
+									}
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -4)),
+							"noBookOrPart": {
+								"noStatus": {
+									"words": 72715,
+									"scenes": 0
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -3)),
+							"noBookOrPart": {
+								"noStatus": {
+									"words": 72715,
+									"scenes": 0
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -2)),
+							"noBookOrPart": {
+								"chapters": 32,
+								"noStatus": {
+									"words": 117432,
+									"scenes": 117
+								}
+							}
+						}, {
+							"uid": my.ProjectData.CreateDataUID(),
+							"when": dojo.date.stamp.toISOString(dojo.date.add(today, "day", -1)),
+							"noBookOrPart": {
+								"chapters": 32,
+								"noStatus": {
+									"words": 117432,
+									"scenes": 117
+								}
+							}
 						}];
 					},
                     GetEntities: function() {
@@ -1809,26 +2325,65 @@ my.ProjectData.Drivers = {
                             name: "Here's the Truth about the Island."
                         
                         }, {
+							uid: my.ProjectData.CreateDataUID(),
+							type: "goal",
+							created: now,
+							modified: now,
+							name: "Ancient Deadline",
+							what: "words",
+							starting: dojo.date.add(today, "day", -90),
+							ending: dojo.date.add(today, "day", -80),
+							targetCount: 500
+						}, {
                             uid: my.ProjectData.CreateDataUID(),
                             type: "goal",
                             created: now,
                             modified: now,
-                            name: "Publisher's Deadline",
+                            name: "Old Deadline",
 							what: "words",
-                            starting: now,
-                            ending: dojo.date.add(now, "month", 1),
-                            targetCount: 500
+                            starting: dojo.date.add(today, "day", -50),
+                            ending: dojo.date.add(today, "day", -40),
+                            targetCount: 9000
                         }, {
                             uid: my.ProjectData.CreateDataUID(),
                             type: "goal",
                             created: now,
                             modified: now,
-                            name: "Personal Deadline",
+                            name: "Recent Deadline",
 							what: "words",
-                            starting: dojo.date.add(now, "week", -1),
-                            ending: dojo.date.add(now, "month", 1),
-                            startingCount: 100,
-                            targetCount: 500
+                            starting: dojo.date.add(today, "day", -25),
+                            ending: dojo.date.add(today, "day", -15),
+                            targetCount: 50000
+                        }, {
+                            uid: my.ProjectData.CreateDataUID(),
+                            type: "goal",
+                            created: now,
+                            modified: now,
+                            name: "Current Deadline",
+							what: "words",
+                            starting: dojo.date.add(today, "day", -5),
+                            ending: dojo.date.add(today, "day", 5),
+                            targetCount: 200000
+                        }, {
+                            uid: my.ProjectData.CreateDataUID(),
+                            type: "goal",
+                            created: now,
+                            modified: now,
+                            name: "Future Deadline",
+							what: "words",
+                            starting: dojo.date.add(today, "day", 5),
+                            ending: dojo.date.add(today, "day", 15),
+                            targetCount: 500000
+                        }, {
+                            uid: my.ProjectData.CreateDataUID(),
+                            type: "goal",
+                            created: now,
+                            modified: now,
+                            name: "Ongoing Deadline",
+							what: "words",
+                            starting: dojo.date.add(today, "day", -60),
+                            ending: dojo.date.add(today, "day", 30),
+                            targetCount: 150000
                         }]
                     },
                     GetTags: function() {

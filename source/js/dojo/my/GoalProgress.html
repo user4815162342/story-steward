@@ -1,89 +1,90 @@
 <div dojoAttachPoint="containerNode">
-<!--
-   Copyright 2011 Neil M. Sheldon
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
--->
-    <div dojoType="dijit.layout.BorderContainer" gutters="false" design="headline">
-        <div dojoType="dijit.layout.ContentPane" region="left" style="width: 320px">
-            <div dojoType="dijit.layout.ContentPane">
-                <div dojoAttachPoint="_chart" dojoType="my.GoalHistoryChart" theme="dojox.charting.themes.Distinctive" style="width: 300px; height: 300px;">
-                    <div class="plot" name="default" type="ClusteredColumns" gap="2" fontColor="black" hAxis="days" vAxis="wordCount">
-                    </div>
-                    <div class="axis" name="days" vertical="true" title="Days">
-                    </div>
-                    <div class="axis" name="wordCount" title="Word Count">
-                    </div>
-                    <div class="action" type="Tooltip">
-                    </div>
-                </div>
-            </div>
-            <h4 dojoAttachPoint="_scold"><em>You Did Not Meet the Goal!</em></h4>
-            <label>
-                Daily Progress to Finish on Time
-            </label>
-            <div dojoType="dijit.ProgressBar" dojoAttachPoint="_requiredProgress" style="width:300px">
-            </div>
-            <label>
-                Daily Progress to Catch Up
-            </label>
-            <div dojoType="dijit.ProgressBar" dojoAttachPoint="_suggestedProgress" style="width:300px">
-            </div>
-            <label>
-                Overall Progress
-            </label>
-            <div dojoType="dijit.ProgressBar" dojoAttachPoint="_goalProgress" style="width:300px">
-            </div>
+    <!--
+    Copyright 2011 Neil M. Sheldon
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    -->
+    <div dojoType="dijit.layout.ContentPane" gutters="false" design="headline">
+        <div style="float: left;" dojoAttachPoint="_chart" style="width: 300px; height: 300px;">
         </div>
-        <div dojoAttachPoint="_statistics" dojoType="dijit.layout.ContentPane" region="center">
-            <h2>Statistics</h2>
-            <p>
-                <label>
-                    Days Remaining:
-                </label>
-                <span dojoAttachPoint="_daysRemaining"></span>
-            </p>
-            <p>
-                <label>
-                    Words Written Today:
-                </label>
-                <span dojoAttachPoint="_wordsToday"></span>
-            </p>
-            <p>
-                <label>
-                    Average Words Written per Day So Far:
-                </label>
-                <span dojoAttachPoint="_averageDailyCount"></span>
-            </p>
-            <p>
-                <label>
-                    Original Suggested Words to Write per Day:
-                </label>
-                <span dojoAttachPoint="_suggestedDailyCount"></span>
-            </p>
-            <p>
-                <label>
-                    At This Rate You Will Finish On:
-                </label>
-                <span dojoAttachPoint="_expectedFinishDate"></span>
-            </p>
-            <p>
-                <label>
-                    Words Required To Be Written per Day to Finish on Time:
-                </label>
-                <span dojoAttachPoint="_requiredDailyCount"></span>
-            </p>
+        <div>
+            <h3 class="hide-on-no-notice"><em dojoAttachPoint="_notice"></em></h3>
+            <table>
+                <tr class="hide-on-goal-ended">
+                    <td class="stats-caption">
+                        Written Today:
+                    </td>
+                    <td dojoAttachPoint="_writtenToday">
+                    </td>
+                </tr>
+                <tr class="hide-on-goal-ended">
+                    <td colspan="2">
+                        <div dojoType="dijit.ProgressBar" dojoAttachPoint="_todayProgress">
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hide-on-goal-ended">
+                    <td class="stats-caption">
+                        Suggested Daily Count To Finish On Time:
+                    </td>
+                    <td dojoAttachPoint="_suggestedDailyGoal">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stats-caption">
+                        Average Per Day:
+                    </td>
+                    <td dojoAttachPoint="_dailyAverage">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stats-caption">
+                        Target Count:
+                    </td>
+                    <td dojoAttachPoint="_targetCount">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stats-caption">
+                        Total Written:
+                    </td>
+                    <td dojoAttachPoint="_totalWritten">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div dojoType="dijit.ProgressBar" dojoAttachPoint="_totalProgress">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stats-caption">
+                        Days Remaining:
+                    </td>
+                    <td dojoAttachPoint="_daysRemaining">
+                    </td>
+                </tr>
+                <tr class="hide-on-goal-ended">
+                    <td colspan="2">
+                        <div dojoType="dijit.ProgressBar" dojoAttachPoint="_timePassed">
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hide-on-goal-ended">
+                    <td class="stats-caption">
+                        At This Rate The Goal Will Be Reached On:
+                    </td>
+                    <td dojoAttachPoint="_projectedFinishDate">
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </div>

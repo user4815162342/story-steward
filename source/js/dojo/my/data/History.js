@@ -104,9 +104,9 @@ dojo.declare("my.data.History", null, {
 		starting = starting || new Date(0);
 		ending = ending || new Date();
 		
-		var compare = dojo.hitch(this, function(a, b) {
+		var compare = function(a, b) {
 			return dojo.date.compare(a.getWhen(), b, "date");
-		})
+		};
 		
 		var result = {
 			entries: []
@@ -116,22 +116,85 @@ dojo.declare("my.data.History", null, {
 			comparator: compare,
 			returnInsertIndex: true
 		});
-		if (startIndex < entries.length) {
+		if (startIndex < this._data.length) {
 			var endIndex = my.utilities.search(this._data, ending, {
 				comparator: compare,
 				returnPriorIndex: true
 			});
 			if ((endIndex >= 0) && (endIndex >= startIndex)) {
-				result.entries = this._data.slice(startIndex, endIndex);
+				result.entries = this._data.slice(startIndex, endIndex + 1);
 			} // else end is before entire range
 		} // else start is after entire range
 		// Finally, if there are no entries, then we may need to return the
 		// entry prior to the first, if at all possible, in case the
 		// user wants to know the last history to get recent totals.
-		if ((entries.length > 0) && (startIndex > 0)) {
+		if ((this._data.length > 0) && (startIndex > 0)) {
 			result.lastEntryPriorToRange = this._data[Math.min(startIndex - 1, this._data.length - 1)];
 		}
 		return result;
+	},
+	
+	getHistoryDataForGoal: function(goal) {
+		var starting = this._projectData.ProjectStore.getValue(goal,"starting",null);
+		if (!starting) {
+			starting = this._projectData.ProjectStore.getValue(goal,"created",null);
+			// if this is null, highly unlikely, will start at the '0' date, so we don't need to worry.
+		}
+		
+		var ending = this._projectData.ProjectStore.getValue(goal,"ending",null);
+		// if this is null, the ending will be 'today'.
+		
+		var whatStatus = this._projectData.ProjectStore.getValue(goal,"whatStatus",null);
+		var bookOrPart = this._projectData.ProjectStore.getValue(goal,"where",null);
+		var what = this._projectData.ProjectStore.getValue(goal,"what","words");
+		var startingCount = this._projectData.ProjectStore.getValue(goal,"startingCount",0);
+		var targetCount = this._projectData.ProjectStore.getValue(goal,"targetCount",0); 
+		
+		var getCountValue = function(entry) {
+			var request = {};
+			if (bookOrPart) {
+				request.bookOrPart = bookOrPart;
+			}
+			if (whatStatus) {
+				request.status = whatStatus;
+			}
+			var f;
+			switch (what) {
+				case "words":
+				   f = entry.getTotalWordCount;
+				   break;
+				case "scenes":
+				   f = entry.getTotalSceneCount;
+				   break;
+				case "chapters":
+				   f = entry.getTotalChapterCount;
+				   break;
+			}
+			return f.apply(entry,[request]);
+		} 
+		
+		
+		
+		var range = this.getRange(starting,ending);
+		
+		return {
+			starting: starting,
+			ending: ending,
+			whatStatus: whatStatus,
+			where: bookOrPart,
+			what: what,
+			startingCount: startingCount || (range.lastEntryPriorToRange && getCountValue(range.lastEntryPriorToRange)) || 0,
+			entries: dojo.map(range.entries,function(item) {
+				return {
+					uid: item.getUID(),
+					when: item.getWhen(),
+					count: getCountValue(item) 
+				}
+			}),
+			targetCount: targetCount
+		}
+		
+		
 	},
 	
 	getLastEntryPriorTo: function(when) {

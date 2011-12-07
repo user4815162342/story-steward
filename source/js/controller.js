@@ -707,37 +707,41 @@ var Controller = new function() {
     }
     
     this.SaveProject = function() {
-		var wait = this.ShowWaitDialog("Saving...", "<p>Saving Project, please wait...</p>");
-        var result = new dojo.Deferred();
-        var tabSavers = [];
-        for (var uid in openTabs) {
-            if (openTabs.hasOwnProperty(uid)) {
-                if (openTabs[uid].IsEditing && openTabs[uid].IsEditing()) {
-                    tabSavers.push(openTabs[uid].ApplyEditing());
-                }
-            }
-        }
-        var deferredApplies = new dojo.DeferredList(tabSavers, false, true);
-        var me = this;
-        deferredApplies.then(function() {
-			me.UpdateTotalWordCountStatus(true).then(function() {
-                me.ProjectData.SaveProject().then(function() {
-                    result.callback(true);
-                }, function(ex) {
-                    result.errback(ex);
-                })
-            }, function(e) {
-                result.errback(e);
-            });
-        }, function(ex) {
-            result.errback(ex);
-        })
-        wait.attach(result);
-        result.then(null, function(ex) {
-            alert("While Saving: " + ex)
-        })
-        return result;
-    }
+		var result = new dojo.Deferred();
+		try {
+			var wait = this.ShowWaitDialog("Saving...", "<p>Saving Project, please wait...</p>");
+			wait.attach(result);
+			var tabSavers = [];
+			for (var uid in openTabs) {
+				if (openTabs.hasOwnProperty(uid)) {
+					if (openTabs[uid].IsEditing && openTabs[uid].IsEditing()) {
+						tabSavers.push(openTabs[uid].ApplyEditing());
+					}
+				}
+			}
+			var deferredApplies = new dojo.DeferredList(tabSavers, false, true);
+			var me = this;
+			deferredApplies.then(function() {
+				me.UpdateTotalWordCountStatus(true).then(function() {
+					me.ProjectData.SaveProject().then(function() {
+						result.callback(true);
+					}, function(ex) {
+						result.errback(ex);
+					})
+				}, function(e) {
+					result.errback(e);
+				});
+			}, function(ex) {
+				result.errback(ex);
+			})
+		} catch (ex) {
+			result.errback(ex);
+		}
+		result.then(null, function(ex) {
+			alert("While Saving: " + ex)
+		})
+		return result;
+	}
     
     this.TriggerFailSafe = function() {
         // basically, open the project and any open contents in a new
@@ -781,6 +785,8 @@ var Controller = new function() {
     }
     
     this._BuildManuscriptText = function(dataItem, showSceneTitles, state) {
+		// TODO: Can make use of ProjectData.IterateContent here. Although
+		// I have to add the option to start at a given data item.
         state = state ||
         {
             ordinals: {

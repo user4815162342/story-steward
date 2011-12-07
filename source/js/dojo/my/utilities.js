@@ -44,5 +44,3 @@ my.utilities.search = function(arr, value, args) {
 	return args.returnInsertIndex ? top : (args.returnPriorIndex ? bottom : -1);
 	
 }
-
-

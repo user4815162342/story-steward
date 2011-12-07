@@ -14,7 +14,6 @@
          "Goal.what has been changed to Goal.where, and has been more clearly defined.",
          "New Goal.what added to specify whether words, scenes or chapters should be counted.",
          "Goal.startingWordCount and targetWordCount changed to startingCount and targetCount.",
-         "Goal.targetCount is now required.",
          "Reorganized the types of entities into three groups on the project (Content, Notes, Work), instead of seven (Content, Notes, People, Places, Things, Journal, Goals)",
          "Added task entity for tracking tasks",
          "Removed subtype from content entities, replaced with differentiated values for type"
@@ -572,11 +571,12 @@
                }
             },
             "startingCount":{
+			   "description":"This is only used for legacy data, from previous project formats. With the new format, the starting value can be taken from the last history entry prior to the goal, or 0 is assumed",
                "type":"integer"
             },
             "targetCount":{
-               "type":"integer",
-               "required":true
+			   "description":"While it may seem odd to have a goal without a targetcount, this is not required. Goals can be used to visually inspect progress without deadlines as well.",  
+               "type":"integer"
             }
          }
       },
@@ -611,7 +611,7 @@
                   "$ref":"project-data-date"
                }
             },
-            "dateCompleted":{
+            "completed":{
                "type":{
                   "$ref":"project-data-date"
                }

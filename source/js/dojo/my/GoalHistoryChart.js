@@ -19,6 +19,7 @@ dojo.provide("my.GoalHistoryChart");
 dojo.require("dojox.charting.widget.Chart2D");
 dojo.require("dojox.charting.themes.Distinctive");
 
+// TODO: Maybe deprecated?
 dojo.declare("my.GoalHistoryChart", [dojox.charting.widget.Chart2D], {
 
     postCreate: function() {
