@@ -1606,7 +1606,6 @@ dojo.addOnLoad(function() {
         dojo.require("my.ProjectData")
         dojo.require("my.DataItemViewer");
         dojo.require("my.extensions");
-        dojo.require("my.GoalHistoryChart");
         dojo.require("my.GoalProgress");
         dojo.require("my.DataGrid");
         // FUTURE: Plugin hook: required-libraries - should go here.

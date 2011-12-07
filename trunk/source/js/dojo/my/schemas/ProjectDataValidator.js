@@ -233,7 +233,6 @@ dojo.require("dojox.json.ref");
 						
 					},
 					"goal": function(data) {
-						debugger;
 						convertEntity(data);
 						if (data.targetStatus) {
 							data.whatStatus = data.targetStatus;
