@@ -1,4 +1,4 @@
-<div widgetClass="my.ChapterViewer" titleField="name" defaultTitle="Scene" defaults="{ dataItem: {}, dataStore: {}, form: '' }" dojoAttachPoint="containerNode">
+<div widgetClass="my.ThingViewer" titleField="name" defaultTitle="Thing" defaults="{ dataItem: {}, dataStore: {}, form: '' }" dojoAttachPoint="containerNode">
 <!--
    Copyright 2011 Neil M. Sheldon
 
@@ -28,7 +28,7 @@
                 </div>
                 <div dojoType="dijit.layout.ContentPane" region="center">
                     <h3>Description:</h3>
-                    <div dojoAttachPoint="_descriptionField" bindField="description" dojoType="dijit.InlineEditBox" editor="dijit.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; Enter a short summary of your scene here &mdash;" title="Editable Scene Description">
+                    <div dojoAttachPoint="_descriptionField" bindField="description" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" noValueIndicator="&mdash; Enter a short summary of your thing here &mdash;" title="Editable Scene Description">
                     </div>
                 </div>
                 <div dojoType="dijit.layout.ContentPane" region="bottom">

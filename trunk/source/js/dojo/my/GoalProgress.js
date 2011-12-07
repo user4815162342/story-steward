@@ -15,9 +15,23 @@ dojo.require("dijit._Widget");
 dojo.require("dijit._Templated");
 dojo.require("dijit.layout.ContentPane");
 dojo.require("dijit.ProgressBar");
+		dojo.require("dojox.charting.Chart2D");
+		dojo.require("dojox.charting.action2d.Tooltip");
+		dojo.require("dojox.charting.themes.Distinctive");
 
 dojo.require("my.DataItemViewer");
-dojo.require("my.GoalHistoryChart");
+//dojo.require("my.GoalHistoryChart");
+
+(function() {
+	var styleContent = dojo.cache("my", "GoalProgress.css");
+	var head = dojo.query("head")[0];
+	var style = dojo.doc.createElement("style");
+	style.type = "text/css";
+	var rules = dojo.doc.createTextNode(styleContent);
+	style.appendChild(rules);
+	head.appendChild(style);
+	
+})();
 
 dojo.declare("my.GoalProgress", [dijit.layout.ContentPane, dijit._Templated], {
 
@@ -29,203 +43,231 @@ dojo.declare("my.GoalProgress", [dijit.layout.ContentPane, dijit._Templated], {
     
     widgetsInTemplate: true,
     
-    postCreate: function() {
-        this.inherited(arguments);
-    },
+	_buildChart: function() {
+// theme="dojox.charting.themes.Distinctive"		
+		this._chartGui = new dojox.charting.Chart2D(this._chart);
+		this._chartGui.addPlot("default", {
+			type: "Default",
+			lines: true,
+			areas: false,
+		    markers: true
+		});
+		this._chartGui.addPlot("projected", {
+			type: "Default",
+			lines: true,
+			areas: false,
+			markers: true
+		});
+		this._chartGui.addPlot("goal", {
+			type: "Default",
+			lines: true,
+			areas: false,
+			markers: false
+		});
+		this._chartGui.addPlot("grid", {
+			type: "Grid",
+			hMajorLines: true,
+			hMinorLines: false,
+			vMajorLines: false,
+			vMinorLines: false
+		});
+		this._chartGui.addAxis("y", {
+			vertical: true,
+			name: "wordCount",
+			title: "Word Count",
+			includeZero: true,
+			fixUpper: "major",
+			fixLower: "major"
+		});
+		this._chartGui.addAxis("x", {
+			name: "days",
+			title: "Days"
+		});
+		this._chartGui.setTheme(dojox.charting.themes.Distinctive);
+		
+		new dojox.charting.action2d.Tooltip(this._chartGui, "default", {});
+		
+		new dojox.charting.action2d.Tooltip(this._chartGui, "projected", {});
+		
+	},
 	
-    _dataItemSetValues: function(newValues, attribute) {
-    
-        // only update if fields we are interested are changed.
-        switch (attribute) {
-            case "starting":
-            case "created":
-            case "ending":
-            case "history":
-            case "targetWordCount":
-            case "startingWordCount":
-                break;
-            default:
-                {
-                    // I don't have to do anything here...
-                    return;
-                }
-        }
-        
-        newValues = dojo.isArray(newValues) ? newValues : [newValues];
-        
-        this._historyItems = newValues;
-        
-        
-        
-        // look for a 'starting' date. If one isn't set, the goal starts
-        // when it was created.
-        var starting = this.bindStore.getValue(this.bindItem, "starting", null);
-        if (!starting) {
-            starting = this.bindStore.getValue(this.bindItem, "created", null);
-            if (!starting) {
-                // really shouldn't happen, as there should be a 'created' date on the goal.
-                starting = newValues.length ? this.bindStore.getValue(newValues[0], "when", new Date()) : new Date();
-            }
-        }
-        
-        // The following will create a sparse array of word counts numbered based on
-        // the day in the goal's period. This means we don't have to sort them
-        // by date, later.        
-        var history = [];
-        for (var i = 0; i < newValues.length; i++) {
-            // NOTE: The 'null' default raises an error here
-            var when = this.bindStore.getValue(newValues[i], "when", null);
-            if (when && (when instanceof Date)) {
-                var index = dojo.date.difference(starting, when, "day");
-                history[index] = this.bindStore.getValue(newValues[i], "wordCount", 0);
-            }
-        }
-        
-        var currentDay = dojo.date.difference(starting, null, "day") - 1;
-        
-        // look for an 'ending' date. If one isn't set, the goal 'ends' on the
-        // last day of the history, or the starting date if there is no history.
-        var ending = this.bindStore.getValue(this.bindItem, "ending", null);
-        if (!ending) {
-            ending = history.length ? history[history.length - 1].when : starting;
-        }
-        
-        // We need the 'target' to calculate the 'suggested' values.		
-        var targetWords = this.bindStore.getValue(this.bindItem, "targetWordCount", 0);
-        
-        var startWords = this.bindStore.getValue(this.bindItem, "startingWordCount", 0);
-        
-        // figure out the real history, for charting:
-        var dayCount = dojo.date.difference(starting, ending, "day") + 1; // add one for the first day as well.
-        var last = {
-            actual: startWords,
-            suggested: startWords,
-            when: starting
-        }
-        var today = last;
-        var yesterday = last;
-        var remainingDays = dayCount;
-        var moreRequired = true;
-        var requiredDailyCount = 0;
-        for (var i = 0; i < dayCount; i++) {
-            history[i] = {
-                actual: history[i] || last.actual,
-                when: dojo.date.add(last.when, "day", 1),
-                suggested: Math.round(last.suggested + ((targetWords - last.suggested) / remainingDays))
-            };
-            moreRequired = moreRequired && (history[i].actual < targetWords);
-            if (i > currentDay) {
-                history[i].actual = null;
-                history[i].required = moreRequired && Math.round((last.required || last.actual) + (Math.max(targetWords - (last.required || last.actual), 0) / remainingDays));
-                if (!requiredDailyCount && history[i].required) {
-                    requiredDailyCount = Math.round((Math.max(targetWords - (last.required || last.actual), 0) / remainingDays));
-                }
-            } else {
-                yesterday = today;
-                today = history[i];
-                if (i == currentDay) {
-                    if (history[i].actual < history[i].suggested) {
-                        history[i].required = moreRequired && Math.min(history[i].suggested,Math.round(history[i].actual + (Math.max(targetWords - history[i].actual, 0) / remainingDays)));
-                        if (!requiredDailyCount && history[i].required) {
-                            requiredDailyCount = Math.round(Math.max(targetWords - history[i].actual, 0) / remainingDays);
-                        }
-                    } else {
-                        history[i].required = moreRequired && history[i].suggested;
-                        if (!requiredDailyCount && history[i].required) {
-                            requiredDailyCount = Math.round(Math.max(targetWords - history[i].actual, 0) / remainingDays);
-                        }
-                    }
-                } else {
-                    history[i].required = null;
-                }
-                
-            }
-            
-            last = history[i];
-            remainingDays--;
-            
-        }
-        
-        var averageDailyCount = currentDay ? ((today.actual - startWords) / currentDay) : 0;
-        var daysToFinish = averageDailyCount ? (Math.ceil((targetWords - today.actual) / averageDailyCount)) : Number.POSITIVE_INFINITY;
-        
-        this._chart.UpdateChart({
-            startWords: startWords,
-            targetWords: targetWords,
-            currentWords: today.actual,
-            dayCount: dayCount,
-            currentDay: currentDay,
-            history: history
-        });
-        
-        this._goalProgress.update({
-            maximum: targetWords,
-            progress: today.actual
-        });
-        this._suggestedProgress.update({
-            maximum: today.suggested - yesterday.actual,
-            progress: today.actual - yesterday.actual
-        });
-        this._requiredProgress.update({
-            maximum: today.required - yesterday.actual,
-            progress: today.actual - yesterday.actual
-        });
-        if ((currentDay < dayCount) || (currentWords > targetWords)) {
-            dojo.style(this._scold, "display", "none");
-        }
-        remainingDays = dayCount - currentDay;
-        if (remainingDays < 0) {
-            this._statistics.set('content', "");
-        } else {
-            this._daysRemaining.innerHTML = remainingDays;
-            this._wordsToday.innerHTML = today.actual - yesterday.actual;
-            this._suggestedDailyCount.innerHTML = Math.round((targetWords - startWords) / dayCount);
-            this._averageDailyCount.innerHTML = averageDailyCount;
-            this._requiredDailyCount.innerHTML = requiredDailyCount;
-            this._expectedFinishDate.innerHTML = (daysToFinish == Number.POSITIVE_INFINITY) ? "Never" : dojo.date.locale.format(dojo.date.add(today.when, "day", daysToFinish), {
-                selector: 'date',
-                fullYear: true
-            });
-        }
-        
-    },
-    
-    _dataItemBind: function(dataStore, dataItem, bindScope, viewer) {
-        this.inherited(arguments);
-        var dataStoreOnSet;
-        if (dataStore.getFeatures()['dojo.data.api.Notification'] == true) {
-            // need to simulate the attribute value changing when the history data changes.
-            this.connect(dataStore, "onSet", function(item, attribute, oldValue, newValue) {
-                if (this._historyItems && (dojo.indexOf(this._historyItems, item) > -1)) {
-                    this._dataItemSetValues(this._historyItems, "history");
-                }
-            });
-        }
-        
-    },
-    
-    _dataItemSet: function(newValue) {
-        throw "Use dataItemSetValues. Should never get here."
-    },
-    
-    _dataItemGet: function() {
-        // This is a read-only item, as should be obvious
-        // that there's no 'onChange'.
-    },
-    
-    _dataItemEditing: function() {
-        return false;
-    },
-    
-    _dataItemSetDisabled: function() {
-        // This is a read-only item, so it shouldn't be enabled in the first place.
-    },
-    
-    _dataItemSave: function() {
-    },
-    
-    _dataItemCancel: function() {
-    }
+    postCreate: function() {
+		this.inherited(arguments);
+		dojo.addClass(this.domNode, ["my-goalprogress", "goal-started", "goal-not-started", "goal-ended"])
+		this._buildChart();
+	},
+	
+	setHistoryData: function(data) {
+	
+	
+		var statistics = {
+			notice: null,
+			writtenToday: null,
+			todayProgress: null,
+			suggestedDailyGoal: null,
+			dailyAverage: null,
+			targetCount: data.targetCount,
+			totalWritten: null,
+			totalProgress: null,
+			daysRemaining: null,
+			timePassed: null,
+			projectedFinishDate: null
+		}
+		
+		var today = new Date();
+		today.setHours(0, 0, 0, 0);
+		var dayCount = dojo.date.difference(data.starting, data.ending, "day") + 1; // Need to add 1 to include that last day.
+		this._chartGui.addSeries("Goal", [{
+			x: 1,
+			y: data.targetCount
+		}, {
+			x: dayCount,
+			y: data.targetCount
+		}], {
+			plot: "goal"
+		});
+		
+		var dayNumber = 1;
+		var lastCount = data.startingCount;
+		var todayNumber = dojo.date.difference(data.starting, today, "day") + 1;
+		statistics.daysRemaining = dayCount - todayNumber;
+		statistics.timePassed = todayNumber / dayCount;
+		var todayIndex = -1;
+		this._chartGui.addSeries("Actual", dojo.map(data.entries, function(item, index) {
+			dayNumber = dojo.date.difference(data.starting, item.when, "day") + 1;
+			if (dayNumber == todayNumber) {
+				todayIndex = index;
+			}
+			previousCount = lastCount;
+			lastCount = item.count;
+			return {
+				x: dayNumber,
+				y: lastCount,
+				tooltip: dojo.date.locale.format(item.when, {
+					datePattern: "MMM d",
+					selector: "date"
+				}) +
+				": " +
+				lastCount +
+				" " +
+				data.what
+			}
+		}));
+		
+		statistics.totalWritten = lastCount;
+		if ((statistics.daysRemaining < 0) && (statistics.totalWritten < statistics.targetCount)) {
+			statistics.notice = "You Did Not Meet Your Goal!";
+		} else if (statistics.totalWritten <= statistics.targetCount) {
+			statistics.notice = "You Met Your Goal!";
+		}
+		
+		statistics.totalProgress = (statistics.totalWritten / statistics.targetCount);
+		statistics.dailyAverage = (lastCount - data.startingCount) / dayNumber;
+		debugger;
+		statistics.projectedFinishDate = dojo.date.add(today, "day", Math.ceil((statistics.targetCount - statistics.totalWritten) / statistics.dailyAverage));
+		
+		var writtenYesterday = data.startingCount;
+		if (todayIndex > 0) {
+			writtenYesterday = data.entries[todayIndex - 1].count;
+			statistics.writtenToday = data.entries[todayIndex].count - writtenYesterday;
+		} else if (todayIndex == 0) {
+			statistics.writtenToday = data.entries[0].count - data.startingCount;
+		} else {
+			statistics.writtenToday = 0;
+		}
+		statistics.suggestedDailyGoal = (data.targetCount - writtenYesterday) / (statistics.daysRemaining + 1);
+		statistics.todayProgress = statistics.writtenToday / statistics.suggestedDailyGoal;
+		
+		if (dojo.date.compare(today, data.ending) < 0) {
+			var projectedCount = Math.floor(lastCount + (statistics.dailyAverage * (dayCount - dayNumber)));
+			this._chartGui.addSeries("Projected", [{
+				x: dayNumber,
+				y: lastCount
+			}, {
+				x: dayCount,
+				y: projectedCount,
+				tooltip: "At your current rate you will have " + projectedCount + " " + data.what + " on day " +
+				dojo.date.locale.format(data.ending, {
+					datePattern: "MMM d",
+					selector: "date"
+				})
+			}], {
+				plot: "projected",
+				stroke: {
+					style: "ShortDash"
+				}
+			})
+		}
+		
+		var dayLabels = [];
+		for (var day = data.starting; dojo.date.compare(day, data.ending) <= 0; day = dojo.date.add(day, "day", 1)) {
+			dayLabels.push({
+				value: dayLabels.length + 1,
+				text: dojo.date.locale.format(day, {
+					datePattern: "MMM d",
+					selector: "date"
+				})
+			})
+		}
+		
+		this._chartGui.addAxis("x", {
+			name: "days",
+			title: "Days",
+			labels: dayLabels
+		});
+		this._chartGui.render();
+		
+		if (statistics.daysRemaining < 0) {
+			dojo.removeClass(this.domNode, "goal-not-started");
+			dojo.removeClass(this.domNode, "goal-started");
+			dojo.addClass(this.domNode, "goal-ended");
+		} else if (todayNumber < 0) {
+			dojo.removeClass(this.domNode, "goal-started");
+			dojo.removeClass(this.domNode, "goal-ended");
+			dojo.addClass(this.domNode, "goal-not-started");
+		} else {
+			dojo.removeClass(this.domNode, "goal-ended");
+			dojo.removeClass(this.domNode, "goal-not-started");
+			dojo.addClass(this.domNode, "goal-started");
+		}
+		
+		if (statistics.notice) {
+			dojo.removeClass(this._notice, "hide-on-no-notice");
+			this._notice.innerHTML = statistics.notice;
+		} else {
+			dojo.addClass(this._notice, "hide-on-no-notice");
+		}
+		if (statistics.daysRemaining >= 0) {
+			this._writtenToday.innerHTML = statistics.writtenToday;
+			this._todayProgress.update({
+				minimum: 0,
+				maximum: 100,
+				progress: Math.max(0, Math.ceil(statistics.todayProgress * 100))
+			})
+			this._suggestedDailyGoal.innerHTML = Math.ceil(statistics.suggestedDailyGoal);
+			this._projectedFinishDate.innerHTML = !isNaN(statistics.projectedFinishDate.getTime()) ? dojo.date.locale.format(statistics.projectedFinishDate, {
+				selector: "date",
+				formatLength: "medium"
+			}) : "Never";
+		}
+		this._dailyAverage.innerHTML = Math.floor(statistics.dailyAverage);
+		this._targetCount.innerHTML = statistics.targetCount;
+		this._totalWritten.innerHTML = statistics.totalWritten;
+		this._totalProgress.update({
+			minimum: 0,
+			maximum: 100,
+			progress: Math.max(0, Math.ceil(statistics.totalProgress * 100))
+		});
+		this._daysRemaining.innerHTML = Math.max(0, statistics.daysRemaining);
+		this._timePassed.update({
+			minimum: 0,
+			maximum: 100,
+			progress: Math.max(0, Math.ceil(statistics.timePassed * 100))
+		});
+		
+		
+	}
+	
     
 });
 

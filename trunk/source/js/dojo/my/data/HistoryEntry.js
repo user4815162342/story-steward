@@ -12,33 +12,33 @@
  */
 dojo.provide("my.data.HistoryEntry");
 dojo.declare("my.data.HistoryEntry", null, {
+	
+	_resetData: function() {
 	/* NOTE: 
-	 * For easier access to values, and minimization of storage, all data is stored
-	 * in objects keyed by book or part uid and then status, as appropriate. For statistics
+	 * For easier access to values, all data is stored
+	 * in objects keyed by book or part uid and then status, if applicable. For statistics
 	 * which don't apply to a specific book or part or status, a blank string is used
 	 * for the key to represent 'unknown'. This reduces the number of lines of code
 	 * being used by preventing the need for conditionals which determine which variable
 	 * to check... instead, only one variable has to be checked all of the time. 
 	 */
-	
-	_resetData: function() {
-		this._parents = {};
-		this._chapters = {};
-		this._scenes = {};
-		this._words = {};
-		this._booksAndParts = [];
-		this._statuses = {};
-		this._totalScenes = {
+		this._parents = {}; // hash of book uid's with their parents. "empty" uid and root uid's do not get entries here.
+		this._chapters = {}; // hash of book uid's with the number of chapters contained. "empty" uid refers to content outside of any book or part.
+		this._scenes = {}; // hash of book uid's containing a hash of status with number of scenes. "empty" uid refers to content outside of any book or part.
+		this._words = {}; // hash of book uid's containing a hash of status with number of words. "empty" uid refers to content outside of any book or part.
+		this._booksAndParts = []; // list of book uid's which have been processed. Empty uid is included.
+		this._statuses = {}; // hash of book uid's with a list of statuses that have been processed. "empty" uid refers to content outside of any book or part. Empty status is included.
+		this._totalScenes = { // cache of scene counts. "empty" uid refers to content outside of any book or part.
 			all: 0,
 			byBookOrPart: {},
 			byStatus: {}
 		};
-		this._totalWords = {
+		this._totalWords = { // cache of word counts. "empty" uid refers to content outside of any book or part.
 			all: 0,
 			byBookOrPart: {},
 			byStatus: {}
 		};
-		this._totalChapters = {
+		this._totalChapters = { // cache of chapter counts. "empty" uid refers to content outside of any book or part.
 			all: 0,
 			byBookOrPart: {}
 		};
@@ -245,6 +245,7 @@ dojo.declare("my.data.HistoryEntry", null, {
 	},
 	
 	getTotalWordCount: function(request) {
+		debugger;
 		// summary: Returns the number of words for a given book, part and status.
 		// description: Unlike the standard get*Count functions, this does do total
 		//              counts -- it includes counts from parts included inside books.
@@ -432,6 +433,7 @@ dojo.declare("my.data.HistoryEntry", null, {
 			}
 			
 			projectData.IterateContent({
+				publishableOnly: true,
 				onBook: groupStart,
 				onBookComplete: groupComplete,
 				onPart: groupStart,

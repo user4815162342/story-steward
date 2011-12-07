@@ -31,11 +31,11 @@
                         <label>
                             Words:
                         </label>
-                        <span dojoAttachPoint="_wordCount" style="width:70px" bindField="targetWordCount" dojoType="dijit.form.NumberTextBox" constraints="{ places: 0 }" title="Target word count"></span>
+                        <span dojoAttachPoint="_wordCount" style="width:70px" bindField="targetCount" dojoType="dijit.form.NumberTextBox" constraints="{ places: 0 }" title="Target word count"></span>
                         <label>
                             Status:
                         </label>
-                        <span dojoAttachPoint="_status" bindField="targetStatus" width="70px" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.Customizations.Scene.Statuses, searchAttr: 'name', autoComplete: true }" title="Choose Scene Status to reach"></span>
+                        <span dojoAttachPoint="_status" bindField="whatStatus" width="70px" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.Customizations.Scene.Statuses, searchAttr: 'name', autoComplete: true }" title="Choose Scene Status to reach"></span>
                         <label>
                             Starting:
                         </label>
@@ -49,15 +49,15 @@
                     <div dojoAttachPoint="_commentsField" bindField="comments" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" title="Edit comments">
                     </div>
                 </div>
-                <div dojoType="dijit.layout.ContentPane" region="right" style="width: 200px;">
-                    <table dojoType="my.DataGrid" dojoAttachPoint="_historyField" bindField="history" formatterScope="Controller">
+                <div dojoType="dijit.layout.ContentPane" region="right" style="width: 225px;">
+                    <table dojoType="my.DataGrid" dojoAttachPoint="_historyGrid" formatterScope="Controller">
                         <thead>
                             <tr>
-                                <th field="when" formatter="GridFormat_DisplayShortDate" width="50">
+                                <th field="when" formatter="GridFormat_DisplayShortDate" width="75">
                                     Date
                                 </th>
-                                <th field="wordCount" width="100">
-                                    Total Words
+                                <th field="count" width="100">
+                                    Total
                                 </th>
                             </tr>
                         </thead>
@@ -69,7 +69,7 @@
                 </div>
             </div>
         </div>
-        <div dojoType="my.GoalProgress" title="Progress" dojoAttachPoint="_progress" bindField="history" bindAll="true" >
+        <div dojoType="my.GoalProgress" title="Progress" dojoAttachPoint="_goalProgress">
         </div>
     </div>
 </div>

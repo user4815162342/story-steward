@@ -1,0 +1,20 @@
+
+.my-goalprogress .stats-caption {
+	font-weight: bold;
+}
+
+.my-goalprogress.goal-not-started .hide-on-goal-unstarted {
+	display: none;
+}
+
+.my-goalprogress.goal-ended .hide-on-goal-ended {
+	display: none;
+}
+
+.my-goalprogress.goal-started .hide-on-goal-started {
+	display: none;
+}
+
+.my-goalprogress .hide-on-no-notice {
+	display: none;
+} 
