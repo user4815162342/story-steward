@@ -664,7 +664,7 @@ var Controller = new function() {
     this._LoadProject = function(uri, mightBeNew, forceReadOnly) {
         var result = new dojo.Deferred();
         var me = this;
-        this.ProjectData.LoadProject(uri, mightBeNew, forceReadOnly).then(function() {
+		this.ProjectData.LoadProject(uri, mightBeNew, forceReadOnly).then(function() {
 			me.UpdateTotalWordCountStatus(false).then(function() {
                 result.callback(true);
             }, function(e) {
