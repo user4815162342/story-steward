@@ -42,6 +42,9 @@ dojo.declare("my.data.HistoryEntry", null, {
 			all: 0,
 			byBookOrPart: {}
 		};
+		this._additionalProperties = {};
+		this._additionalBookOrPartProperties = {};
+		this._additionalStatusProperties = {};
 	},
 	
 	_loadIncCounts: function(uid, parentUid, status, type, value) {
@@ -84,6 +87,27 @@ dojo.declare("my.data.HistoryEntry", null, {
 		}
 		
 	},
+	
+	_deserializeStatus: function(uid, parent, status, serialized) {
+		this._statuses[uid].push(status);
+		this._loadIncCounts(uid || "", parent || "", status || "", "_scenes", serialized.scenes || 0);
+		this._loadIncCounts(uid || "", parent || "", status || "", "_words", serialized.words || 0);
+		for (var key in serialized) {
+			if (serialized.hasOwnProperty(key)) {
+				switch (key) {
+					case "scenes":
+					case "words":
+					break;
+					default:
+						this._additionalStatusProperties = this._additionalStatusProperties  || {};
+						this._additionalStatusProperties[uid] = this._additionalStatusProperties[uid] || {};
+						this._additionalStatusProperties[uid][status] = this._additionalStatusProperties[uid][status]|| {};
+						this._additionalStatusProperties[uid][status][key] = serialized[key];
+				}
+				
+			}
+		}
+	},
 
 	_deserializeBookOrPartGroup: function(uid, serialized) {
 		if (serialized.parent) {
@@ -97,16 +121,27 @@ dojo.declare("my.data.HistoryEntry", null, {
 		}
 		this._loadIncChapters(uid || "", serialized.parent || "", serialized.chapters || 0);
 		if (serialized.noStatus) {
-			this._statuses[uid].push("");
-			this._loadIncCounts(uid || "", serialized.parent || "", "", "_scenes", serialized.noStatus.scenes || 0);
-			this._loadIncCounts(uid || "", serialized.parent || "", "", "_words", serialized.noStatus.words || 0);
+			this._deserializeStatus(uid,serialized.parent,"",serialized.noStatus);
 		}
 		if (serialized.statuses) {
 			for (var status in serialized.statuses) {
 				if (serialized.statuses.hasOwnProperty(status)) {
-					this._statuses[uid].push(status);
-					this._loadIncCounts(uid || "", serialized.parent || "", status || "", "_scenes", serialized.statuses[status].scenes || 0);
-					this._loadIncCounts(uid || "", serialized.parent || "", status || "", "_words", serialized.statuses[status].words || 0);
+					this._deserializeStatus(uid, serialized.parent, status, serialized.statuses[status]);
+				}
+			}
+		}
+		for (var key in serialized) {
+			if (serialized.hasOwnProperty(key)) {
+				switch (key) {
+					case "parent":
+					case "chapters":
+					case "statuses":
+					case "noStatus":
+						break;
+					default:
+						this._additionalBookOrPartProperties = this._additionalBookOrPartProperties || {};
+						this._additionalBookOrPartProperties[uid] = this._additionalBookOrPartProperties[uid] || {};
+						this._additionalBookOrPartProperties[uid][key] = serialized[key];
 				}
 			}
 		}
@@ -145,6 +180,20 @@ dojo.declare("my.data.HistoryEntry", null, {
 			}
 			if (args.serialized.noBookOrPart) {
 				this._deserializeBookOrPartGroup("", args.serialized.noBookOrPart);
+			}
+			
+			for (var key in args.serialized) {
+				if (args.serialized.hasOwnProperty(key)) {
+					switch (key) {
+						case "uid":
+						case "when":
+						case "booksAndParts":
+						case "noBookOrPart":
+							break;
+						default:
+							this._additionalProperties[key] = args.serialized[key]
+					}
+				}
 			}
 			
 			
@@ -188,6 +237,13 @@ dojo.declare("my.data.HistoryEntry", null, {
 				var statusResult = {};
 				statusResult.words = this._words[uid][status];
 				statusResult.scenes = this._scenes[uid][status];
+				if (this._additionalStatusProperties[uid] && this._additionalStatusProperties[uid][status]) {
+					for (var key in this._additionalStatusProperties[uid][status]) {
+						if (this._additionalStatusProperties[uid][status].hasOwnProperty(key)) {
+							statusResult[key] = this._additionalStatusProperties[uid][status][key];							
+						}
+					}
+				}
 				if (status === "") {
 					result.noStatus = statusResult;
 				} else {
@@ -195,6 +251,14 @@ dojo.declare("my.data.HistoryEntry", null, {
 					result.statuses[status] = statusResult;
 				}
 				isEmpty = false;
+			}
+		}
+		if (this._additionalBookOrPartProperties[uid]) {
+			for (var key in this._additionalBookOrPartProperties[uid]) {
+				if (this._additionalBookOrPartProperties[uid].hasOwnProperty(key)) {
+					result[key] = this._additionalBookOrPartProperties[uid][key];
+					isEmpty = false;
+				}
 			}
 		}
 		return !isEmpty ? result : null;
@@ -209,6 +273,11 @@ dojo.declare("my.data.HistoryEntry", null, {
 				selector: "date",
 				zulu: true
 			})
+		}
+		for (var key in this._additionalProperties) {
+			if (this._additionalProperties.hasOwnProperty(key)) {
+				result[key] = this._additionalProperties[key];
+			}
 		}
 		
 		if (this._booksAndParts.length) {
