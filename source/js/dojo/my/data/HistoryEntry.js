@@ -245,7 +245,6 @@ dojo.declare("my.data.HistoryEntry", null, {
 	},
 	
 	getTotalWordCount: function(request) {
-		debugger;
 		// summary: Returns the number of words for a given book, part and status.
 		// description: Unlike the standard get*Count functions, this does do total
 		//              counts -- it includes counts from parts included inside books.

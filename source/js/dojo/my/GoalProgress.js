@@ -20,7 +20,6 @@ dojo.require("dijit.ProgressBar");
 		dojo.require("dojox.charting.themes.Distinctive");
 
 dojo.require("my.DataItemViewer");
-//dojo.require("my.GoalHistoryChart");
 
 (function() {
 	var styleContent = dojo.cache("my", "GoalProgress.css");
@@ -163,7 +162,6 @@ dojo.declare("my.GoalProgress", [dijit.layout.ContentPane, dijit._Templated], {
 		
 		statistics.totalProgress = (statistics.totalWritten / statistics.targetCount);
 		statistics.dailyAverage = (lastCount - data.startingCount) / dayNumber;
-		debugger;
 		statistics.projectedFinishDate = dojo.date.add(today, "day", Math.ceil((statistics.targetCount - statistics.totalWritten) / statistics.dailyAverage));
 		
 		var writtenYesterday = data.startingCount;

@@ -95,7 +95,6 @@ dependencies = {
 		   "my.ProjectData",
            "my.DataItemViewer",
            "my.extensions",
-           "my.GoalHistoryChart",
            "my.GoalProgress",
            "my.DataGrid"
 		],
