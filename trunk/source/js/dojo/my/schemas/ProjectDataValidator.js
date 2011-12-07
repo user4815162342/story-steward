@@ -332,6 +332,7 @@ dojo.require("dojox.json.ref");
 				if (history.length > 0) {
 					function convertHistory(data) {
 						var result = {
+							legacy: "1.0", 
 							uid: data.uid,
 							when: data.when,
 							noBookOrPart: {
