@@ -85,6 +85,11 @@
             "when":{
                "$ref":"project-data-date"
             },
+			"legacy": {
+			   "description": "This field means that the history item was converted from a previous version of the format. The value of this property indicates it's original format.",
+			   "type": "string",
+			   "pattern": "^1.0$"
+			},
             "booksAndParts":{
                "description":"Counts statistics grouped by the Book or Part they occurred in. Counts per Book refer only to counts from Chapters or Scenes not also inside a Part in the Book.",
                "type":"object",

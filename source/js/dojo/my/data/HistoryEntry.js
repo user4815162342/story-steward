@@ -170,6 +170,9 @@ dojo.declare("my.data.HistoryEntry", null, {
 			}
 			this._uid = args.serialized.uid;
 			this._when = dojo.date.stamp.fromISOString(args.serialized.when);
+			if (args.serialized.legacy) {
+				this._legacy = args.serialized.legacy;
+			}
 			
 			if (args.serialized.booksAndParts) {
 				for (var uid in args.serialized.booksAndParts) {
@@ -187,6 +190,7 @@ dojo.declare("my.data.HistoryEntry", null, {
 					switch (key) {
 						case "uid":
 						case "when":
+						case "legacy":
 						case "booksAndParts":
 						case "noBookOrPart":
 							break;
@@ -217,6 +221,10 @@ dojo.declare("my.data.HistoryEntry", null, {
 	getWhen: function() {
 		// summary: Returns the date this entry is good for.
 		return this._when;
+	},
+	
+	isLegacy: function() {
+		return this._legacy ? true : false;
 	},
 	
 	_serializeBookOrPart: function(uid) {
@@ -273,6 +281,9 @@ dojo.declare("my.data.HistoryEntry", null, {
 				selector: "date",
 				zulu: true
 			})
+		}
+		if (this._legacy) {
+			result.legacy = this._legacy;
 		}
 		for (var key in this._additionalProperties) {
 			if (this._additionalProperties.hasOwnProperty(key)) {
