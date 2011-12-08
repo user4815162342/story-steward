@@ -55,7 +55,7 @@ if (isDevTarget) {
     fileUtil.copyFile(scriptPath + "../vendor/Math.uuid.js", scriptPath + "../development/js/Math.uuid.js", true);
 	// json schema
 	var jsonSchema = fileUtil.readFile(scriptPath + "../vendor/json-schema/validate.js");
-	jsonSchema = jsonSchema.replace("module.exports","JSON = JSON || {}; JSON.schema");
+	jsonSchema = jsonSchema.replace("module.exports","JSON = window.JSON || {}; JSON.schema");
 	fileUtil.saveFile(scriptPath + "../development/js/json-validate.js", jsonSchema);
     logger.info("Copying version to development");
 	fileUtil.saveFile(scriptPath + "../development/js/appinfo.js",AppInfoText);
@@ -73,7 +73,7 @@ if (isRelTarget) {
 	logger.info("Copying non-dojo vendor to release");
     fileUtil.copyFile(scriptPath + "../vendor/Math.uuid.js", scriptPath + "../release/js/Math.uuid.js", true);
 	var jsonSchema = fileUtil.readFile(scriptPath + "../vendor/json-schema/validate.js");
-	jsonSchema = jsonSchema.replace("module.exports","JSON = JSON || {}; JSON.schema");
+	jsonSchema = jsonSchema.replace("module.exports","JSON = window.JSON || {}; JSON.schema");
 	fileUtil.saveFile(scriptPath + "../release/js/json-validate.js", jsonSchema);
     logger.info("Copying version to release");
 	fileUtil.saveFile(scriptPath + "../release/js/appinfo.js",AppInfoText);

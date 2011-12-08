@@ -1603,7 +1603,7 @@ dojo.addOnLoad(function() {
         dojo.require("my.Editors");
         dojo.require("my.LocalFileAccess");
         dojo.require("my.Settings");
-        dojo.require("my.ProjectData")
+		dojo.require("my.ProjectData")
         dojo.require("my.DataItemViewer");
         dojo.require("my.extensions");
         dojo.require("my.GoalProgress");

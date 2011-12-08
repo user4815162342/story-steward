@@ -44,3 +44,16 @@ my.utilities.search = function(arr, value, args) {
 	return args.returnInsertIndex ? top : (args.returnPriorIndex ? bottom : -1);
 	
 }
+
+my.utilities.addCSS = function(styleContent) {
+	var head = dojo.query("head")[0];
+	var style = dojo.doc.createElement("style");
+	style.setAttribute("type","text/css");
+	if (style.styleSheet) { // Necessary in IE.
+		style.styleSheet.cssText = styleContent
+	} else {
+		style.appendChild(dojo.doc.createTextNode(styleContent));
+	}
+	head.appendChild(style);
+
+}

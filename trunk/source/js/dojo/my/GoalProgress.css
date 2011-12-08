@@ -15,6 +15,10 @@
 	display: none;
 }
 
-.my-goalprogress .hide-on-no-notice {
+.my-goalprogress .notice {
+	text-align: center;
+}
+
+.my-goalprogress.notice-hidden .notice {
 	display: none;
 } 

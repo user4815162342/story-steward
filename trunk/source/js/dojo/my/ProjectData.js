@@ -1404,7 +1404,7 @@ my.ProjectData.Drivers = {
 				},
 				GetHistory: function() {
 					return history;
-				},
+				}
 			}
 		} else {
 			var msg = "Project file is not an appropriate format\n\n" +
