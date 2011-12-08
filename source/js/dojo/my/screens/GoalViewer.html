@@ -1,75 +1,67 @@
 <div widgetClass="my.ChapterViewer" titleField="name" defaultTitle="Scene" defaults="{ dataItem: {}, dataStore: {}, form: '' }" dojoAttachPoint="containerNode">
-<!--
-   Copyright 2011 Neil M. Sheldon
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
--->
-    <div dojoType="dijit.layout.TabContainer" region="center" tabStrip="true" tabPosition="bottom">
-        <div dojoType="dijit.layout.ContentPane" title="Details">
-            <div dojoType="dijit.layout.BorderContainer" gutters="false" design="headline">
-                <div dojoType="dijit.layout.ContentPane" region="top">
-                    <h2 dojoAttachPoint="_titleField" bindField="name" dojoType="dijit.InlineEditBox" editor="dijit.form.TextBox" title="Editable Name"></h2>
-                    <p class="subtitle">
-                        Goal&mdash; 
-                        Created: <span dojoAttachPoint="_createdField" bindField="created" bindDataType="Date"></span>&nbsp; 
-                        Modified: <span dojoAttachPoint="_modifiedField" bindField="modified" bindDataType="Date"></span>&nbsp;<span dojoType="dijit.form.Button" class="readOnlyDisable" showLabel="false" iconClass="iconDelete" dojoAttachPoint="_deleteButton" dojoAttachEvent="onClick:DeleteDataItem">Delete</span>&nbsp;
-                    </p>
-                </div>
-                <div dojoType="dijit.layout.ContentPane" region="center">
-                    <p>
-                        <label>
-                            Words:
-                        </label>
-                        <span dojoAttachPoint="_wordCount" style="width:70px" bindField="targetCount" dojoType="dijit.form.NumberTextBox" constraints="{ places: 0 }" title="Target word count"></span>
-                        <label>
-                            Status:
-                        </label>
-                        <span dojoAttachPoint="_status" bindField="whatStatus" width="70px" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.Customizations.Scene.Statuses, searchAttr: 'name', autoComplete: true }" title="Choose Scene Status to reach"></span>
-                        <label>
-                            Starting:
-                        </label>
-                        <span dojoType="dijit.form.DateTextBox" style="width:70px" dojoAttachPoint="_startDate" bindField="starting" title="Edit starting date."></span>
-                        <label>
-                            Ending:
-                        </label>
-                        <span dojoType="dijit.form.DateTextBox" style="width:70px" dojoAttachPoint="_endDate" bindField="ending" title="Edit ending date."></span>
-                    </p>
-                    <h3>Comments:</h3>
-                    <div dojoAttachPoint="_commentsField" bindField="comments" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" title="Edit comments">
-                    </div>
-                </div>
-                <div dojoType="dijit.layout.ContentPane" region="right" style="width: 225px;">
-                    <table dojoType="my.DataGrid" dojoAttachPoint="_historyGrid" formatterScope="Controller">
-                        <thead>
-                            <tr>
-                                <th field="when" formatter="GridFormat_DisplayShortDate" width="75">
-                                    Date
-                                </th>
-                                <th field="count" width="100">
-                                    Total
-                                </th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-                <div dojoType="dijit.layout.ContentPane" region="bottom">
-                    <h4 class="tagsLabel">Tags:</h4>
-                    <span dojoType="my.TagEditor" bindField="tags" getTagStore="DataViewerFormat_GetTagStore" getTagStoreScope="Controller" dojoAttachPoint="_tagsField"></span>
-                </div>
+    <!--
+    Copyright 2011 Neil M. Sheldon
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    -->
+    <div dojoType="dijit.layout.BorderContainer" gutters="false" design="headline">
+        <div dojoType="dijit.layout.ContentPane" region="top">
+            <h2 dojoAttachPoint="_titleField" bindField="name" dojoType="dijit.InlineEditBox" editor="dijit.form.TextBox" title="Editable Name"></h2>
+            <p class="subtitle">
+                Goal&mdash; 
+                Created: <span dojoAttachPoint="_createdField" bindField="created" bindDataType="Date"></span>&nbsp; 
+                Modified: <span dojoAttachPoint="_modifiedField" bindField="modified" bindDataType="Date"></span>&nbsp;<span dojoType="dijit.form.Button" class="readOnlyDisable" showLabel="false" iconClass="iconDelete" dojoAttachPoint="_deleteButton" dojoAttachEvent="onClick:DeleteDataItem">Delete</span>&nbsp;
+            </p>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" region="center">
+            <p>
+                <label>
+                    Words:
+                </label>
+                <span dojoAttachPoint="_wordCount" style="width:70px" bindField="targetCount" dojoType="dijit.form.NumberTextBox" constraints="{ places: 0 }" title="Target word count"></span>
+                <label>
+                    Status:
+                </label>
+                <span dojoAttachPoint="_status" bindField="whatStatus" width="70px" dojoType="dijit.InlineEditBox" editor="dijit.form.ComboBox" editorParams="{store: Controller.ProjectData.Customizations.Scene.Statuses, searchAttr: 'name', autoComplete: true }" title="Choose Scene Status to reach"></span>
+                <label>
+                    Starting:
+                </label>
+                <span dojoType="dijit.form.DateTextBox" style="width:70px" dojoAttachPoint="_startDate" bindField="starting" title="Edit starting date."></span>
+                <label>
+                    Ending:
+                </label>
+                <span dojoType="dijit.form.DateTextBox" style="width:70px" dojoAttachPoint="_endDate" bindField="ending" title="Edit ending date."></span>
+            </p>
+            <h3>Comments:</h3>
+            <div dojoAttachPoint="_commentsField" bindField="comments" dojoType="dijit.InlineEditBox" editor="my.MemoEditor" renderAsHtml="true" autoSave="false" title="Edit comments">
+            </div>
+            <div dojoType="my.GoalProgress" title="Progress" dojoAttachPoint="_goalProgress">
             </div>
         </div>
-        <div dojoType="my.GoalProgress" title="Progress" dojoAttachPoint="_goalProgress">
+        <div dojoType="dijit.layout.ContentPane" region="right" style="width: 225px;">
+            <table dojoType="my.DataGrid" dojoAttachPoint="_historyGrid" formatterScope="Controller">
+                <thead>
+                    <tr>
+                        <th field="when" formatter="GridFormat_DisplayShortDate" width="75">
+                            Date
+                        </th>
+                        <th field="count" width="100">
+                            Total
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div dojoType="dijit.layout.ContentPane" region="bottom">
+            <h4 class="tagsLabel">Tags:</h4>
+            <span dojoType="my.TagEditor" bindField="tags" getTagStore="DataViewerFormat_GetTagStore" getTagStoreScope="Controller" dojoAttachPoint="_tagsField"></span>
         </div>
     </div>
 </div>
