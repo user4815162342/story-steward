@@ -13,7 +13,6 @@
 dojo.provide("my.schemas.ProjectDataValidator");
 dojo.require("dojo.cache");
 dojo.require("dojox.json.ref");
-//dojo.require("dojox.json.schema");
 // NOTE: Since the dojox schema isn't up to the latest revisions of the spec, 
 // I'm using a third-party code, ironically written by the same guy who
 // wrote the one in dojo, (also the guy who wrote the specs), except that
@@ -29,10 +28,11 @@ dojo.require("dojox.json.ref");
  * transformer object would be used to transform a schema into the current version,
  * based on the version found.
  */ 
+dojo.declare("my.schemas.ProjectDataValidator", null, {});
 
 (function() {
 
-	var me = dojo.declare("my.schemas.ProjectDataValidator", [], {});
+	var me = my.schemas.ProjectDataValidator; 
 	
 	/* NOTE: For Adding New Format Versions:
 	 * Assuming the validation process will always be done similarly, I've marked
@@ -142,7 +142,7 @@ dojo.require("dojox.json.ref");
 			if (!this.schema) {
 				
 				try {
-					this.schema = dojox.json.ref.fromJson(dojo.cache("my.schemas", "1.0/project-data.json"));
+					this.schema = dojox.json.ref.fromJson(dojo.cache("my.schemas.10", "project-data.json"));
 					// TODO: Comment out this next line when everything seems to be working.
 					lookForProblems(this.schema);
 					// NEWFORMAT: May need to make sure this is done for new schemas.
@@ -171,7 +171,7 @@ dojo.require("dojox.json.ref");
 			if (!this.schema) {
 			
 				try {
-					this.schema = dojox.json.ref.fromJson(dojo.cache("my.schemas", "1.1/project-data.json"));
+					this.schema = dojox.json.ref.fromJson(dojo.cache("my.schemas.11", "project-data.json"));
 					// TODO: Comment out this next line when everything seems to be working.
 					lookForProblems(this.schema);
 				// NEWFORMAT: May need to make sure this is done for new schemas.

@@ -15,17 +15,10 @@
 
 
  */
-var scriptPath = arguments[0];
-if (scriptPath.indexOf("/") == -1) {
-    scriptPath = scriptPath.replace(/\\/g, "/");
-}
-var isDevTarget = arguments[1] == 1;
-var isRelTarget = arguments[2] == 1;
 
-buildScriptsPath = typeof buildScriptsPath == "undefined" ? scriptPath + "../vendor/dojo/util/buildscripts/" : buildScriptsPath;
-load(buildScriptsPath + "jslib/fileUtil.js");
-load(scriptPath + "fixFileUtil.js")
-load(buildScriptsPath + "jslib/logger.js");
+require("dojo","fileUtil");
+require("my","fixFileUtil");
+require("dojo","logger");
 
 function cleanOutputDir(path) {
     var file = new java.io.File(path);
@@ -49,12 +42,12 @@ function cleanOutputDir(path) {
     }
 }
 
-if (isDevTarget) {
+if (params.targets.development) {
     logger.info("Cleaning development");
-    cleanOutputDir(scriptPath + "../development/");
+    cleanOutputDir(params.scriptPath + "../development/");
 }
-if (isRelTarget) {
+if (params.targets.release) {
     logger.info("Cleaning release");
-    cleanOutputDir(scriptPath + "../release/");
+    cleanOutputDir(params.scriptPath + "../release/");
 }
 logger.info("Cleaned.");
