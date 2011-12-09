@@ -137,11 +137,11 @@ dojo.declare("my.data.History", null, {
 	getHistoryDataForGoal: function(goal) {
 		var starting = this._projectData.ProjectStore.getValue(goal,"starting",null);
 		if (!starting) {
-			starting = this._projectData.ProjectStore.getValue(goal,"created",null);
+			starting = this._projectData.ProjectStore.getValue(goal,"created",new Date(0));
 			// if this is null, highly unlikely, will start at the '0' date, so we don't need to worry.
 		}
 		
-		var ending = this._projectData.ProjectStore.getValue(goal,"ending",null);
+		var ending = this._projectData.ProjectStore.getValue(goal,"ending",new Date());
 		// if this is null, the ending will be 'today'.
 		
 		var whatStatus = this._projectData.ProjectStore.getValue(goal,"whatStatus",null);

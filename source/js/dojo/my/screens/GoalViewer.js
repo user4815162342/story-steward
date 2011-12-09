@@ -33,6 +33,8 @@ dojo.declare("my.screens.GoalViewer", [my.DataItemViewer], {
 						return;
 					}
 				case "whatStatus":
+				case "targetCount":
+				case "startingCount":
 				case "where":
 				case "what":
 					if (oldValue == newValue) {

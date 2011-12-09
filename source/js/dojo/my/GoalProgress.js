@@ -89,7 +89,6 @@ dojo.declare("my.GoalProgress", [dijit.layout.ContentPane, dijit._Templated], {
     
     setHistoryData: function(data) {
     
-    
         var statistics = {
             notice: null,
             writtenToday: null,
@@ -164,10 +163,10 @@ dojo.declare("my.GoalProgress", [dijit.layout.ContentPane, dijit._Templated], {
         } else {
             statistics.writtenToday = 0;
         }
-        statistics.suggestedDailyGoal = (data.targetCount - writtenYesterday) / (statistics.daysRemaining + 1);
+        statistics.suggestedDailyGoal = Math.max(0,(data.targetCount - writtenYesterday) / (statistics.daysRemaining + 1));
         statistics.todayProgress = statistics.writtenToday / statistics.suggestedDailyGoal;
         
-        if (dojo.date.compare(today, data.ending) < 0) {
+        if ((statistics.daysRemaining > 0) && (todayNumber >= 0)) {
             var projectedCount = Math.floor(lastCount + (statistics.dailyAverage * (dayCount - dayNumber)));
             this._chartGui.addSeries("Projected", [{
                 x: dayNumber,
@@ -220,7 +219,7 @@ dojo.declare("my.GoalProgress", [dijit.layout.ContentPane, dijit._Templated], {
 			}
 		}
         
-        if (statistics.daysRemaining < 0) {
+        if ((statistics.daysRemaining < 0) || (statistics.totalWritten >= statistics.targetCount)) {
             dojo.removeClass(this.domNode, "goal-not-started");
             dojo.removeClass(this.domNode, "goal-started");
             dojo.addClass(this.domNode, "goal-ended");

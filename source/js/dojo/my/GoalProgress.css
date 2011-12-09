@@ -3,7 +3,7 @@
 	font-weight: bold;
 }
 
-.my-goalprogress.goal-not-started .hide-on-goal-unstarted {
+.my-goalprogress.goal-not-started .hide-on-goal-not-started {
 	display: none;
 }
 
