@@ -2560,7 +2560,7 @@ my.ProjectData.Drivers = {
             };
             
             this.save = function(dataReader, success, error) {
-                var result = new dojo.Deferred();
+				var result = new dojo.Deferred();
                 // just eat all of the changes.
                 if (readonly) {
                     result.errback("Can't save to this sample database.")
