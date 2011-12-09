@@ -17,27 +17,27 @@
         </div>
         <div>
             <table>
-                <tr class="hide-on-goal-ended">
+                <tr class="hide-on-goal-ended hide-on-goal-not-started">
                     <td class="stats-caption">
                         Written Today:
                     </td>
                     <td dojoAttachPoint="_writtenToday">
                     </td>
                 </tr>
-                <tr class="hide-on-goal-ended">
+                <tr class="hide-on-goal-ended hide-on-goal-not-started">
                     <td colspan="2">
                         <div dojoType="dijit.ProgressBar" dojoAttachPoint="_todayProgress">
                         </div>
                     </td>
                 </tr>
-                <tr class="hide-on-goal-ended">
+                <tr class="hide-on-goal-ended hide-on-goal-not-started">
                     <td class="stats-caption">
                         Suggested Daily Count To Finish On Time:
                     </td>
                     <td dojoAttachPoint="_suggestedDailyGoal">
                     </td>
                 </tr>
-                <tr>
+                <tr class="hide-on-goal-not-started">
                     <td class="stats-caption">
                         Average Per Day:
                     </td>
@@ -64,20 +64,20 @@
                         </div>
                     </td>
                 </tr>
-                <tr>
+                <tr class="hide-on-goal-not-started">
                     <td class="stats-caption">
                         Days Remaining:
                     </td>
                     <td dojoAttachPoint="_daysRemaining">
                     </td>
                 </tr>
-                <tr class="hide-on-goal-ended">
+                <tr class="hide-on-goal-ended hide-on-goal-not-started">
                     <td colspan="2">
                         <div dojoType="dijit.ProgressBar" dojoAttachPoint="_timePassed">
                         </div>
                     </td>
                 </tr>
-                <tr class="hide-on-goal-ended">
+                <tr class="hide-on-goal-ended hide-on-goal-not-started">
                     <td class="stats-caption">
                         At This Rate The Goal Will Be Reached On:
                     </td>

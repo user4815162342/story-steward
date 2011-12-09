@@ -142,7 +142,7 @@ dojo.declare("my.schemas.ProjectDataValidator", null, {});
 			if (!this.schema) {
 				
 				try {
-					this.schema = dojox.json.ref.fromJson(dojo.cache("my.schemas.10", "project-data.json"));
+					this.schema = dojox.json.ref.fromJson(dojo.cache("my.schemas.10", "project.json"));
 					// TODO: Comment out this next line when everything seems to be working.
 					lookForProblems(this.schema);
 					// NEWFORMAT: May need to make sure this is done for new schemas.
@@ -171,7 +171,7 @@ dojo.declare("my.schemas.ProjectDataValidator", null, {});
 			if (!this.schema) {
 			
 				try {
-					this.schema = dojox.json.ref.fromJson(dojo.cache("my.schemas.11", "project-data.json"));
+					this.schema = dojox.json.ref.fromJson(dojo.cache("my.schemas.11", "project.json"));
 					// TODO: Comment out this next line when everything seems to be working.
 					lookForProblems(this.schema);
 				// NEWFORMAT: May need to make sure this is done for new schemas.
