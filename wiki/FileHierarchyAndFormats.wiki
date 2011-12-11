@@ -1,6 +1,8 @@
 #summary Project File Hierarchy and Formats
 #labels Phase-Implementation
 
+*NOTE: The project file format has changed as of the 0.9.81 version of Story Steward. It is now described in a json schema format within the project.*
+
 = Introduction =
 
 Story Steward does not use on monolithic file to store it's data. This improves performance some, as only a little bit has to be loaded at a time, when it is needed. This is a description of the formats, it is not a full fledged specification.
