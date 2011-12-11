@@ -1,7 +1,7 @@
 #summary Project File Hierarchy and Formats
 #labels Phase-Implementation
 
-*NOTE: The project file format has changed as of the 0.9.81 version of Story Steward. It is now described in a json schema format within the project.*
+*NOTE: The project file format has changed as of the 0.9.81 version of Story Steward. It is now described in a json schema format within the project. This document still refers to the older format, and due to lack of validation, may not actually describe the format actually used.*
 
 = Introduction =
 
