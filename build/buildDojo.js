@@ -16,10 +16,9 @@ require("dojo", "logger");
 require("my", "runprocess");
 
 (function() {
-    var jarPath = "../shrinksafe/";
-    var classPath = jarPath + "js.jar;" + jarPath + "shrinksafe.jar";
-    
-    
+    var jarPath = params.buildScriptsPath.replace(/[^\/]*\/$/g, "") +  "shrinksafe/";
+    var classPath = jarPath + "js.jar:" + jarPath + "shrinksafe.jar";
+
     
     if (params.targets.development || params.targets.release) {
         // FUTURE: Pre-build, perhaps go through source and find dojo.requires and build 
