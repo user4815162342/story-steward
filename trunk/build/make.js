@@ -22,7 +22,8 @@ params.scriptPath = scriptArguments[0];
 if (params.scriptPath.indexOf("/") == -1) {
     params.scriptPath = params.scriptPath.replace(/\\/g, "/");
 }
-params.buildScriptsPath = "../vendor/dojo/util/buildscripts/";
+params.projectPath = params.scriptPath.replace(/[^\/]*\/$/g, "");
+params.buildScriptsPath =  params.projectPath + "vendor/dojo/util/buildscripts/";
 
 // This thing overrides the global print function to print to the log file,
 // so I don't have to change any included scripts to do this. This is basically

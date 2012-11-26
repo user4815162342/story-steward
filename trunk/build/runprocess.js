@@ -33,6 +33,8 @@ function RunProcess(cmdArgs, workingDirectory, out) {
         // wait for process completion
         var exitCode = p.waitFor();
         if (exitCode != 0) {
+            out.println("Error running command " + cmdArgs.join(" "));
+            out.println("Working Directory was " + workingDirectory);
             throw "Process ended with exit code: " + exitCode;
         }
     } finally {
