@@ -66,7 +66,7 @@ require("my", "info");
     if (params.targets.release) {
         logger.info("Copying source to release");
         fileUtil.copyDir(params.scriptPath + "../source/", params.scriptPath + "../release/", {
-            include: /^(?:.*\.(?:html|js|htm|css|txt))|LICENSE|NOTICE$/g,
+            include: /^(?:.*\.(?:html|js|json|htm|css|txt))|LICENSE|NOTICE$/g,
             exclude: /^.*\/source\/js\/dojo\/my\/.*/g
         }, true);
         logger.info("Copying resources to release");
