@@ -1,0 +1,23 @@
+{
+  "main": "index.html",
+  "name": "story-steward",
+  "description": "Cross Platform Novel Writing Software",
+  "version": "0.1",
+  "keywords": [ "writing", "wordprocessing", "book", "novel", "author" ],
+  "window": {
+		"title": "Story Steward",
+    "toolbar": false
+  },
+  "webkit": {
+    "plugin": false
+  },
+  "maintainers": [{
+		"name": "Neil M. Sheldon",
+		"web": "http://code.google.com/p/story-steward/"
+	}],
+	"bugs": "http://code.google.com/p/story-steward/issues/list",
+	"licenses": [{
+		"type": "Apache 2.0",
+		"url": "http://www.apache.org/licenses/LICENSE-2.0"
+	}]
+}
