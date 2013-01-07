@@ -4,9 +4,11 @@ _Story Steward_ is currently in beta, and there are numerous features which are 
 
 If you are looking for a good novel writing software, but are unsure about using a beta project, please try it out. If you don't like it, [Support contact] this project and let me know what's wrong. Maybe it's something that can be fixed.
 
-Story Steward is intended to run on Firefox, Internet Explorer, Opera and webkit-based browsers like Safari and Chrome. However at this point it has only been tested on Firefox and Internet Explorer. Further, [http://code.google.com/p/story-steward/issues/detail?id=1 Issue #1] prevents it from running properly on Internet Explorer.
+Story Steward is intended to run on Firefox, Internet Explorer, Opera and webkit-based browsers like Safari and Chrome. However at this point it has only been tested on Firefox and Internet Explorer. 
 
-As I'm also a struggling writer and have other paying projects to work on, I can't spend all my time working on this software for free. For that reason, this project will see small spurts of activity now and then, with possibly several months between where nothing is happening while I'm working on other projects.
+*Update:* Story Steward is moving away from in-browser use. For one thing, Firefox, at least, has made it much more difficult for Story Steward to function in its most recent versions without extensive configuration. More importantly, however, I don't want this application to be dependent on whether someone else's web page causes the browser to crash or hang in the middle of writing, or some future version update suddenly makes the application no longer run. Standalone versions will be available soon.
+
+As I'm also a struggling writer and have other paying projects to work on, I can't spend all my time working on this software for free. For that reason, this project will see small spurts of activity now and then, with possibly several months or even a year between where nothing is happening while I'm working on other projects.
 
 If you want to hurry up progress, there are several things you can do: 
   # [Support Let me know] that you're interested in this project, and especially what features you want me to finish, or bugs you want me to fix. This reminds me that my users are waiting, and may give me a nudge to finish up something that is only a couple hours from being done.
