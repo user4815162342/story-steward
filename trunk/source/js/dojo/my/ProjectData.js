@@ -567,6 +567,8 @@ dojo.declare("my.ProjectData", null, {
         var now = new Date(); // for creating UID's.
         var me = this;
         var result = {
+            /*
+             * */
             IsReadOnly: function() {
                 return false;
             },
@@ -580,10 +582,10 @@ dojo.declare("my.ProjectData", null, {
                     credits: [{
                         created: now,
                         modified: now,
+                        type: "credit",
                         uid: my.ProjectData.CreateDataUID(),
                         role: "Author"
                     }]
-                
                 }, {
                     created: now,
                     modified: now,
@@ -673,6 +675,9 @@ dojo.declare("my.ProjectData", null, {
             },
             GetInterfaceSettings: function() {
                 return {};
+            },
+            GetHistory: function() {
+                return [];
             }
         }
         return result;

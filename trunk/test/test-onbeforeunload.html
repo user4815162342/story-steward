@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Testing</title>
+    </head>
+    <body>
+        <p>This should warn before closing.</p>
+        <script type="text/javascript">
+            window.onbeforeunload = function() {
+                return "Are you sure you want to close me?";
+            };
+            var nw = require('nw.gui').Window.get();
+            nw.on('close',function() {
+                if (window.onbeforeunload) {
+                    var confirmMessage = window.onbeforeunload();
+                    if (confirmMessage) {
+                        var result = confirm(confirmMessage);
+                        if (!result) {
+                            return false;
+                        }
+                    }
+                }
+                nw.close(true);
+            });
+        </script>
+    </body>
+</html>

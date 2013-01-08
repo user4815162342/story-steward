@@ -183,10 +183,15 @@ var Controller = new function() {
             dojo.connect(this.ProjectData, "onMessage", this, this._projectMessage);
             dojo.connect(dojo.global, "onresize", this, this._windowResize);
             
-            dojo.addOnBeforeUnload(dojo.hitch(this, function() {
-                if (this.ProjectData.IsDirty()) {
-                    return "The project has been modified. Are you sure you want to leave this page before saving?";
-                }
+            // NMS: Pushed this off into an 'environment' object, since this is handled
+            // differently in different places.
+            //dojo.addOnBeforeUnload(dojo.hitch(this, function() {
+            //    if (this.ProjectData.IsDirty()) {
+            //        return "The project has been modified. Are you sure you want to leave this page before saving?";
+            //    }
+            //}));
+            window.environment.addCloseQuery(dojo.hitch(this, function() {
+                return !this.ProjectData.IsDirty();
             }));
             
             // NOTE: The following allows us to turn on and off escape handling.			

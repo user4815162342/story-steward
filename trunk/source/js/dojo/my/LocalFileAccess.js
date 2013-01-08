@@ -13,6 +13,8 @@
  3) Fall back to a manual copy of content if no copyFile is available on
  the driver.
  4) Added copyfile to mozilla driver.
+ 5) Fixed false positive for availability of tiddlysaver applet.
+ 6) Added drivers for nodejs (for use in node-webkit) and requestFileSystem (for use in general modern webkit browsers)
  
  I've marked the code that has changed in a way that will make it easier to see
  with a diff program:
@@ -31,7 +33,7 @@ dojo.getObject("my.LocalFileAccess", true);
     //-	$.extend($.twFile,{
     dojo.mixin(my.LocalFileAccess, { //+
         currentDriver: null,
-        driverList: ["activeX", "mozilla", "tiddlySaver", "javaLiveConnect"],
+        driverList: ["node", "activeX", "mozilla", "requestFileSystem", "tiddlySaver", "javaLiveConnect"],
         
         // Loads the contents of a text file from the local file system
         // filePath is the path to the file in these formats:
@@ -104,8 +106,13 @@ dojo.getObject("my.LocalFileAccess", true);
         getDriver: function() {
             if (this.currentDriver === null) {
                 for (var t = 0; t < this.driverList.length; t++) {
-                    if (this.currentDriver === null && drivers[this.driverList[t]].isAvailable && drivers[this.driverList[t]].isAvailable()) 
+                    if (this.currentDriver === null && drivers[this.driverList[t]].isAvailable && drivers[this.driverList[t]].isAvailable()) { 
                         this.currentDriver = drivers[this.driverList[t]];
+                        break;
+                    }
+                }
+                if (this.currentDriver === null) {
+                    throw "Story Steward can't write to the local file system.";
                 }
             }
             return this.currentDriver;
@@ -127,6 +134,86 @@ dojo.getObject("my.LocalFileAccess", true);
     
     var drivers = {};
     
+    // Nodejs driver, for node-webkit. This is by far the preferred driver, and
+    // if it's available, then it should be used first.
+    // TODO: Need to convert to async as well.
+    // -- Step 1: Get nodejs driver working, so we can test things once I go async.
+    // -- Step 2: Convert over to async, and make sure everything works. (It looks
+    //            like all calls to these eventually work with a deferred) The code
+    //            changes are going to be in ProjectData.js and Settings.js. Make
+    //            sure nodejs works this way, and do the conversion in a way in
+    //            which there are minimal changes to the other drivers.
+    // -- Step 3: Disable nodejs temporarily, and get requestFileSystem to work
+    //            with the new async mechanism. Test and make sure it works,
+    //            as I want it to work in the future on cordova.
+    // -- Step 4: Once it's all working, then go ahead and re-enable nodejs.
+    //            Test it and make sure it's working, and we've now got node-webkit
+    //            running.
+    drivers.node = {
+        name: "nodejs",
+        isAvailable: function() {
+            if (require) {
+                this.fs = require('fs');
+                return !!this.fs;
+            }
+            return false
+        },
+        loadFile: function(filePath) {
+            // Returns null if it can't do it (file doesn't exist), false if there's an error, or a string of the content if successful
+            try {
+                return this.fs.readFileSync(filePath,'utf8');
+            } catch (ex) {
+                if (ex.code && (ex.code === 'ENOENT')) {
+                    return null;
+                }
+                throw "Can't Load file '" + filePath + "': " + ex; //+
+            }
+        },
+        saveFile: function(filePath,content) {
+            // Returns null if it can't do it, false if there's an error, true if it saved OK
+            try {
+                this.fs.writeFileSync(filePath,content,'utf8');
+                return true;
+            } catch (ex) {
+                throw "Can't Save file '" + filePath + "': " + ex; //+
+            }
+            return null;
+        },
+        copyFile: function(dest,source) {
+            try {
+                // TODO: Should use a stream and pipe, etc.
+                this.saveFile(dest,this.loadFile(source));
+            } catch (ex) {
+                throw "Can't copy file '" + source + "' to '" + dest + "': " + ex; //+
+            }
+            return true;
+        }
+    }
+    
+    // requestFileSystem, available on chrome and in cordova. This is a poor driver to have,
+    // since we don't have access to the whole system, just a subset, but I'll use
+    // what I can.
+    // TODO: I think that the paths will be converted into single file names, where the path
+    // separators are converted into underscores and so forth. That way, if the user is *used*
+    // to this mechanism (for example, if we're on a mobile system), then they can just do
+    // those file names. Of course, the loading/saving paradigm, as far as the user is concerned,
+    // is going to change in the near future, getting rid of having to enter URLs.
+    drivers.requestFileSystem = {
+        name: "requestFileSystem",
+        isAvailable: function() {
+            return !!(window && (window.requestFileSystem || window.webkitRequestFileSystem));
+        },
+        loadFile: function() {
+            throw "requestFileSystem loadFile Unimplemented";
+        },
+        saveFile: function() {
+            throw "requestFileSystem saveFile Unimplemented";
+        },
+        copyFile: function() {
+            throw "requestFileSystem copyFile Unimplemented";
+        }
+    }
+
     // Internet Explorer driver
     
     drivers.activeX = {
@@ -302,7 +389,8 @@ dojo.getObject("my.LocalFileAccess", true);
             }
         },
         isAvailable: function() {
-            return !!document.applets["TiddlySaver"];
+            var applet = document.applets["TiddlySaver"];
+            return !!(applet.loadFile && applet.saveFile);
         },
         loadFile: function(filePath) {
             var r;
