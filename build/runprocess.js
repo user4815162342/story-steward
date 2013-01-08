@@ -1,6 +1,6 @@
 function PipeThread(inputStream,out) {
 
-    spawn(function() {
+    return spawn(function() {
         var isr = new java.io.InputStreamReader(inputStream);
         var br = new java.io.BufferedReader(isr);
         var line = null;
@@ -25,20 +25,28 @@ function RunProcess(cmdArgs, workingDirectory, out) {
         // it's output from our process to the new one) to avoid weird deadlocks.
         p.getOutputStream().close();
         
-        PipeThread(p.getInputStream(),out);
+        var outputThread = PipeThread(p.getInputStream(),out);
         
-        PipeThread(p.getErrorStream(),out);
+        var errorThread = PipeThread(p.getErrorStream(),out);
         
         
         // wait for process completion
         var exitCode = p.waitFor();
+        // also need to wait for the pipe threads to finish, otherwise we
+        // don't actually get the data. This is a bug that's been sitting around 
+        // for ages, waiting to rear it's ugly head just when the circumstances 
+        // are right. Maybe it's because I'm running this on a dual core, now?
+        outputThread.join();
+        errorThread.join();
         if (exitCode != 0) {
             out.println("Error running command " + cmdArgs.join(" "));
             out.println("Working Directory was " + workingDirectory);
             throw "Process ended with exit code: " + exitCode;
         }
+        
     } finally {
+        // NOTE: For some reason, the process is continuing at this point.
         p.destroy();
+        p = null;
     }
-    
 }
