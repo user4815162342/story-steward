@@ -41,35 +41,60 @@ dojo.getObject("my.LocalFileAccess", true);
         //    \\server\share\path\path\path\filename - PC network file
         //    /path/path/path/filename - Mac/Unix local file
         // returns the text of the file, or null if the operation cannot be performed or false if there was an error
-        load: function(filePath) {
-            var d = this.getDriver();
-            return d ? d.loadFile(filePath) : null;
+        load: function(filePath,success,failure) {
+            try {
+                var d = this.getDriver();
+                if (d.isAsync) {
+                    d.loadFile(filePath,success,failure);
+                } else {
+                    success(d.loadFile(filePath));
+                }
+            } catch (e) {
+                failure(e);
+            }
         },
         // Saves a string to a text file on the local file system
         // filePath is the path to the file in the format described above
         // content is the string to save
         // returns true if the file was saved successfully, or null if the operation cannot be performed or false if there was an error
-        save: function(filePath, content) {
-            var d = this.getDriver();
-            return d ? d.saveFile(filePath, content) : null;
+        save: function(filePath, content,success,failure) {
+            try {
+                var d = this.getDriver();
+                if (d.isAsync) {
+                    d.saveFile(filePath,content,success,failure);
+                } else {
+                    success(d.saveFile(filePath, content));
+                }
+            } catch (e) {
+                failure(e);
+            }
         },
         // Copies a file on the local file system
         // dest is the path to the destination file in the format described above
         // source is the path to the source file in the format described above
         // returns true if the file was copied successfully, or null if the operation cannot be performed or false if there was an error
-        copy: function(dest, source) {
+        copy: function(dest, source,success,failure) {
             var d = this.getDriver();
-            if (d && d.copyFile) 
-                return d.copyFile(dest, source);
+            if (d && d.copyFile) {
+                try {
+                    if (d.isAsync) {
+                        d.copyFile(dest,source,success,failure);
+                    } else {
+                        success(d.copyFile(dest, source));
+                    }
+                } catch (e) {
+                    failure(e);
+                }
             //-else
             //-    return null;
-            else {//+
-                var c = this.load(source);//+
-                if (c) {//+
-                    return this.save(dest, c)//+
-                } else {//+
-                    return null;//+
-                }
+            } else {//+
+                this.load(source,function(c) {
+                    if (c) {//+
+                        success(this.save(dest, c))//+
+                    } else {//+
+                        success(null);//+
+                    }
+                },failure);//+
             }//+
         },
         // Converts a local file path from the format returned by document.location into the format expected by this plugin
@@ -108,6 +133,7 @@ dojo.getObject("my.LocalFileAccess", true);
                 for (var t = 0; t < this.driverList.length; t++) {
                     if (this.currentDriver === null && drivers[this.driverList[t]].isAvailable && drivers[this.driverList[t]].isAvailable()) { 
                         this.currentDriver = drivers[this.driverList[t]];
+                        console.info("Using file access driver: " + this.driverList[t]);
                         break;
                     }
                 }
@@ -136,82 +162,267 @@ dojo.getObject("my.LocalFileAccess", true);
     
     // Nodejs driver, for node-webkit. This is by far the preferred driver, and
     // if it's available, then it should be used first.
-    // TODO: Need to convert to async as well.
-    // -- Step 1: Get nodejs driver working, so we can test things once I go async.
-    // -- Step 2: Convert over to async, and make sure everything works. (It looks
-    //            like all calls to these eventually work with a deferred) The code
-    //            changes are going to be in ProjectData.js and Settings.js. Make
-    //            sure nodejs works this way, and do the conversion in a way in
-    //            which there are minimal changes to the other drivers.
-    // -- Step 3: Disable nodejs temporarily, and get requestFileSystem to work
-    //            with the new async mechanism. Test and make sure it works,
-    //            as I want it to work in the future on cordova.
-    // -- Step 4: Once it's all working, then go ahead and re-enable nodejs.
-    //            Test it and make sure it's working, and we've now got node-webkit
-    //            running.
     drivers.node = {
         name: "nodejs",
         isAvailable: function() {
-            if (require) {
+            if (require && !this.fs) {
                 this.fs = require('fs');
                 return !!this.fs;
             }
-            return false
+            return !!this.fs;
         },
-        loadFile: function(filePath) {
-            // Returns null if it can't do it (file doesn't exist), false if there's an error, or a string of the content if successful
-            try {
-                return this.fs.readFileSync(filePath,'utf8');
-            } catch (ex) {
-                if (ex.code && (ex.code === 'ENOENT')) {
-                    return null;
+        isAsync: true,
+        loadFile: function(filePath,success,failure) {
+            this.fs.readFile(filePath,'utf8',function(err,data) {
+                if (err) {
+                    if (err.code === 'ENOENT') {
+                        success(null);
+                    } else {
+                        failure("Can't Load file '" + filePath + "': " + err);
+                    }
+                } else {
+                    success(data);
                 }
-                throw "Can't Load file '" + filePath + "': " + ex; //+
-            }
+            });
         },
-        saveFile: function(filePath,content) {
-            // Returns null if it can't do it, false if there's an error, true if it saved OK
-            try {
-                this.fs.writeFileSync(filePath,content,'utf8');
-                return true;
-            } catch (ex) {
-                throw "Can't Save file '" + filePath + "': " + ex; //+
+        createParentDirectories: function(filePath,success,failure) {
+            var me = this;
+            if (!me.path) {
+                me.path = require('path');
             }
-            return null;
+            var dirname = me.path.dirname(filePath);
+            me.fs.exists(dirname,function(exists) {
+                if (exists) {
+                    success();
+                } else {
+                    me.createParentDirectories(dirname,function() {
+                        me.fs.mkdir(dirname,0755,function(err) {
+                            if (err) {
+                                failure("Can't create directory '" + dirname + "': " + err);
+                            } else {
+                                success();
+                            }
+                        });
+                    },failure);
+                }
+            });
         },
-        copyFile: function(dest,source) {
-            try {
-                // TODO: Should use a stream and pipe, etc.
-                this.saveFile(dest,this.loadFile(source));
-            } catch (ex) {
-                throw "Can't copy file '" + source + "' to '" + dest + "': " + ex; //+
-            }
-            return true;
+        saveFile: function(filePath,content,success,failure) {
+            var me = this;
+            me.createParentDirectories(filePath,function() {
+                me.fs.writeFile(filePath,content,'utf8',function(err) {
+                    if (err) {
+                        failure("Can't save file '" + filePath + "': " + err);
+                    } else {
+                        success();
+                    }
+                });
+            },function(err) {
+                failure("Can't save file '" + filePath + "': " + err);
+            });
+        },
+        copyFile: function(dest,source,success,failure) {
+            var me = this;
+            me.createParentDirectories(dest,function() {
+                try {
+                    var failed = false;
+                    // Need to make sure we don't call failure more than once,
+                    // since this error handler will be called on both the reader
+                    // and the writer errors, which may both happen if one
+                    // happens.
+                    var errorHandler = function(err) {
+                        if (!failed) {
+                            failed = true;
+                            if (err.code === 'ENOENT') {
+                                // this is actually a success, since it would
+                                // be if the driver didn't support it's own copy.
+                                success();
+                            } else {
+                                failure("Can't copy file '" + source + "' to '" + dest + "': " + err);
+                            }
+                        }
+                    }
+                    var reader = me.fs.createReadStream(source);
+                    var writer = me.fs.createWriteStream(dest);
+                    writer.on('error',errorHandler);
+                    reader.on('error',errorHandler);
+                    // in theory, this will be called when everything's done.
+                    writer.on('close',function() {
+                        // I don't think this *should* happen, but just in case.
+                        if (!failed) {
+                            success();
+                        }
+                    }); 
+                    reader.pipe(writer);
+                } catch (ex) {
+                    failure("Can't copy file '" + source + "' to '" + dest + "': " + ex); //+
+                }
+            },function(err) {
+                failure("Can't copy file '" + source + "' to '" + dest + "': " + ex);
+            });
         }
     }
     
     // requestFileSystem, available on chrome and in cordova. This is a poor driver to have,
     // since we don't have access to the whole system, just a subset, but I'll use
     // what I can.
-    // TODO: I think that the paths will be converted into single file names, where the path
-    // separators are converted into underscores and so forth. That way, if the user is *used*
-    // to this mechanism (for example, if we're on a mobile system), then they can just do
-    // those file names. Of course, the loading/saving paradigm, as far as the user is concerned,
-    // is going to change in the near future, getting rid of having to enter URLs.
+    // Note that this creates files at a sandboxed location on the computer. If full paths
+    // are given, it will attempt to write to those paths as subfolders of this location,
+    // which will throw errors if that path is invalid, for some reason. Users who use
+    // it in this manner should get used to specifying single file names.
+    // FUTURE: This is currently untestable. Node-webkit comes with a segmentation fault
+    // when requesting disk space, but I can use the node fs system there, which is
+    // better anyway. I'll have to try this on chromium sometime.
     drivers.requestFileSystem = {
         name: "requestFileSystem",
         isAvailable: function() {
-            return !!(window && (window.requestFileSystem || window.webkitRequestFileSystem));
+            if (window && (!this.fileSystemMethod)) {
+                if (window.requestFileSystem) {
+                    this.fileSystemMethod = "requestFileSystem";
+                } else if (window.webkitRequestFileSystem) {
+                    this.fileSystemMethod = "webkitRequestFileSystem";
+                }
+            }
+            return !!this.fileSystemMethod;
         },
-        loadFile: function() {
-            throw "requestFileSystem loadFile Unimplemented";
+        isAsync: true,
+        
+        // This is asking for 256 MB of disk space. That's almost a quarter of a gig, which is quite a lot
+        // on a low-end tablet, but with all of the backups, Story Steward can build up, especially with
+        // multiple novels. 
+        // FUTURE: Need some way to configure this, so that we can start small and let the user increase
+        // it as he/she wants.
+        requestedQuotaSizeInMB: 256,
+        
+        getRootDirectory: function(writable, success,failure) {
+            var me = this;
+            var PERSISTENT = window.PERSISTENT || (LocalFileSystem && LocalFileSystem.PERSISTENT);
+            // Need the quota converted to bits.
+            var requestedQuotaSize = this.requestedQuotaSizeInMB * 1024 * 1024; 
+            if (writable && window.webkitStorageInfo) {
+                console.info("Requesting storage quota of " + requestedQuotaSize + " bytes.");
+                // we probably have to request storage here instead. I don't think this exists on cordova.
+                window.webkitStorageInfo.requestQuota(PERSISTENT,requestedQuotaSize, function(grantedBytes) {
+                    console.info("Given " + grantedBytes + " bytes storage");
+                    window[me.fileSystemMethod](PERSISTENT,grantedBytes,function(fs) {
+                        success(fs.root);
+                    },failure);
+                },failure);
+            } else {
+                // we don't need to ask for a quota if we're just reading, but so we don't have to worry
+                // about writing to it later...
+                window[me.fileSystemMethod](PERSISTENT,requestedQuotaSize,function(fs) {
+                    success(fs.root);
+                },failure);
+            }
+            
+            
+            
+            
         },
-        saveFile: function() {
-            throw "requestFileSystem saveFile Unimplemented";
+        translateFileError: function(error) {
+            switch (error.code) {
+                case FileError.NOT_FOUND_ERR:
+                    return "File not found.";
+                case FileError.SECURITY_ERR:
+                    return "Operation not permitted.";
+                case FileError.ABORT_ERR:
+                    return "Operation aborted.";
+                case FileError.NOT_READABLE_ERR:
+                    return "File is not readable.";
+                case FileError.ENCODING_ERR:
+                    return "File encoding error.";
+                case FileError.NO_MODIFICATION_ALLOWED_ERR:
+                    return "File is not writable.";
+                case FileError.INVALID_STATE_ERR:
+                    return "Invalid State";
+                case FileError.SYNTAX_ERR:
+                    return "Syntax Error.";
+                case FileError.INVALID_MODIFICATION_ERR:
+                    return "Invalid modification.";
+                case FileError.QUOTA_EXCEEDED_ERR:
+                    return "Quota exceeded.";
+                case FileError.TYPE_MISMATCH_ERR:
+                    return "Type mismatch.";
+                case FileError.PATH_EXISTS_ERR:
+                    return "Path already exists.";
+                default:
+                    if (error.code) {
+                        return "Unknown error";
+                    }
+                    return error;
+            }
         },
-        copyFile: function() {
-            throw "requestFileSystem copyFile Unimplemented";
+        loadFile: function(filePath,success,failure) {
+            var me = this;
+            var internalFailure = function(err) {
+                var result = me.translateFileError(err);
+                failure(result);
+            }
+            this.getRootDirectory(false,function(root) {
+                root.getFile(filePath,{},function(fileEntry) {
+                    fileEntry.file(function(file) {
+                        try {
+                            var reader = new FileReader();
+                            reader.onloadend = function(e) {
+                                success(e.target.result);
+                            }
+                            reader.onerror = internalFailure;
+                            reader.readAsText(file);
+                        } catch (ex) {
+                            internalFailure(ex);
+                        }
+                    },internalFailure);
+                },function(ex) {
+                    if (ex.code === FileError.NOT_FOUND_ERR) {
+                        success(null);
+                    } else {
+                        internalFailure(ex);
+                    }
+                });
+            },internalFailure);
+        },
+        createDirectories: function(dirEntry,folders,success,failure) {
+            var me = this;
+            // remove blank folders caused by intial slash,
+            while (folders[0] === "") {
+                folders = folders.slice(1);
+            }
+            if (folders.length) {
+                console.info("Creating directory '" + folders[0] + "'");
+                dirEntry.getDirectory(folders[0], {create: true}, function(childEntry) {
+                    me.createDirectories(childEntry,folders.slice(1),success,failure);
+                },failure);
+            } else {
+                console.info("Directories created");
+                success(dirEntry);
+            }
+        },
+        saveFile: function(filePath,content,success,failure) {
+            var me = this;
+            var internalFailure = function(err) {
+                var result = me.translateFileError(err);
+                failure(result);
+            }
+            this.getRootDirectory(true,function(root) {
+                // have to create the directory, first.
+                var folders = filePath.split("/");
+                var baseName = filePath.slice(-1);
+                folders = folders.slice(0,-1);
+                me.createDirectories(root,folders,function(dirEntry) {
+                    dirEntry.getFile(baseName,{create: true},function(fileEntry) {
+                        fileEntry.createWriter(function (fileWriter) {
+                            fileWriter.onwriteend = function() {
+                                success();
+                            }
+                            fileWriter.onerror = internalFailure;
+                            fileWriter.write(content);
+                        }, internalFailure);
+                    },internalFailure);
+                },internalFailure);
+            },internalFailure);
         }
+        // copy not implemented here, since the implementation would be the same as the default implementation.
     }
 
     // Internet Explorer driver
