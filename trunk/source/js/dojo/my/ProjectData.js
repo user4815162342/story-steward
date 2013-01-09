@@ -1474,25 +1474,50 @@ my.ProjectData.Drivers = {
 			}
             
             this._backup = function(CLOBid) {
+                var result = new dojo.Deferred();
                 var me = this;
                 var lfa = my.LocalFileAccess;
                 var state = CLOBid ? backupState.getClobState(CLOBid) : backupState;
-                var copy = function(fromUri, toUri) {
+                var copy = function(fromUri, toUri, completed) {
                     var from = lfa.convertUriToLocalPath(fromUri);
                     var to = lfa.convertUriToLocalPath(toUri);
                     try {
-                        lfa.copy(to, from);
+                         lfa.copy(to, from, completed, function(ex) {
+                            me.log("Error backing up file [" + from + "] to [" + to + "]: " + ex);
+                            // don't do anything else, I want to let them try to save.
+                            completed();
+                        });
                     } catch (ex) {
                         me.log("Error backing up file [" + from + "] to [" + to + "]: " + ex);
                         // don't do anything else, I want to let them try to save.
+                        completed();
                     }
                 }
-                var doBackup = function(baseUri, backupName) {
+                var doBackup = function(baseUri, backupName, completed) {
                     var last = paths.getBackupURI(backupName, backupMax, CLOBid);
                     var toFile;
                     var fromFile;
+                    
+                    var backupClosure = function(level) {
+                        if (level >= 0) {
+                            toFile = fromFile || last;
+                            fromFile = paths.getBackupURI(backupName, level, CLOBid);
+                            copy(fromFile, toFile, function() {
+                                backupClosure(level-1);
+                            });
+                        } else {
+                            toFile = fromFile;
+                            fromFile = baseUri;
+                            copy(fromFile,toFile,function() {
+                                completed(last);
+                            });
+                        }
+                    }
+
                     // NOTE: Yes, I want to do -1, since the last one is simply going to get overwritten.
-                    for (var i = backupMax - 1; i >= 0; i--) {
+                    backupClosure(backupMax - 1);
+                    
+                    /*for (var i = backupMax - 1; i >= 0; i--) {
                         toFile = fromFile || last;
                         fromFile = paths.getBackupURI(backupName, i, CLOBid);
                         copy(fromFile, toFile);
@@ -1500,11 +1525,41 @@ my.ProjectData.Drivers = {
                     toFile = fromFile;
                     fromFile = baseUri;
                     copy(fromFile, toFile);
-                    return last;
+                    return last;*/
                 }
                 
                 var baseUri = CLOBid ? paths.getCLOBURI(CLOBid) : paths.projectURI;
-                if (state.session) {
+                var processAllBackups = function(completed) {
+                    if (state.session) {
+                        doBackup(baseUri,"everySession",function() {
+                            state.session = false;
+                            processAllBackups(completed);
+                        });
+                    } else {
+                        doBackup(baseUri, "everySave", function(everySave) {
+                            if ((state.count % 10) === 0) {
+                                doBackup(everySave,"every10thSave",function(every10thSave) {
+                                    if ((state.count % 100) === 0) {
+                                        doBackup(every10thSave,"every100thSave",function() {
+                                            completed();
+                                        });
+                                    } else {
+                                        completed();
+                                    }
+                                });
+                            } else {
+                                completed();
+                            }
+                        });
+                    }
+                }
+                
+                processAllBackups(function() {
+                    state.count += 1;
+                    result.callback();
+                });
+                
+                /*if (state.session) {
                     doBackup(baseUri, "everySession");
                     state.session = false;
                 }
@@ -1515,8 +1570,9 @@ my.ProjectData.Drivers = {
                         doBackup(every10thSave, "every100thSave");
                     }
                 }
-                state.count++;
+                state.count++;*/
                 
+                return result;
             }
 			
 			this.getUri = function() {
@@ -1543,47 +1599,49 @@ my.ProjectData.Drivers = {
                 //    we can load the project data as writeable.
                 // 2) If that fails, fallback to http, which uses xhrGet.
                 if (my.LocalFileAccess) {
-                    try {
-                        // first, try to 'save' the lock file. If this raises an
-                        // error, then we're falling back to http.
-                        my.LocalFileAccess.save(my.LocalFileAccess.convertUriToLocalPath(paths.lockURI), new Date().toString());
+                    var result = new dojo.Deferred();
+                    // first, try to 'save' the lock file. If this raises an
+                    // error, then we're falling back to http.
+                    my.LocalFileAccess.save(my.LocalFileAccess.convertUriToLocalPath(paths.lockURI), new Date().toString(),function() {
                         // if we can save, then we can load. From now on, any errors do not fall
                         // back to http anymore.
-                        var result = new dojo.Deferred();
                         try {
                             projectFile = my.LocalFileAccess.convertUriToLocalPath(paths.projectURI);
                             var data;
                             var content;
-                            try {
-                                content = my.LocalFileAccess.load(projectFile);
-                            } catch (e) {
+                            my.LocalFileAccess.load(projectFile,function(content) {
+                                if (content) {
+                                    var rawData = dojo.fromJson(content);
+                                    data = my.ProjectData.Drivers._readStandardJSONFormat(rawData, false);
+                                } else if (createNew) {
+                                    data = createNew(paths.fileName);
+                                } else {
+                                    result.errback("Can't find file at " + projectFile);
+                                    return;
+                                }
+                                result.callback(data);
+                            },function(e) {
                                 if (createNew) {
-                                    content = null;
+                                    data = createNew(paths.fileName);
+                                    result.callback(data);
                                 } else {
                                     throw e;
                                 }
-                            }
-                            if (content) {
-								var rawData = dojo.fromJson(content);
-                                data = my.ProjectData.Drivers._readStandardJSONFormat(rawData, false);
-                            } else if (createNew) {
-                                data = createNew(paths.fileName);
-                            } else {
-                                throw "Can't find file at " + projectFile;
-                            }
-                            result.callback(data);
+                            });
                         } catch (e) {
                             result.errback(e);
                         }
-                        return result;
-                        
-                        
-                    } catch (ex) {
+                    },function(e) {
                         // can't load, so fallback to xhrGet.
-                        alert("Error loading file, falling back to http access: " + ex);
+                        alert("Error loading file, falling back to http access: " + e);
                         fallback = true;
-                        return httpFallback.load();
-                    }
+                        dojo.when(httpFallback.load(),function(data) {
+                            result.callback(data);
+                        },function(e) {
+                            result.errback(e);
+                        });
+                    });
+                    return result;
                 } else {
                     // can't load, so fallback to xhrGet.
                     alert("Local file access is not available, falling back to http access.");
@@ -1599,12 +1657,15 @@ my.ProjectData.Drivers = {
                     var result = new dojo.Deferred();
                     try {
                         contentFile = my.LocalFileAccess.convertUriToLocalPath(paths.getCLOBURI(id));
-                        content = my.LocalFileAccess.load(contentFile);
-                        if (content) {
-                            result.callback(content);
-                        } else {
-                            throw "Can't find file at " + contentFile;
-                        }
+                        my.LocalFileAccess.load(contentFile,function(content) {
+                            if (content) {
+                                result.callback(content);
+                            } else {
+                                result.errback("Can't find file at " + contentFile);
+                            }
+                        },function(e) {
+                            result.errback(e);
+                        });
                     } catch (e) {
                         result.errback(e);
                     }
@@ -1618,10 +1679,16 @@ my.ProjectData.Drivers = {
                 var result = new dojo.Deferred();
                 try {
                     if (!fallback) {
-                        this._backup(id);
-                        contentFile = my.LocalFileAccess.convertUriToLocalPath(paths.getCLOBURI(id));
-                        my.LocalFileAccess.save(contentFile, value);
-                        result.callback();
+                        dojo.when(this._backup(id),function() {
+                            contentFile = my.LocalFileAccess.convertUriToLocalPath(paths.getCLOBURI(id));
+                            my.LocalFileAccess.save(contentFile, value, function() {
+                                result.callback();
+                            },function(e) {
+                                result.errback(e);
+                            });
+                        },function(ex) {
+                            result.errback(ex);
+                        });
                     } else {
                         result.errback("Can't POST to local file.");
                     }
@@ -1635,13 +1702,19 @@ my.ProjectData.Drivers = {
                 var result = new dojo.Deferred();
                 try {
                     if (!fallback) {
-                        this._backup();
-                        my.ProjectData.Drivers._writeStandardJSONFormat(dataReader).then(function(rawData) {
-                            var content = dojo.toJson(rawData, true);
-                            var projectFile = my.LocalFileAccess.convertUriToLocalPath(paths.projectURI);
-                            my.LocalFileAccess.save(projectFile, content);
-                            result.callback();
-                        }, function(ex) {
+                        dojo.when(this._backup(),function() {
+                            my.ProjectData.Drivers._writeStandardJSONFormat(dataReader).then(function(rawData) {
+                                var content = dojo.toJson(rawData, true);
+                                var projectFile = my.LocalFileAccess.convertUriToLocalPath(paths.projectURI);
+                                my.LocalFileAccess.save(projectFile, content, function() {
+                                    result.callback();
+                                }, function(e) {
+                                    result.errback(e);
+                                });
+                            }, function(ex) {
+                                result.errback(ex);
+                            });
+                        },function(ex) {
                             result.errback(ex);
                         });
                     } else {

@@ -25,7 +25,7 @@ dojo.getObject("my.Settings", true);
             })
         },
         saveObject: function(data) {
-            return this.saveSerialized(dojo.toJson(data),true);
+            return dojo.when(this.saveSerialized(dojo.toJson(data),true));
         }
     }
     if (dojo.global.location.href.indexOf("http:") == 0) {
@@ -54,13 +54,24 @@ dojo.getObject("my.Settings", true);
     } else if (dojo.global.location.href.indexOf("file:") == 0) {
         driver.filePath = my.LocalFileAccess.convertUriToLocalPath(getSiblingUri("usersettings.json"));
         driver.saveSerialized = function(content) {
-			my.LocalFileAccess.save(driver.filePath,content)
+            var result = new dojo.Deferred();
+			my.LocalFileAccess.save(driver.filePath,content,function() {
+                result.callback();
+            },function(e) {
+                result.errback(e);
+            });
+            return result;
         }
         driver.loadSerialized = function() {
-			var result = my.LocalFileAccess.load(driver.filePath);
-			if (result == null) {
-				result = defaultSettings;
-			} 
+            var result = new dojo.Deferred();
+			my.LocalFileAccess.load(driver.filePath, function(data) {
+                if (data == null) {
+                    data = defaultSettings;
+                } 
+                result.callback(data);
+            },function(e) {
+                result.errback(e);
+            });
             return result;
         }
         
