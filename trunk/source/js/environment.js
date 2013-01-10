@@ -53,11 +53,20 @@
         }
         
         this.closeQueryMessage = "You have unsaved changes. Are you sure you want to close?";
+
+        this.getSiblingUri = function(filename) {
+            var location = dojo.global.location.href;
+            // strip off the current file.
+            location = location.substring(0, location.lastIndexOf('/'));
+            return location + "/" + filename;
+        }
+        
         
         
         // environment specific code:
         switch (environmentName) {
             case "node-webkit":
+                var path = require('path');
                 var nw = require('nw.gui').Window.get();
                 // need to keep track of this, since nw doesn't seem to do so itself.
                 var maximized = false;
@@ -110,6 +119,23 @@
                     }
                                 
                 });
+
+                this.getLocalSettingsPath = function(filename) {
+                    switch (process.platform) {
+                        case "win32":
+                            return path.join(process.env['APPDATA'],"Story Steward",filename);
+                        case "sunos": // TODO: Untested
+                        case "freebsd": // TODO: Untested
+                        case "linux":
+                            return path.join(process.env['HOME'],".story-steward",filename);
+                        case "darwin":
+                        // TODO: Test this.
+                            return path.join(process.env['HOME'],"Library","Preferences","story-steward",filename);
+                        default:
+                            throw "Settings directory can not be retrieved on this platform.";
+                    }
+                }
+
                 break;
             case "browser":
             default:
@@ -118,6 +144,10 @@
                         return me.closeQueryMessage;
                     }
                 }));
+                
+                this.getLocalSettingsPath = function(filename) {
+                    return my.LocalFileAccess.convertUriToLocalPath(this.getSiblingUri(filename));
+                }
                 break;
         }
         

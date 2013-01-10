@@ -3,15 +3,9 @@ dojo.getObject("my.Settings", true);
 
 (function() {
 
-    var getSiblingUri = function(filename) {
-        var location = dojo.global.location.href;
-        // strip off the current file.
-        location = location.substring(0, location.lastIndexOf('/'));
-        return location + "/" + filename;
-        
-    }
-	
-	var defaultSettings = '{"recentProjects":[{"uri":"sample://TheDarkHorizon"}]}';
+    // Added the "lastUsed" date to this. For some reason, this was not being set, but it didn't
+    // cause an error until I moved the settings file to a non-sibling directory.
+	var defaultSettings = '{"recentProjects":[{"uri":"sample://TheDarkHorizon", "lastUsed":"' + (new Date()).toISOString() + '"}]}';
     
     var driver = {
         saveSerialized: function(content) {
@@ -30,7 +24,7 @@ dojo.getObject("my.Settings", true);
     }
     if (dojo.global.location.href.indexOf("http:") == 0) {
         driver.cookieName = "usersettings";
-        driver.fileUri = getSiblingUri("usersettings.json");
+        driver.fileUri = environment.getSiblingUri("usersettings.json"); 
         driver.loadObject = function() {
 			var result = new dojo.Deferred();
             dojo.xhrGet({
@@ -52,7 +46,7 @@ dojo.getObject("my.Settings", true);
 			return result;
         }
     } else if (dojo.global.location.href.indexOf("file:") == 0) {
-        driver.filePath = my.LocalFileAccess.convertUriToLocalPath(getSiblingUri("usersettings.json"));
+        driver.filePath = environment.getLocalSettingsPath("usersettings.json");
         driver.saveSerialized = function(content) {
             var result = new dojo.Deferred();
 			my.LocalFileAccess.save(driver.filePath,content,function() {

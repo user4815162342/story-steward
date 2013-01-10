@@ -44,6 +44,7 @@ var Controller = new function() {
         var lastUsed;
         this.fetch({
             onItem: dojo.hitch(this, function(item) {
+                debugger;
                 saveData.push({
                     uri: this.getIdentity(item),
                     lastUsed: dojo.date.stamp.toISOString(this.getValue(item, "lastUsed", new Date()))

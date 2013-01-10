@@ -50,9 +50,14 @@ require("my", "info");
     if (params.targets.development) {
     
         logger.info("Copying test to development");
-        fileUtil.copyDir(params.scriptPath + "../test/", params.scriptPath + "../development/", /^(?:.*\.(?:html|js|htm|css|json|txt))|LICENSE|NOTICE$/g, true);
+        fileUtil.copyDir(params.scriptPath + "../test/", params.scriptPath + "../development/", /^(?:.*\.(?:html|js|htm|css|txt))|LICENSE|NOTICE$/g, true);
         logger.info("Copying source to development");
-        fileUtil.copyDir(params.scriptPath + "../source/", params.scriptPath + "../development/", /^(?:.*\.(?:html|js|htm|css|txt))|LICENSE|NOTICE$/g, true);
+        fileUtil.copyDir(params.scriptPath + "../source/", params.scriptPath + "../development/",{ 
+            include: /^(?:.*\.(?:html|js|htm|css|txt))|LICENSE|NOTICE$/g, 
+            exclude: /package-.*\.json$/g 
+        }, true);
+        logger.info("Creating package file for development");
+        fileUtil.copyFile(params.scriptPath + "../source/package-development.json", params.scriptPath + "../development/package.json");
         logger.info("Copying resources to development");
         fileUtil.copyFile(params.scriptPath + "../resources/icons/icons.png", params.scriptPath + "../development/resources/icons.png", true);
         fileUtil.copyFile(params.scriptPath + "../resources/icons/readme.txt", params.scriptPath + "../development/resources/readme.txt", true);
@@ -66,9 +71,11 @@ require("my", "info");
     if (params.targets.release) {
         logger.info("Copying source to release");
         fileUtil.copyDir(params.scriptPath + "../source/", params.scriptPath + "../release/", {
-            include: /^(?:.*\.(?:html|js|json|htm|css|txt))|LICENSE|NOTICE$/g,
-            exclude: /^.*\/source\/js\/dojo\/my\/.*/g
+            include: /^(?:.*\.(?:html|js|htm|css|txt))|LICENSE|NOTICE$/g,
+            exclude: /^.*\/source\/js\/dojo\/my\/.*|package-.*\.json/g
         }, true);
+        logger.info("Creating package file for release");
+        fileUtil.copyFile(params.scriptPath + "../source/package-release.json", params.scriptPath + "../release/package.json");
         logger.info("Copying resources to release");
         fileUtil.copyFile(params.scriptPath + "../resources/icons/icons.png", params.scriptPath + "../release/resources/icons.png", true);
         fileUtil.copyFile(params.scriptPath + "../resources/icons/readme.txt", params.scriptPath + "../release/resources/readme.txt", true);

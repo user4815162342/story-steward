@@ -58,6 +58,14 @@ require("my", "info");
     logger.info("Packages Created.");
     
     if (params.targets.release) {
+        
+        // Create Linux Package, need 32-bit *and* 64-bit.
+        // 1. Need a 'debian' folder, for creating the debian package configuration files.
+        // 2. Concatenate the nw binary with the zip package above to to create the executable, and put it into the debian folder.
+        // 3. Run whatever build tools are necessary on the debian folder in order to create a deb package and put in deploy.
+        
+        // Create Windows Package (currently using Prism build)
+        // TODO: Could make use of Wine to run this.
         var compiler = "C:/Program Files/Inno Setup 5/ISCC.exe"
         var compilerFile = new java.io.File(compiler);
         if (compilerFile.exists()) {
