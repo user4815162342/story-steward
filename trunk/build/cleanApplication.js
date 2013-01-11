@@ -50,4 +50,8 @@ if (params.targets.release) {
     logger.info("Cleaning release");
     cleanOutputDir(params.scriptPath + "../release/");
 }
+
+logger.info("Cleaning tmp");
+cleanOutputDir(params.scriptPath + "../tmp/");
+
 logger.info("Cleaned.");
