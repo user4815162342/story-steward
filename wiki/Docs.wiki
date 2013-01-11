@@ -5,15 +5,13 @@ As a [Status beta project], one of the features that still has not been complete
 
 = Installation =
 
-First, [http://code.google.com/p/story-steward/downloads/list download] the latest version of the General Release archive.
+First, [http://code.google.com/p/story-steward/downloads/list download] the latest standalone version that will run on your machine.
 
 Using the zip application of your choice, unzip the contents of the downloaded file into an appropriate place on your hard drive, preferably in its own directory next to other programs on your machine, where you're not going to forget about it.
 
-If you wish, create a shortcut to the index.html file in that directory and place it on your desktop or startup menu, according to how that is normally done on your operating system.
+If you wish, create a shortcut to the startup file in that directory and place it on your desktop or startup menu, according to how that is normally done on your operating system. This file is called story-steward.bat on Windows, and just story-steward on LInux.
 
-NOTE: It is possible to run this as a stand-alone application, or at least something that looks like one. Please see [StandaloneStorySteward documentation here].
-
-Assuming your operating system is configured to open up your browser when an HTML file (web page) is opened up, you should then be able to run that shortcut whenever you want to run Story Steward.
+NOTE: It is possible to run this as an in-browser application, as it was originally developed. This is recommended for advanced users only, but installation is about as simple as the above. 
 
 = Usage =
 
