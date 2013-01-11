@@ -191,10 +191,15 @@ dojo.getObject("my.LocalFileAccess", true);
                 me.path = require('path');
             }
             var dirname = me.path.dirname(filePath);
+            var atRoot = dirname === filePath;
             me.fs.exists(dirname,function(exists) {
                 if (exists) {
                     success();
                 } else {
+                    if (atRoot) {
+                       failure("Root directory '" + dirname + "' does not exist, and can not be created.");
+                       return;
+                    }
                     me.createParentDirectories(dirname,function() {
                         me.fs.mkdir(dirname,0755,function(err) {
                             if (err) {

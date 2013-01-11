@@ -17,6 +17,11 @@ function RunProcess(cmdArgs, workingDirectory, out) {
     if (!out) {
 		out = java.lang.System.out;
 	}
+    var fileOutput;
+    if (typeof out === typeof "") {
+        fileOutput = new java.io.FileOutputStream(out);
+        out = new java.io.PrintStream(fileOutput);
+    }
 
     var p = java.lang.Runtime.getRuntime().exec(cmdArgs, null, new java.io.File(workingDirectory));
     
@@ -38,9 +43,11 @@ function RunProcess(cmdArgs, workingDirectory, out) {
         // are right. Maybe it's because I'm running this on a dual core, now?
         outputThread.join();
         errorThread.join();
+        if (fileOutput) {
+            out.close();
+            fileOutput.close();
+        }
         if (exitCode != 0) {
-            out.println("Error running command " + cmdArgs.join(" "));
-            out.println("Working Directory was " + workingDirectory);
             throw "Process ended with exit code: " + exitCode;
         }
         

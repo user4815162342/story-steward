@@ -29,3 +29,33 @@ if (fileUtil && fileUtil.copyFile) {
 	})();
 
 }
+
+if (fileUtil) {
+    
+    fileUtil.concatenateFiles = function(/*Array*/sourceFiles, /*String*/destFileName) {
+    
+        //summary: copies srcFileName to destFileName. If onlyCopyNew is set, it only copies the file if
+        //srcFileName is newer than destFileName. Returns a boolean indicating if the copy occurred.
+        var destFile = new java.io.File(destFileName);
+
+
+        //Make sure destination dir exists.
+        var parentDir = destFile.getParentFile();
+        if(!parentDir.exists()){
+            if(!parentDir.mkdirs()){
+                throw "Could not create directory: " + parentDir.getAbsolutePath();
+            }
+        }
+
+        //Java's version of copy file.
+        var destChannel = new java.io.FileOutputStream(destFileName).getChannel();
+        for (var i = 0; i < sourceFiles.length; i++) {
+            var srcChannel = new java.io.FileInputStream(sourceFiles[i]).getChannel();
+            destChannel.transferFrom(srcChannel, 0, srcChannel.size());
+            srcChannel.close();
+        }
+        destChannel.close();
+	
+        return true; //Boolean
+    }
+}
