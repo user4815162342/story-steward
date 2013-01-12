@@ -5,7 +5,7 @@ As a [Status beta project], one of the features that still has not been complete
 
 = Installation =
 
-Story Steward runs with the help of [https://github.com/rogerwang/node-webkit node-webkit]. You do not need to install this separately, as it is included with all binary packages. 
+Story Steward runs with the help of [https://github.com/rogerwang/node-webkit node-webkit]. You do not need to install this separately, as it is included with all standalone packages. 
 
 First, [http://code.google.com/p/story-steward/downloads/list download] the latest standalone version that will run on your machine.
 
