@@ -1,7 +1,7 @@
 #summary Project File Hierarchy and Formats
 #labels Phase-Implementation
 
-*NOTE: The project file format has changed as of the 0.9.81 version of Story Steward. It is now described in a json schema format within the project. This document still refers to the older format, and due to lack of validation, may not actually describe the format actually used.*
+*NOTE: The project file format has changed as of the 0.9.81 version of Story Steward. It is now described in a json schema format within the project. This document still refers to the older format, and due to lack of validation, may not actually describe the format actually used. However, it does resemble the current status.*
 
 = Introduction =
 
@@ -16,9 +16,9 @@ The lack of a single monolithic file means there is a specific folder hierarchy 
 
 There is no default extension for the main project file, which is what is loaded. Currently, it is somewhat standard to use '.json' as the extension, because that defines the format of the content, however this is not required. You can give it whatever extension you want.
 
-The filename of the project, before the extension, determines the path for all other files in the project. For example, if your file is "MyNovel.json", files and folders will be named with "MyNovel" as a prefix. 
+The filename of the project, before the extension, determines the path for all other files in the project. For example, if your file is "!MyNovel.json", files and folders will be named with "!MyNovel" as a prefix. 
 
-_NOTE: that if you have a project file in the same directory named "MyNovel.manuscript", it's folder and file names will conflict with the first project._
+_NOTE: that if you have a project file in the same directory named "!MyNovel.manuscript", it's folder and file names will conflict with the first project._
 
 If you have more than one period in the filename, only the last one will be used to mark the extension.
 
