@@ -1,0 +1,13 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+Previously, Story Steward was designed as a web-like application, meant to be run in a browser, but on the local computer. And it _may_ still run locally in your browser, although compatibility depends on both what browser you're using, and the version it uses. This method for using Story Steward is no longer fully supported, but I have not completely given up on it.
+
+= Details =
+
+Newer browser versions have made it much more difficult for Story Steward to function as a browser application. For example, some features have been removed from the most recent versions of Firefox which have made it impossible for Story Steward to access the local disk, even from within a local (file scheme) web page.
+
+More importantly, however, running Story Steward in a browser means it is at the mercy of browser crashes and hangs initiated by browser extensions or other open web pages. 
+
+I haven't completely thrown out the possibility of running Story Steward in this manner, or especially running it as a cloud-based application. So, if you are serious about supporting either of these methods of running it, and especially if you are a developer willing to help out, let me know.
