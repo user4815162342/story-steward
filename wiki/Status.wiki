@@ -4,11 +4,7 @@ _Story Steward_ is currently in beta, and there are numerous features which are 
 
 If you are looking for a good novel writing software, but are unsure about using a beta project, please try it out. If you don't like it, [Support contact] this project and let me know what's wrong. Maybe it's something that can be fixed.
 
-Story Steward runs as a stand-alone application, using [https://github.com/rogerwang/node-webkit node-webkit] as an engine. 
-
-Previously, Story Steward was designed as a web-like application, meant to be run in a browser. And it _may_ still run locally in your browser, although compatibility depends on both what browser you're using, and the version it uses. 
-
-This method for using Story Steward is no longer supported. Newer browser versions have made it much more difficult for Story Steward to function as a browser application, some features have been removed from the most recent versions of Firefox which have made it impossible. More importantly, I don't want this application to be dependent on whether someone else's web page causes the browser to crash or hang in the middle of writing. However, if you are serious about supporting this type of environment, let me know.
+Story Steward runs as a stand-alone application, using [https://github.com/rogerwang/node-webkit node-webkit] as an engine. Also see this note about [StoryStewardInBrowser running Story Steward in a browser].
 
 As I'm also a struggling writer and have other paying projects to work on, I can't spend all my time working on this software for free. For that reason, this project will see small spurts of activity now and then, with possibly several months or even a year between where nothing is happening while I'm working on other projects.
 
