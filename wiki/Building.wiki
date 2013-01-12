@@ -5,21 +5,24 @@
 
 Unfortunately, a number of factors make the process for creating the packages found in the downloads section relatively tedious. Fortunately, most of it is done via scripts, and after the initial build, quick building for development and testing is a snap. 
 
-However, initial set up for building requires a number of steps. Also, a full 'make all' can take a long time (at least an hour on my, admittedly old, machine).
+However, initial set up for building requires a number of steps. Also, a full 'make all' can take a long time (could be as much as an hour on older machines).
 
 = Requirements =
 
-In addition to the line tools, there are several third-party libraries which are not included in source control due to their size, and due to my dislike of duplicating repositories (All of these are open source). If you are unable to obtain the required versions as listed below, let me know and I'd be willing to upload them to a file transfer site for you. Newer versions may work, but haven't been tested.
+There are several third-party tools and libraries which are not included in source control due to their size, and due to my dislike of duplicating repositories (All of these are open source). If you are unable to obtain the required versions as listed below, let me know and I'd be willing to upload them to a file transfer site for you. Newer versions may work, but haven't been tested.
 
 Tools:
   * Java Runtime (My version is 1.6, I have not tried it with earlier versions)
-  * Windows Batch File interpreter (cmd --version on my machine produces 5.1.2600) (NOTE: Windows is only required for building, not for running)
+  * On Windows: Windows Batch File interpreter (cmd --version on my old machine produced 5.1.2600) (NOTE: I've recently switched to linux, and some changes have been made which might have broken Windows building)
+  * On Linux: bash
   * Subversion command line client, with svnversion command (My version is 1.6.15)
+  * [https://github.com/rogerwang/node-webkit node-webkit] for all operating systems you need to build for. (Last successful tests and build ran on 0.3.7)
 
 Libraries:
   * Dojo Toolkit v1.5 full source build
   * Math.uuid.js v1.4 from http://www.broofa.com
-  * famfamfam Silk Icons v1.3 (only if you plan on modifying the icons)
+  * famfamfam Silk Icons v1.3 (only if you plan on modifying the icons
+  * A json schema validator script which I can't find the origin for anymore, and you'll have to get from me.
 
 = Setup =
 
@@ -47,15 +50,23 @@ Libraries:
       * dojox/
       * util/
 
-4) Place the Math.uuid.js script directly under vendor, and unzip the famfamfam file into a directory called famfam-silkicons.
+4) Place the Math.uuid.js script directly under vendor, and unzip the famfamfam file into a directory called famfam-silkicons. The json schema validator goes in a folder called json-schema here.
 
-5) Make sure the java runtime and svn command line are set up on your path environment variable.
+5) Unzip the node-webkit installs into the following structure:
+  * vendor/
+    * node-webkit/
+      * node-webkit-linux-x64
+      * node-webkit-linux-ia32
+      * node-webkit-win-ia32
+      * ...etc.
 
-6) If you are creating a package to deploy for this project page: Make sure all code is updated and committed to the repository. 
+6) Make sure the java runtime and svn command line are set up on your path environment variable.
+
+7) If you are creating a package to deploy for this project page: Make sure all code is updated and committed to the repository, so that the version number doesn't get an 'M' after it. If you are creating a fork package for your own distribution, please edit the build/info.js script so that the resulting filenames differ in some meaningful manner. 
 
 = Building =
 
-Assuming everything is working right, open up a command shell and change to the build directory in the structure above. Run 'make' to call the make.bat script and see a basic usage.
+Assuming everything is working right, open up a command shell and change to the build directory in the structure above. Run './make.sh' to see a basic usage for the script.
 
 == Building Custom Dojo ==
 
