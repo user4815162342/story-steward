@@ -6,6 +6,11 @@ Technically, most of these questions haven't actually been asked yet. However, t
 
 = Details =
 
+
+=== Why can't I get your program to work? How do I get it to do what I want? How do I install it? Why doesn't it work? ===
+
+If you are having problems with this software, [Contact] me, and maybe I can help. If you don't contact me, I'll never know that someone is having problems, and the problem will never be fixed.
+
 === Why should I use this instead of a word processor? ===
 
 If you want to use a word processor, and have never felt limited by them, then go ahead and keep doing what you're doing.
@@ -83,7 +88,3 @@ Because I'm the sole developer right now, and I have other projects I need to wo
 There's also the fact that the only user base I know of, despite the few times the file has been downloaded, is me. Which means, the only things that are going to get done are the things _I_ need to have done.
 
 If you want it to get done faster, I need one of two things. First, you could let me know you want it to get done, and what issues you would like me to focus on. Second, is money. If you can offer either of these things, [Contact] me.
-
-=== Why can't I get your program to work? ===
-
-If you are having problems with this software, [Contact] me, and maybe I can help.
