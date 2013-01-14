@@ -7,7 +7,8 @@
   "window": {
 		"title": "Story Steward",
     "toolbar": true,
-    "position": "center"
+    "position": "center",
+    "icon": "story-steward.png"
   },
   "webkit": {
     "plugin": false
