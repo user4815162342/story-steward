@@ -1,0 +1,88 @@
+# Introduction #
+
+Technically, most of these questions haven't actually been asked yet. However, these are some questions which I imagine other people may have about this project.
+
+# Details #
+
+
+### Why can't I get your program to work? How do I get it to do what I want? How do I install it? Why doesn't it work? ###
+
+If you are having problems with this software, [Contact](Contact.md) me, and maybe I can help. If you don't contact me, I'll never know that someone is having problems, and the problem will never be fixed.
+
+### Why should I use this instead of a word processor? ###
+
+If you want to use a word processor, and have never felt limited by them, then go ahead and keep doing what you're doing.
+
+There is a class of applications, in which Story Steward belongs,  designed around writing novels. These applications have evolved to fill a niche that many writers have seen the need for after using Word Processors for all of their work.
+
+The primary problem is that a word processor document is monolithic. It contains the content, the whole content, and nothing but the content, except when it's also containing the formatting for that content. Rather than try to explain what's wrong with that, I'll explain what you can do instead with novel writing software.
+
+  * Navigate easily right to the scenes and chapters you need to work on. You don't have to do a search, or guess with the scrollbar, or remember which bookmark the scene was at.
+  * Easily move scenes around to the right place in the book, by simply moving them before or after another scene. You don't have to try to select all of the text, cut it, find the place it's supposed to be and paste it.
+  * Track 'metadata' about scenes: a synopsis, who's involved, where it's at, when it occurs, comments and notes, and what status it's at (i.e. draft, reviewed, edited, ready to publish)
+  * Keep notes on characters, objects and other things in places where they can easily be reached when you need them.
+
+A secondary problem with word processors is that they contain numerous, additional features which are really not needed when you're drafting a novel. This isn't a problem until either you are looking for some menu choice but can't find it amidst all of the extra stuff, or worse, when you find yourself playing with those features when you should be writing. For an example of the latter, consider the writer who spends an entire day getting the font, page setup and layout figured out, when he or she has only yet written a single paragraph.
+
+### Why should I use this instead of (Some other novel writing software package I've heard about)? ###
+
+There are quite a few novel writing applications out there, it's kind of surprising. I highly recommend that you take a look at some of these before you decide to use Story Steward. I don't have the links, you'll have to look them up on Google.
+
+One primary problem I found with all of the software was that, in this day and age of cross-platform applications, I couldn't find any that were available on all platforms. I don't want the software I choose to work with to force my decisions as to what kind of computer I buy, and I want to have access to my work on my desktop, on my laptop and if I ever get one, on my tablet.
+
+Warning: I very seriously considered many of these applications before I decided to write Story Steward, and if some of these applications resolve my problems with them, I may abandon Story Steward. If I found the perfect application, I would even be willing to pay a little bit.
+
+Keep in mind that some of the problems that I found with these other software packages have not been solved by Story Steward yet either, but the difference is usually that I fully intend to. If you agree with me on those features, please support this project so that I can get them done.
+
+  * Scrivener: By far this appears to be the most popular software in this class. The primary problem when I started this project was that Scrivener was only available on Mac OS X. That is changing now, with the release of Scrivener for Windows and Linux. There are still two problems which I don't intend to see with Story Steward. First, Scrivener still costs about $40. Second, the Windows version will not be the same as the Mac version -- there may be feature differences, the software will be at a little different level of stability. I intend Story Steward to have the same features and share the same basic core on every platform it is available for, even if the user interface may differ slightly. I also intend to one day release a version for mobile and tablet platforms, which Scrivener does not seem to have any plans for.
+  * PageFour: For a while this was the software the Scrivener programmer recommended as a replacement for Windows. It suffers from similar problems, however. It costs about $40, and it is only available on Windows. I also wasn't entirely pleased with the user interface in the demo version.
+  * YWriter: I was this close to using this instead, basically because it was free. However, I had a number of problems with the user interface, I felt it was difficult to navigate around, lacking some modern features (such as a tabbed interface) that I've grown used to in other applications.
+  * Liquid Story Binder: Again, this is not available for all platforms, and it's even more expensive. The primary problem with it, though, is that the interface appears to be over-designed, to me. The screenshots show fancy colors and layouts, and just looking at the amount of real estate they take up, it almost looks like it was intended for use on a 26" monitor.
+
+### Is this a "Cloud" application? ###
+
+Yes and no.
+
+To be frank, the "Cloud" that everyone's talking about these days is just a new name for the internet -- which is always represented as a cloud on network diagrams.
+
+What they're actually talking about, though, are client-server applications which are at least partially run off of a server, or at least store data on the server, making it easy to share your work with others, and to access that work from any computer.
+
+This isn't an entirely new idea either. Corporations have been doing this sort of thing for years, really since the earliest days of corporate computing. Over the years it's been called things like multi-tier, client-server and terminals. You may have also heard the phrases thin client and fat client, which really only differ in the amount of work done on your own computer versus a server.
+
+The only new thing in the "cloud" is that some applications are making greater use of web browsers as clients, and web technologies for data transfer. Of course, this isn't really new either, that's been around for about a decade now, and used to be called "web 2.0".
+
+The primary problem that I find with cloud applications is that you are at the mercy of the server and it's owner. If, someday, Google decides to start charging you for their Google Docs service, you have suddenly lost a lot of work if you can't afford to pay. If Google decides to start looking through your documents, you have no control over it. Backup and uptime really isn't an issue, but it could be with smaller cloud services which don't spend as much money on servers as Google does.
+
+Most importantly, if you can't connect to that server, or only have access to very slow connections, and you want to work on your documents, having them on the server instead of your own computer is going to be a huge problem.
+
+Yes, Story Steward makes use of some of the same technologies as other cloud applications, which means it is a cloud application in that way. However, it doesn't currently run off of a server, so it isn't a cloud application in that way.
+
+I do have plans to someday make Story Steward able to store and work with data directly off of a server. This will make it easier to switch computers and collaborate, which would be very useful. However, I guarantee you that when this day comes, you will not be at the mercy of _my_ servers (although I have considered the option of reselling server space), and you will always be able to store your work on your own computer so that you can work on it when not connected.
+
+### Why is it free? ###
+
+Basically, because I can't afford to charge for it.
+
+If I were to charge for this software, it would probably be as low as $10 or $20, in order to compete with existing products. However, if I did this, then no one would use this software, because for twice the price you can get a perfectly good, more mature software with more complete features. So... there's no way anyone would pay for it.
+
+I have considered the possibility of some day charging for the software, which is one reason why I placed it under the Apache license instead of GPL. This would only happen after the software has matured, and gained the popularity it needs to allow me to charge.
+
+But, don't worry. Because I chose the Apache license, it will be easy for anyone who wants to to grab the last "free" version and continue to distribute it, or even create a new project that would remain free. I promise that I'll give ample warning.
+
+### Why is it open source? ###
+
+Because I can't afford to have it closed source.
+
+I'm the only developer on this right now. I have other projects I need to work on, including the novels that I created this software to help me write.
+
+If this project ever does become popular, I don't want it to take too much time away from these other projects. Which means, I would need to recruit others to help me, and they will have to do this work voluntarily. This will be far easier to do if the project is open source, since any potential contributor will have a chance to look at the code first to decide if they want to help out.
+
+There is a second reason to do this, of course. As I mentioned above, I've considered the possibility of some day charging for this software. Therefore, putting this out as open source protects its users from Future Me. The very last free version will be available for others to download, start distributing on their own, and even modify and add new features to.
+
+### Why isn't it done yet? ###
+
+Because I'm the sole developer right now, and I have other projects I need to work on, including the novels that I created this software to help me write.
+
+There's also the fact that the only user base I know of, despite the few times the file has been downloaded, is me. Which means, the only things that are going to get done are the things _I_ need to have done.
+
+If you want it to get done faster, I need one of two things. First, you could let me know you want it to get done, and what issues you would like me to focus on. Second, is money. If you can offer either of these things, [Contact](Contact.md) me.

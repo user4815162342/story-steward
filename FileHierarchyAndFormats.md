@@ -1,0 +1,266 @@
+**NOTE: The project file format has changed as of the 0.9.81 version of Story Steward. It is now described in a json schema format within the project. This document still refers to the older format, and due to lack of validation, may not actually describe the format actually used. However, it does resemble the current status.**
+
+# Introduction #
+
+Story Steward does not use on monolithic file to store it's data. This improves performance some, as only a little bit has to be loaded at a time, when it is needed. This is a description of the formats, it is not a full fledged specification.
+
+
+# Details #
+
+The lack of a single monolithic file means there is a specific folder hierarchy which the project must maintain, it also means that you have to be careful to copy all files when you are moving them around, and keep them in the same relative hierarchy.
+
+## Project File Name ##
+
+There is no default extension for the main project file, which is what is loaded. Currently, it is somewhat standard to use '.json' as the extension, because that defines the format of the content, however this is not required. You can give it whatever extension you want.
+
+The filename of the project, before the extension, determines the path for all other files in the project. For example, if your file is "MyNovel.json", files and folders will be named with "MyNovel" as a prefix.
+
+_NOTE: that if you have a project file in the same directory named "MyNovel.manuscript", it's folder and file names will conflict with the first project._
+
+If you have more than one period in the filename, only the last one will be used to mark the extension.
+
+Hereafter, I use `<filename>` to reference the name of the file before the extension, and `<extension>` to indicate the extension of the project file.
+
+## File Hierarchy ##
+
+The file hierarchy for the project begins at the level of the primary project file. It is not currently possible to have more disconnected set up, and I do not foresee it every being possible. Just don't mess with the hierarchy, and everything should be fine. You can put a readme.txt file in the same folder if you want to make sure everyone knows to leave it alone.
+
+The hierachy of the project is listed below. The formats of each file are explained later.
+
+  * `<filename>`.`<extension>`: this is the primary project file.
+  * `<filename>`.lock: this is a 'lock' file, explained below.
+  * `<filename>`.contents\: this is a directory which contains content files used for scene contents and certain notes fields.
+    * `<identifier>`.htm: this would be a content file identified by the semi-random unique identifier used as a filename, and referenced in the project file.
+  * `<filename>`.backup\: this is a directory which contains backup files.
+    * project.everySave.`<n>`.json: This is a backup of the primary file file created before every save. The most recent backup is always numbered '0', with each previous backup numbered '1','2', etc. The maximum number of backups is 10, as defined in the source code.
+    * project.everySession.`<n>`.json: This is a backup of the primary file created before the first save in every session.
+    * `<identifier>`.everySave.`<n>`.htm: This is a backup of a content file created before each save of that content.
+    * `<identifier>`.everySession.`<n>`.htm: This is a backup of a content file created before the first save of every session.
+
+## Primary Project File Format ##
+
+The syntax of the primary project file conforms to the JSON specifications.
+
+The schema of the format is defined in a pseudo-JSON below. Conventions used:
+  * `name: <type>` = specifies that the property 'name' contains an object of type 'type'.
+  * `name: "value"` = specifies that the property 'name' must contain a string with the value 'value'.
+  * `[ <type> ]` = specifies that the type is an array that contains 0 or more objects of type 'type'.
+  * `<type0>: <type1>` = specifies that a property with an arbitrary name of type 'type0' (which must be a string or a number) contains an object of type 'type1'.
+  * `<@type>` = specifies that the type is a `<uid>` which must reference the 'uid' property of an object of type 'type'.
+  * `<type0> | <type1> | <type2>` = specifies that objects of type 'type0', 'type1' or 'type2' are all allowed in this location.
+  * `<type> = <type> + { ... }` = specifies that the type extends a base type with additional properties.
+
+All properties are optional. In general, defaults for values are standard for a type (string defaults to a blank string, objects to null, etc), although this varies and is described further in the source code.
+
+Each object type may also have additional undocumented properties, to allow for future compatibility (i.e. I don't have to change the format identifier every time I want to add a new property). In theory, the application should keep these undocumented attributes intact.
+
+The following primitive types are used:
+  * `<string>`: a JSON string value.
+  * `<number>`: a JSON numeric value.
+  * `<boolean>`: a JSON boolean value.
+  * `<date>`: a JSON string representing a date formatted in ISO 8601 format.
+  * `<uid>`: a JSON string representing an id intended to be unique within the project, usually generated by the application.
+  * `<memo>`: a JSON string containing an HTML fragment representing formatted text content.
+  * `<file>`: a JSON string representing the name of a content file in which formatted text content is stored. The data for this field is an HTML fragment stored in a content file identified by this value. This is **not** just used for the content of a scene, it is also used for certain notes fields.
+
+The base type for the project file is `<project>`.
+
+```
+
+<project> = {
+  format: "story-steward-1.0", 
+  type: "project",
+  /* NOTE: pre-specifying this id makes it possible to find this unique item in the database later. */
+  uid: "project", 
+  created: <date>,
+  modified: <date>,
+  name: <string>,
+  description: <memo>,
+  credits: [ <credit> ],
+  content: [ <book> | <part> | <chapter> | <scene> ],
+  notes: [ <note> ],
+  journal: [ <journal-entry> ],
+  persons: [ <person> ],
+  places: [ <place> ],
+  things: [ <thing> ],
+  goals: [ <goal> ],
+  customizations: {
+    scene: {
+      /* specifies the statuses that a scene can have. */
+      statuses: [ <string> ], 
+      /* specifies the 'structure' of the scene (action, reaction, etc.), */
+      structures: [ <string> ],  
+      /* specifies the importance of the scene (plot,subplot,exposition,etc.) */     
+      importances: [ <string> ],
+      /* specifies the ways in which a scene can be rated (for review statistics, etc.) */ 
+      ratings: [ <string> ], 
+    }
+    person: {
+      /* specifies the 'role' of the character (antagonist, protagonist, etc.) */
+      roles: [ <string> ], 
+      /* specifies the importance of the scene (major, minor ,etc.) */
+      importances: [ <string> ],
+      /* specifies the ways in which a character can be rated (for review statistics, etc.) */ 
+      ratings: [ <string> ], 
+    }
+  },
+  interface: { 
+     /* Eventually, data stored here will be use for recording the state of the interface between sessions. */ 
+  }
+}
+
+<credit> = {
+  type: "credit",
+  uid: <uid>,
+  name: <string>,
+  biography: <memo>,
+  role: <string> 
+}
+
+<content> = {
+  type: "content",
+  uid: <uid>,
+  created: <date>,
+  modified: <date>,
+  name: <string>, 
+  description: <memo>, 
+  credits: [ <credit> ],
+  doNotPublish: <boolean>,
+  tags: [ <string> ]
+}
+
+<book> = <content> + {
+  subtype: "book",
+  content: [ <part> | <chapter> | <scene> ]
+}
+
+<part> = <content> + {
+  subtype: "part",
+  content: [ <chapter> | <scene> ]
+}
+
+<chapter> = <content> + {
+  subtype: "chapter",
+  content: [ <scene> ]
+}
+
+<scene> = <content> + {
+  subtype: "scene",
+  begins: <date>,
+  ends: <date>,
+  viewpoint: <@person>, 
+  setting: <@place>,
+  people: [ <@person> ],
+  places: [ <@place> ],
+  things: [ <@thing> ],
+  notes: <file>, 
+  lastWordCount: <number>,
+  tags: [ <string> ], 
+  status: <string>, 
+  structure: <string>, 
+  importance: <string>, 
+  ratings: [ <number> ], 
+  goal: <memo>,
+  conflict: <memo>,
+  disaster: <memo>,
+  reaction: <memo>,
+  dilemma: <memo>,
+  decision: <memo>,
+  text: <file>   
+}
+
+<note> = {
+  type: "note",
+  uid: <uid>,
+  created: <date>,
+  modified: <date>,
+  name: <string>,
+  text: <file>, 
+  subnotes: [ <note> ],
+  tags: [ <string> ]
+}
+
+<journal-entry> = {
+  type: "journal",
+  uid: <uid>,
+  created: <date>,
+  modified: <date>,
+  posted: <date>,
+  name: <string>,
+  text: <file>,
+  tags: [ <string> ]
+}
+
+<person> = {
+  type: "person",
+  uid: <uid>,
+  created: <date>,
+  modified: <date>,
+  name: <string>,
+  fullName: <string>,
+  aliases: <string>,
+  isMajor: <boolean>,
+  description: <memo>,
+  biography: <file>,
+  notes: <file>,
+  role: <string>, 
+  importance: <string>, 
+  ratings: [ <number> ], 
+  motivation: <memo>,
+  goal: <memo>,
+  conflict: <memo>,
+  epiphany: <memo>,
+  tags: [ <string> ],
+}
+
+
+<place> = {
+  type: "place",
+  uid: <uid>,
+  created: <date>,
+  modified: <date>,
+  name: <string>,
+  description: <memo>,
+  background: <file>,
+  notes: <file>,
+  tags: [ <string> ],
+}
+
+<thing> = {
+  type: "thing",
+  uid: <uid>,
+  created: <date>,
+  modified: <date>,
+  name: <string>,
+  description: <memo>,
+  background: <file>,
+  notes: <file>,
+  tags: [ <string> ],
+}
+
+<goal> = {
+  type: "goal",
+  uid: <uid>,
+  created: <date>,
+  modified: <date>,
+  name: <string>,
+  what: <@book> | <@part> | <@chapter>,
+  comments: <memo>,
+  starting: <date>,
+  ending: <date>,
+  startingWordCount: <number>, 
+  targetWordCount: <number>, 
+  history: [ 
+    {
+      uid: <uid>,
+      when: <date>,
+      wordCount: <number> 
+    } 
+  ]
+}
+
+```
+
+## Content File Format ##
+
+Content file formats are simple HTML fragments. That is, they contain HTML markup that would normally appear in the `<body>` tag of an HTML document. Their exact structure may depend on what browser you are running Story Steward in, but in general they will always be readable and editable in every browser.

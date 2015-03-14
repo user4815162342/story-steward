@@ -1,0 +1,3 @@
+If you notice a bug in the software, an error in the documentation, or have a feature suggestion, please consider searching the issue list. If you can't find something that matches, [feel free](http://en.wiktionary.org/wiki/feel_free) to add one. If you can, go ahead and add a comment to it. let me know that you're interested so I can decide what to work on next.
+
+If you have any questions or problems installing or using it, and the [documentation](Docs.md) on this site does not help you, or if you have comments or assistance to offer, please [Contact](Contact.md) me. Once the user base has grown, I will consider adding a forum to this project for easier support.

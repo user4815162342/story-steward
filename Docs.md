@@ -1,0 +1,27 @@
+# Introduction #
+
+As a [beta project](Status.md), one of the features that still has not been completed is decent documentation. The following is a simple run-down on what you have to do to install and use the application. If you need more information, [let me know](Support.md).
+
+# Installation #
+
+First, [download](http://code.google.com/p/story-steward/downloads/list) the latest standalone version that will run on your machine.
+
+Using the zip application of your choice, unzip the contents of the downloaded file into an appropriate place on your hard drive, preferably in its own directory next to other programs on your machine, where you're not going to forget about it.
+
+If you wish, create a shortcut to the startup file in that directory and place it on your desktop or startup menu, according to how that is normally done on your operating system. This file is called story-steward.bat on Windows, and just story-steward on LInux.
+
+NOTE: It is possible to run this as an in-browser application, as it was originally developed. This is recommended for advanced users only, but installation is about as simple as the above, it's just the browser configuration that's complex. See [StoryStewardInBrowser](StoryStewardInBrowser.md) for more info.
+
+# Usage #
+
+After the application loads, you will be greeted with a dialog box which asks for a URI to the Story Steward project you want to load.
+
+If you just want to play around with the features, press the 'Sample' button on this dialog, and a basic test project will open up. You will be able to make any changes in this project, but saving it does nothing. This way, you can go back to the original sample project again in the future.
+
+Once you are ready to open up a real project, go back to this dialog either be refreshing the Story Steward page, or clicking the folder button in the top left corner. Then enter the path to your project, but wait...
+
+Currently, Story Steward expects an actual URL, not just the path on your disk. This means, it must start with a _`file://`_ and continue on with the regular path, but with forward slashes instead of backwards. On Windows, the path to your C: drive would be _`file:///C:/`_ and you can continue from there.
+
+Assuming this is a new project, check the 'New' box in the dialog, and a new project will be created at that location (Otherwise, you will see an error message stating that the project could not be found -- this is a safeguard). Go ahead and start working on your project. Press the disk button in the upper left to save.
+
+If you have any problems, please [contact me](Support.md).
