@@ -1,3 +1,5 @@
+**This project is no longer active. Please check out my other project, [Stew](https://github.com/user4815162342/stew-gui) for a better way**
+
 Story Steward is an old project of mine, which I'd originally stored on Google Code before that was closed down. I'm currently in the process of switching over to my "stew" project (stew-core, stew-cli repositories) which replaces this project.
 
 This project was downloaded 72 times at its height. I'm assuming that at least a few of those weren't bots or me 
